@@ -1,0 +1,84 @@
+<div class="jumbotron">
+	<div class="container">
+		<h1 class="display-4">Predicting Glass Properties</h1>
+		<p class="lead">Select the property you want to predict and the machine learning algorithms you want to use. Finally, enter the chemical formula.</p>
+		<hr class="my-4">
+		<!-- <form class="container"> -->
+		<div class="form-group">
+			<label for="chemicalFormula">Chemical Formula</label>
+			<input #formula type="text" class="form-control" id="chemicalFormula" aria-describedby="formulaHelp" placeholder="Enter formula">
+			<small id="formulaHelp" class="form-text text-muted">Something like: Al2O3.</small>
+		</div>
+		<div class="form-group">
+			<label for="propertyControlSelect">Property</label>
+			<select #prop class="form-control" id="propertyControlSelect">
+				<option *ngFor="let p of this.predConf.glass_property">{{p}}</option>
+			</select>
+		</div>
+		<div class="form-group">
+			<label for="mlControlSelect">Machine learning model</label>
+			<select #ml class="form-control" id="mlControlSelect">
+				<option *ngFor="let a of this.predConf.ml_algorithm">{{a}}</option>
+			</select>
+		</div>
+		<!-- </div> -->
+		<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+			<div class="btn-group mr-2" role="group" aria-label="First group">
+				<button type=button (click)="predict(formula.value, prop.value, ml.value);" class="btn btn-outline-danger">Predict</button>
+			</div>
+			<div *ngIf="dataSource.length > 0" class="btn-group mr-2" role="group" aria-label="">
+				<button type=button (click)="refresh();" class="btn btn-outline-primary">Refresh Table</button>
+			</div>
+			<div *ngIf="dataSource.length > 0" class="btn-group mr-2" role="group" aria-label="">
+				<button type=button (click)="clear();" class="btn btn-outline-primary">Clear Table</button>
+			</div>
+		<!-- </div> -->
+		</div>
+		<hr class="my-4">
+		<!-- </form> -->
+	</div>
+
+	<!-- <button (click)="save()">Print</button> -->
+	<div class="container">
+		<hr class="my-4">
+		<h3 class="display-4">Results: </h3>
+
+		<div *ngIf="dataSource.length > 0">	
+			<div class="mat-elevation-z8">
+				<table mat-table [dataSource]="dataSource" >
+
+					<!--- Note that these columns can be defined in any order.
+			 The actual rendered columns are set as a property on the row definition" -->
+
+					<!-- Position Column -->
+					<ng-container matColumnDef="formula">
+						<th mat-header-cell *matHeaderCellDef> Formula </th>
+						<td mat-cell *matCellDef="let element"> {{element.formula}} </td>
+					</ng-container>
+
+					<!-- Name Column -->
+					<ng-container matColumnDef="glass_property">
+						<th mat-header-cell *matHeaderCellDef> Property </th>
+						<td mat-cell *matCellDef="let element"> {{element.glass_property}} </td>
+					</ng-container>
+
+					<!-- Weight Column -->
+					<ng-container matColumnDef="ml_algorithm">
+						<th mat-header-cell *matHeaderCellDef> ML Algorithm </th>
+						<td mat-cell *matCellDef="let element"> {{element.ml_algorithm}} </td>
+					</ng-container>
+
+					<!-- Symbol Column -->
+					<ng-container matColumnDef="value">
+						<th mat-header-cell *matHeaderCellDef> Value </th>
+						<td mat-cell *matCellDef="let element"> {{element.value}} </td>
+					</ng-container>
+
+					<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+					<tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+				</table>
+			</div>
+		</div>
+		<hr class="my-4">
+	</div>
+</div>
