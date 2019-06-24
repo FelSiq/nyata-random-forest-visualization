@@ -36,17 +36,15 @@ def serialize_decision_tree(
     return json.dumps(dt_model.__dict__, default=json_encoder_type_manager)
 
 
-if __name__ == "__main__":
+def get_toy_model():
     from sklearn.datasets import load_iris
-
-    def get_toy_model(x, y):
-        model = sklearn.tree.DecisionTreeClassifier()
-        model.fit(x, y)
-        return model
-
     iris = load_iris()
 
-    model = get_toy_model(iris.data, iris.target)
+    model = sklearn.tree.DecisionTreeClassifier()
+    model.fit(iris.data, iris.target)
 
-    json_str = serialize_decision_tree(model)
-    print(json_str)
+    return model
+
+
+if __name__ == "__main__":
+    print(serialize_decision_tree(get_toy_model()))

@@ -1,5 +1,6 @@
 import flask
 
+from . import model_dt
 
 def create_app():
     """DT visualization application factory."""
@@ -7,6 +8,6 @@ def create_app():
 
     @app.route("/dt-visualization")
     def visualization():
-        return "Hello world!"
+        return model_dt.serialize_decision_tree(model_dt.get_toy_model())
 
     return app
