@@ -1,10 +1,12 @@
 import flask
+import flask_cors
 
 from . import model_dt
 
 def create_app():
     """DT visualization application factory."""
     app = flask.Flask(__name__, instance_relative_config=True)
+    flask_cors.CORS(app)
 
     @app.route("/dt-visualization")
     def visualization():
