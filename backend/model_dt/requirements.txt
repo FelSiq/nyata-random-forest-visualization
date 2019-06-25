@@ -2,3 +2,4 @@ flask
 numpy
 sklearn
 flask-cors
+flask-restful
