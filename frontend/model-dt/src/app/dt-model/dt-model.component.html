@@ -1,1 +1,3 @@
-{{treeModel}}
+<ul>
+  <li *ngFor="let item of treeModelJSON | keyvalue"> {{ item.key }} {{ item.value }}</li>
+</ul>

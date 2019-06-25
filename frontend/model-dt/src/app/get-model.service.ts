@@ -11,7 +11,7 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class GetModelService {
-  private url_get_model = 'http://localhost:5000/dt-visualization';
+  private url_get_model = 'http://127.0.0.1:5000/dt-visualization';
 
   constructor(private http: HttpClient) { }
 
