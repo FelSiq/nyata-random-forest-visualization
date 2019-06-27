@@ -6,7 +6,7 @@ from . import model_dt
 
 class DecisionTree(flask_restful.Resource):
     def get(self):
-        return model_dt.serialize_decision_tree(model_dt.get_toy_model())
+        return flask.jsonify(model_dt.serialize_decision_tree(model_dt.get_toy_model()))
 
 def create_app():
     """DT visualization application factory."""

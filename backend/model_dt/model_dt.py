@@ -1,7 +1,5 @@
 """Module dedicated to the visualization of a Decision Tree."""
 import typing as t
-import json
-import inspect
 
 import sklearn.tree
 import numpy as np
@@ -15,25 +13,25 @@ def get_tree_structure(tree: sklearn.tree._tree.Tree) -> str:
 def json_encoder_type_manager(o: t.Any) -> t.Any:
     """Manage non-native python data type to serialize as a JSON."""
     if isinstance(o, np.ndarray):
-        return list(o)
+        return list(map(json_encoder_type_manager, o))
 
-    if isinstance(o, np.int64):
-        return int(o)
+    if isinstance(o, np.int):
+        return str(o)
 
     if isinstance(o, sklearn.tree._tree.Tree):
         return get_tree_structure(o)
 
-    _func_name = inspect.stack()[0][3]
-
-    raise TypeError("JSON encoder does not support type '{}'. "
-                    "Please update '{}' function to give a "
-                    "custom workaround.".format(type(o), _func_name))
+    return str(o)
 
 
 def serialize_decision_tree(
         dt_model: sklearn.tree.DecisionTreeClassifier) -> str:
     """Transform the given Decision Tree model to a JSON string."""
-    return json.dumps(dt_model.__dict__, default=json_encoder_type_manager)
+    new_model = {
+        str(key): json_encoder_type_manager(value)
+        for key, value in dt_model.__dict__.items()
+    }
+    return new_model
 
 
 def get_toy_model():
