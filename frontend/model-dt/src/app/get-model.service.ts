@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import { DTInterface } from './dt-interface';
 
 const httpOptions = {
@@ -15,7 +16,23 @@ export class GetModelService {
 
   constructor(private http: HttpClient) { }
 
-  getDTModel() {
-    return this.http.get<DTInterface>(this.url_get_model);
+  getDTModel(): Observable<DTInterface> {
+    return this.http.get<DTInterface>(this.url_get_model, { responseType: 'json' })
+      .pipe(
+        retry(3),
+      	catchError(this.handleError)
+      );
   }
+
+  private handleError(error: HttpErrorResponse) {
+  if (error.error instanceof ErrorEvent) {
+    console.error('An error occurred:', error.error.message);
+  } else {
+    console.error(
+      `Backend returned code ${error.status}, ` +
+      `body was: ${error.error}`);
+  }
+  return throwError(
+    'Something went wrong.');
+  };
 }

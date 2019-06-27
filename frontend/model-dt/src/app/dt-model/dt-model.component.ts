@@ -9,7 +9,6 @@ import { DTInterface } from '../dt-interface';
 })
 export class DtModelComponent implements OnInit {
     public treeModel: DTInterface;
-    public treeModelJSON: JSON;
 
   constructor(
     private modelService: GetModelService) { }
@@ -21,8 +20,7 @@ export class DtModelComponent implements OnInit {
   getDTModel(): void {
     this.modelService.getDTModel()
       .subscribe((model: DTInterface ) => {
-        this.treeModel = model;
-        this.treeModelJSON = JSON.parse(model);
+	this.treeModel = { ...model };
    });
   }
 
