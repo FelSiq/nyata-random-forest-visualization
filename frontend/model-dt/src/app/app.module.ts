@@ -6,17 +6,20 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DtModelComponent } from './dt-model/dt-model.component';
 
+import { D3Service } from 'd3-ng2-service';
+
+
 @NgModule({
   declarations: [
     AppComponent,
-    DtModelComponent
+    DtModelComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: [D3Service],
+  bootstrap: [AppComponent],
 })
 export class AppModule { }
