@@ -1,0 +1,5 @@
+<button *ngFor="let b of buttons" (click)="updateOption(b.id)">
+  {{ b.label }}
+</button>
+
+<pre *ngIf="curOption === 0"> Data Obtained is: {{ treeModel | json }} </pre>
