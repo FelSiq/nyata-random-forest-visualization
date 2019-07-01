@@ -29,13 +29,13 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     if isinstance(obj, np.ndarray):
         return list(map(json_encoder_type_manager, obj))
 
-    if isinstance(obj, np.int):
-        return str(obj)
+    if isinstance(obj, (np.int8, np.int16, np.int32, np.int64)):
+        return int(obj)
 
     if isinstance(obj, sklearn.tree._tree.Tree):
         return get_tree_structure(obj)
 
-    return str(obj)
+    return obj
 
 
 def serialize_decision_tree(dt_model: sklearn.tree.DecisionTreeClassifier
