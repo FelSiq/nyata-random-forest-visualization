@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { DTInterface } from '../../dt-interface';
 
 interface Button {
   label: string;
@@ -13,6 +14,7 @@ interface Button {
 export class TreeDisplayerComponent implements OnInit {
   public curOption: number;
   public buttons: Button[];
+  @Input() public treeModel: DTInterface;
 
   constructor() { }
 
