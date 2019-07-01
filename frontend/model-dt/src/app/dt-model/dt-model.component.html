@@ -1,10 +1,1 @@
-<ul>
-  <li *ngFor="let item of treeModel | keyvalue"> {{ item.key }} {{ item.value }}</li>
-</ul>
-<ul>
-  <li *ngFor="let item of treeModel.tree_ | keyvalue"> {{ item.key }} {{ item.value }}</li>
-</ul>
-
-<pre>Data Obtained is: {{ treeModel | json }}</pre>
-
-<svg width="960" height="600"></svg>
+<app-tree-displayer></app-tree-displayer>
