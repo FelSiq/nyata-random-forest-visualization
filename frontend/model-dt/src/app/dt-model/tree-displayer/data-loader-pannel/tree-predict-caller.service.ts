@@ -14,12 +14,12 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class TreePredictCallerService {
-  private url_post_instance = 'http://127.0.0.1:5000/predict-single-instance'
+  private url_post_instance = 'http://127.0.0.1:5000/predict-single-instance/'
 
   constructor(private http: HttpClient) { }
 
   predictSingleInstance(instance: number[]): Observable<PredictResults> {
-    return this.http.post<PredictResults>(this.url_post_instance, httpOptions)
+    return this.http.get<PredictResults>(this.url_post_instance + instance.toString(), httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)

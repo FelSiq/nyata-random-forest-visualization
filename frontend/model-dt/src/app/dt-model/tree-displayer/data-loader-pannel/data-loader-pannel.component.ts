@@ -31,6 +31,7 @@ export class DataLoaderPannelComponent implements OnInit {
       .subscribe((results: PredictResults) => {
         this.predictResults = { ...results };
       });
+    console.log(this.predictResults);
   }
 
 }
