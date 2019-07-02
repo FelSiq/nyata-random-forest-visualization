@@ -47,8 +47,8 @@ export class DtModelComponent implements OnInit, OnDestroy {
   getDTModel(): void {
     this.modelService.getDTModel()
       .subscribe((model: DTInterface ) => {
-	    this.treeModel = { ...model };
-    });
+	      this.treeModel = { ...model };
+      });
   }
 
 }

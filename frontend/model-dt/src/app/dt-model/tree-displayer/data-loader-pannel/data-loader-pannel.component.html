@@ -9,22 +9,9 @@
       [(value)]="value"
       [ngModel]="value"
       #attr="ngModel" >
-
-    <div *ngIf="attr.invalid && (attr.dirty || attr.touched)"
-        class="alert alert-danger">
-    
-      <div *ngIf="attr.errors.required">
-        All attributes must be filled in.
-      </div>
-      <div *ngIf="attr.errors.pattern">
-        Attribute values must be all numerical, 'NaN' or 'Inf'.
-      </div>
-    
-    </div>
-
   </span>
 
-  <button (click)="predictValues()" [disabled]="0"> Predict </button>
+  <button (click)="predictTestInstanceValues()"> Predict </button>
 </div>
 
 <h2> Load your own dataset </h2>

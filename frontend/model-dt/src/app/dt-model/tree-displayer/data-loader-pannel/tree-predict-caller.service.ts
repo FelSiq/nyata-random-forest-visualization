@@ -3,25 +3,26 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 
-import { DTInterface } from './dt-interface';
+import { PredictResults } from '../predict-results';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
+
 @Injectable({
   providedIn: 'root'
 })
-export class GetModelService {
-  private url_get_model = 'http://127.0.0.1:5000/dt-visualization';
+export class TreePredictCallerService {
+  private url_post_instance = 'http://127.0.0.1:5000/predict-single-instance'
 
   constructor(private http: HttpClient) { }
 
-  getDTModel(): Observable<DTInterface> {
-    return this.http.get<DTInterface>(this.url_get_model, { responseType: 'json' })
+  predictSingleInstance(instance: number[]): Observable<PredictResults> {
+    return this.http.post<PredictResults>(this.url_post_instance, httpOptions)
       .pipe(
         retry(3),
-      	catchError(this.handleError)
+        catchError(this.handleError)
       );
   }
 
@@ -34,6 +35,7 @@ export class GetModelService {
         `body was: ${error.error}`);
     }
     return throwError(
-      'Something went wrong.');
+      'Something went wrong while predicting a single instance.');
     };
+
 }

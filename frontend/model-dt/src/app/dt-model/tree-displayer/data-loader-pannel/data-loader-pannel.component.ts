@@ -1,4 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { PredictResults } from '../predict-results';
+import { TreePredictCallerService } from './tree-predict-caller.service';
 
 @Component({
   selector: 'app-data-loader-pannel',
@@ -10,8 +12,9 @@ export class DataLoaderPannelComponent implements OnInit {
   @Input() public datasetDim: number;
   public maxFileSize: number = 50;
   public maxFileSizeUnit: string = 'MB';
+  public predictResults: PredictResults;
 
-  constructor() { }
+  constructor(public predictor: TreePredictCallerService) { }
 
   ngOnInit() {
     this.testInstanceValues = new Array(this.datasetDim);
@@ -21,6 +24,13 @@ export class DataLoaderPannelComponent implements OnInit {
   updateBoxValue(newValue: number, boxIndex: number): void {
     this.testInstanceValues[boxIndex] = +newValue;
     console.log(this.testInstanceValues);
+  }
+
+  predictTestInstanceValues(): void {
+    this.predictor.predictSingleInstance(this.testInstanceValues)
+      .subscribe((results: PredictResults) => {
+        this.predictResults = { ...results };
+      });
   }
 
 }
