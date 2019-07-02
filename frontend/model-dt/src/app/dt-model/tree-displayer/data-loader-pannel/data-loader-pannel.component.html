@@ -1,0 +1,31 @@
+<h2> Custom test instance </h2>
+<div id="div-test-instance-values">
+  <span *ngFor="let value of testInstanceValues; index as i;">
+    <input
+      name="attr_{{i}}"
+      (keyup.enter)="updateBoxValue(attr.value, i)"
+      required
+      pattern="[-+]?([0-9]+\.?|[0-9]*\.[0-9]+)|nan|[+-]?inf"
+      [(value)]="value"
+      [ngModel]="value"
+      #attr="ngModel" >
+
+    <div *ngIf="attr.invalid && (attr.dirty || attr.touched)"
+        class="alert alert-danger">
+    
+      <div *ngIf="attr.errors.required">
+        All attributes must be filled in.
+      </div>
+      <div *ngIf="attr.errors.pattern">
+        Attribute values must be all numerical, 'NaN' or 'Inf'.
+      </div>
+    
+    </div>
+
+  </span>
+
+  <button (click)="predictValues()" [disabled]="0"> Predict </button>
+</div>
+
+<h2> Load your own dataset </h2>
+<p class="p-note"> Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}. </p>

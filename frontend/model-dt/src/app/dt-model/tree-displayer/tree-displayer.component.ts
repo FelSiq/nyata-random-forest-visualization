@@ -21,8 +21,8 @@ export class TreeDisplayerComponent implements OnInit {
   ngOnInit() {
     this.curOption = 0;
     this.buttons = [
-        { label: 'Tree Information', id: 0},
-        { label: 'Test Instance', id: 1},
+        { label: 'Model information', id: 0},
+        { label: 'Predict', id: 1},
         { label: 'Train statistics', id: 2},
     ];
   }

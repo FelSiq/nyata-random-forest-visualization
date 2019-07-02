@@ -1,5 +1,17 @@
-<button *ngFor="let b of buttons" (click)="updateOption(b.id)">
-  {{ b.label }}
-</button>
+<div id="model-control-pannel">
+  Model control pannel
+  <button *ngFor="let b of buttons" (click)="updateOption(b.id)">
+    {{ b.label }}
+  </button>
+</div>
 
-<pre *ngIf="curOption === 0"> Data Obtained is: {{ treeModel | json }} </pre>
+<div *ngIf="curOption === 0" id="div-option-0" class="div-option">
+  <pre> Data Obtained is: {{ treeModel | json }} </pre>
+</div>
+
+<div *ngIf="curOption === 1" id="div-option-1" class="div-option">
+  <app-data-loader-pannel [datasetDim]="treeModel.n_features_"></app-data-loader-pannel>
+</div>
+
+<div *ngIf="curOption === 2" id="div-option-2" class="div-option">
+</div>
