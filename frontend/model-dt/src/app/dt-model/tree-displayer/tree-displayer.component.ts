@@ -1,11 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { DTInterface } from '../../dt-interface';
 
-interface Button {
-  label: string;
-  id: number;
-}
-
 @Component({
   selector: 'app-tree-displayer',
   templateUrl: './tree-displayer.component.html',
@@ -13,7 +8,7 @@ interface Button {
 })
 export class TreeDisplayerComponent implements OnInit {
   public curOption: number;
-  public buttons: Button[];
+  public buttons: string[];
   @Input() public treeModel: DTInterface;
 
   constructor() { }
@@ -21,9 +16,10 @@ export class TreeDisplayerComponent implements OnInit {
   ngOnInit() {
     this.curOption = 0;
     this.buttons = [
-        { label: 'Model information', id: 0},
-        { label: 'Predict', id: 1},
-        { label: 'Train statistics', id: 2},
+        'Model information',
+        'Predict',
+        'Train statistics',
+        'Notes',
     ];
   }
 
