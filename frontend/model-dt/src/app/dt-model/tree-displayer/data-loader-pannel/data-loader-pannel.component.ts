@@ -1,4 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
 import { PredictResults } from '../predict-results';
 import { TreePredictCallerService } from './tree-predict-caller.service';
 
@@ -9,7 +11,9 @@ import { TreePredictCallerService } from './tree-predict-caller.service';
 })
 export class DataLoaderPannelComponent implements OnInit {
   @Input() public datasetDim: number;
-  public testInstanceValues: string;
+  @Input() public testInstSep: string;
+  public isValidFormSubmitted: boolean;
+  public testInstValues: string;
   public errorMessage: string;
   public predictResults: PredictResults;
   public readonly maxFileSize: number;
@@ -20,18 +24,31 @@ export class DataLoaderPannelComponent implements OnInit {
     this.maxFileSizeUnit = 'MB';
   }
 
-  ngOnInit() { }
+  ngOnInit() { 
+    this.testInstValues = '';
+    this.testInstSep = ',';
+  }
 
-  updateBoxValue(values: string): void {
-    this.testInstanceValues = values;
+  onFormSubmit(form: NgForm): void {
+    this.isValidFormSubmitted = false;
+
+    if (form.invalid) {
+      return;
+    }
+
+    this.isValidFormSubmitted = true;
+    this.testInstValues = form.controls['attrs'].value;
+    this.testInstSep = form.controls['sep'].value;
+
+    this.predictTestInstValues();
   }
 
   clearErrorMessage(): void {
     this.errorMessage = '';
   }
 
-  predictTestInstanceValues(separator: string): void {
-    let splittedValues: string[] = this.testInstanceValues.split(separator);
+  predictTestInstValues(): void {
+    let splittedValues: string[] = this.testInstValues.split(this.testInstSep);
 
     this.clearErrorMessage();
 
@@ -46,14 +63,6 @@ export class DataLoaderPannelComponent implements OnInit {
         dataset (${this.datasetDim}) does not match!
       `;
     }
-  }
-
-  errorHandler(): void {
-    this.errorMessage = `
-      Something went wrong while predicting your
-      instance values. Please check the attribute
-      values are correct.
-    `;
   }
 
 }

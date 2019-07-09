@@ -1,26 +1,53 @@
 <h2> Custom test instance </h2>
 <p> Current dataset dimension: {{ datasetDim }} </p>
-<form id="div-test-instance-values">
+<form #testInstForm="ngForm"
+      id="div-test-instance-values"
+      (ngSubmit)="onFormSubmit(testInstForm)">
   <p>
-    <label for="test-instance-separator"> Attribute separator:
-      <input #boxSep id="test-instance-attributes" value=",">
+    <label for="sep-comma">
+      <input type="radio"
+             name="sep"
+             [ngModel]="testInstSep"
+             id="sep-comma"
+             value=",">
+      Comma
     </label>
+    <label for="sep-space">
+      <input type="radio"
+             name="sep"
+             [ngModel]="testInstSep"
+             id="sep-space"
+             value=" ">
+      Space
+    </label>
+
+    <label for="sep-custom">
+      <input type="radio"
+             name="sep"
+             [ngModel]="testInstSep"
+             id="sep-custom"
+             [value]="boxSep.value">
+      Custom
+    </label>
+
+    <input #boxSep value="">
+
   </p>
 
   <p>
     <label for="test-instance-attributes"> Test instance attributes:
-      <input
-        #boxAttr
-        (blur)="updateBoxValue(boxAttr.value); clearErrorMessage();"
-        (keydown.enter)="updateBoxValue(boxAttr.value); clearErrorMessage();"
-        [(value)]="testInstanceValues">
+      <input name="attrs" [ngModel]="testInstValues" required #attrs="ngModel">
+      <div *ngIf="attrs.invalid && testInstForm.submitted && !isValidFormSubmitted" [ngClass]="'error'">
+          Test instance attribute values are required.
+      </div>
     </label>
   </p>
-  <button (click)="predictTestInstanceValues(boxSep.value)"> Predict </button>
+
+  <button> Predict </button>
 </form>
 
 <div *ngIf="predictResults">
-  <p> Prediction result: {{ predictResults['classes'] }} </p>
+  <p> Prediction result: {{ predictResults.classes }} </p>
 </div>
 
 <div *ngIf="errorMessage">
