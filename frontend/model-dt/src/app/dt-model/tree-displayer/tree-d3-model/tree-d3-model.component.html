@@ -1,16 +1,15 @@
 <div *ngIf="treeNodes && treeNodes.length > 1">
   Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
-  <select ng-model="chosenTree">
+  <select [(ngModel)]="chosenTree">
     <option *ngFor="let tree of treeNodes; index as i;"
-            value="i">
+            value="{{ i }}">
             {{ i + 1 }} (size: {{ tree.tree_.node_count }})
     </option>
   </select>
-  {{ chosenTree }}
 </div>
 
 <div *ngFor="let tree of treeNodes; index as i">
-  <div *ngIf="chosenTree === i">
+  <div *ngIf="chosenTree == i">
     {{ tree | json }}
   </div>
 </div>

@@ -57,7 +57,7 @@ def serialize_decision_tree(
     return new_model
 
 
-def get_toy_model(forest: bool = False, regressor: bool = False):
+def get_toy_model(forest: bool = True, regressor: bool = False):
     """Create a DT toy model for testing purposes."""
     from sklearn.datasets import load_iris
     iris = load_iris()  # type: sklearn.utils.Bunch
