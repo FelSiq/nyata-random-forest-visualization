@@ -5,20 +5,22 @@
   </button>
 </div>
 
-<!-- Actual tree model. Should be visible no matter the option selected. -->
-<app-tree-d3-model [treeModel]="treeModel"></app-tree-d3-model>
-
-<div *ngIf="curOption === 0" id="div-option-0" class="div-option">
-  <pre> Data Obtained is: {{ treeModel | json }} </pre>
-</div>
-
-<div *ngIf="curOption === 1" id="div-option-1" class="div-option">
-  <app-data-loader-pannel [datasetDim]="treeModel.n_features_"></app-data-loader-pannel>
-</div>
-
-<div *ngIf="curOption === 2" id="div-option-2" class="div-option">
-</div>
-
-<div *ngIf="curOption === 3" id="div-option-3" class="div-option">
-  <p> Notes for developers: new interesting functionalities can be easily added to this application simply by adding new options in "tree-displayer" component, and conditionally showing other components in "tree-displayer" template. </p>
+<div *ngIf="treeModel">
+  <!-- Actual tree model. Should be visible no matter the option selected. -->
+  <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel.tree_] : treeModel.estimators_"></app-tree-d3-model>
+  
+  <div *ngIf="curOption === 0" id="div-option-0" class="div-option">
+    <pre> Data Obtained is: {{ treeModel | json }} </pre>
+  </div>
+  
+  <div *ngIf="curOption === 1" id="div-option-1" class="div-option">
+    <app-data-loader-pannel [datasetDim]="treeModel.n_features_"></app-data-loader-pannel>
+  </div>
+  
+  <div *ngIf="curOption === 2" id="div-option-2" class="div-option">
+  </div>
+  
+  <div *ngIf="curOption === 3" id="div-option-3" class="div-option">
+    <p> Notes for developers: new interesting functionalities can be easily added to this application simply by adding new options in "tree-displayer" component, and conditionally showing other components in "tree-displayer" template. </p>
+  </div>
 </div>
