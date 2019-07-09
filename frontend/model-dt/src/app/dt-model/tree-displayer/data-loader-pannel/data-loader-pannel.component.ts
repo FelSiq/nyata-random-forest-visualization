@@ -8,30 +8,52 @@ import { TreePredictCallerService } from './tree-predict-caller.service';
   styleUrls: ['./data-loader-pannel.component.css']
 })
 export class DataLoaderPannelComponent implements OnInit {
-  public testInstanceValues: number[];
   @Input() public datasetDim: number;
-  public maxFileSize: number = 50;
-  public maxFileSizeUnit: string = 'MB';
+  public testInstanceValues: string;
+  public errorMessage: string;
   public predictResults: PredictResults;
+  public readonly maxFileSize: number;
+  public readonly maxFileSizeUnit: string;
 
-  constructor(public predictor: TreePredictCallerService) { }
-
-  ngOnInit() {
-    this.testInstanceValues = new Array(this.datasetDim);
-    this.testInstanceValues.fill(0.0);
+  constructor(public predictor: TreePredictCallerService) {
+    this.maxFileSize = 50;
+    this.maxFileSizeUnit = 'MB';
   }
 
-  updateBoxValue(newValue: number, boxIndex: number): void {
-    this.testInstanceValues[boxIndex] = +newValue;
-    console.log(this.testInstanceValues);
+  ngOnInit() { }
+
+  updateBoxValue(values: string): void {
+    this.testInstanceValues = values;
   }
 
-  predictTestInstanceValues(): void {
-    this.predictor.predictSingleInstance(this.testInstanceValues)
-      .subscribe((results: PredictResults) => {
-        this.predictResults = { ...results };
-      });
-    console.log(this.predictResults);
+  clearErrorMessage(): void {
+    this.errorMessage = '';
+  }
+
+  predictTestInstanceValues(separator: string): void {
+    let splittedValues: string[] = this.testInstanceValues.split(separator);
+
+    this.clearErrorMessage();
+
+    if (splittedValues.length === this.datasetDim) {
+      this.predictor.predictSingleInstance(splittedValues)
+        .subscribe((results: PredictResults) => {
+          this.predictResults = { ...results };
+        });
+    } else {
+      this.errorMessage = `
+        Dimension of test instance (${splittedValues.length}) and
+        dataset (${this.datasetDim}) does not match!
+      `;
+    }
+  }
+
+  errorHandler(): void {
+    this.errorMessage = `
+      Something went wrong while predicting your
+      instance values. Please check the attribute
+      values are correct.
+    `;
   }
 
 }

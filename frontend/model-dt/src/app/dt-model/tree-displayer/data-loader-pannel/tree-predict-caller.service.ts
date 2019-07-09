@@ -18,7 +18,7 @@ export class TreePredictCallerService {
 
   constructor(private http: HttpClient) { }
 
-  predictSingleInstance(instance: number[]): Observable<PredictResults> {
+  predictSingleInstance(instance: Array<number | string>): Observable<PredictResults> {
     return this.http.get<PredictResults>(this.url_post_instance + instance.toString(), httpOptions)
       .pipe(
         retry(3),

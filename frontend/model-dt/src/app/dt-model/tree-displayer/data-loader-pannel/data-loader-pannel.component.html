@@ -1,17 +1,30 @@
 <h2> Custom test instance </h2>
-<div id="div-test-instance-values">
-  <span *ngFor="let value of testInstanceValues; index as i;">
-    <input
-      name="attr_{{i}}"
-      (keyup.enter)="updateBoxValue(attr.value, i)"
-      required
-      pattern="[-+]?([0-9]+\.?|[0-9]*\.[0-9]+)|nan|[+-]?inf"
-      [(value)]="value"
-      [ngModel]="value"
-      #attr="ngModel" />
-  </span>
+<p> Current dataset dimension: {{ datasetDim }} </p>
+<form id="div-test-instance-values">
+  <p>
+    <label for="test-instance-separator"> Attribute separator:
+      <input #boxSep id="test-instance-attributes" value=",">
+    </label>
+  </p>
 
-  <button (click)="predictTestInstanceValues()"> Predict </button>
+  <p>
+    <label for="test-instance-attributes"> Test instance attributes:
+      <input
+        #boxAttr
+        (blur)="updateBoxValue(boxAttr.value); clearErrorMessage();"
+        (keydown.enter)="updateBoxValue(boxAttr.value); clearErrorMessage();"
+        [(value)]="testInstanceValues">
+    </label>
+  </p>
+  <button (click)="predictTestInstanceValues(boxSep.value)"> Predict </button>
+</form>
+
+<div *ngIf="predictResults">
+  <p> Prediction result: {{ predictResults['classes'] }} </p>
+</div>
+
+<div *ngIf="errorMessage">
+  <p> {{ errorMessage }} </p>
 </div>
 
 <h2> Load your own dataset </h2>
