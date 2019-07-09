@@ -3,6 +3,7 @@ import typing as t
 import inspect
 
 import sklearn.tree
+import sklearn.ensemble
 import numpy as np
 
 
@@ -12,8 +13,8 @@ def get_tree_structure(tree: sklearn.tree._tree.Tree) -> t.Dict[str, t.Any]:
     For more information, check the sklearn documentation (url below.)
     https://scikit-learn.org/stable/auto_examples/tree/plot_unveil_tree_structure.html
     """
-    attributes = inspect.getmembers(
-        tree, lambda attr: not inspect.isroutine(attr))
+    attributes = inspect.getmembers(tree,
+                                    lambda attr: not inspect.isroutine(attr))
 
     encoded_tree = {
         attr_name: json_encoder_type_manager(attr_val)
@@ -26,7 +27,11 @@ def get_tree_structure(tree: sklearn.tree._tree.Tree) -> t.Dict[str, t.Any]:
 
 def json_encoder_type_manager(obj: t.Any) -> t.Any:
     """Manage non-native python data type to serialize as a JSON."""
-    if isinstance(obj, np.ndarray):
+    if isinstance(obj, (sklearn.tree.tree.DecisionTreeClassifier,
+                        sklearn.tree.tree.DecisionTreeRegressor)):
+        return serialize_decision_tree(obj)
+
+    if isinstance(obj, (np.ndarray, list)):
         return list(map(json_encoder_type_manager, obj))
 
     if isinstance(obj, (np.int8, np.int16, np.int32, np.int64)):
@@ -38,8 +43,12 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     return obj
 
 
-def serialize_decision_tree(dt_model: sklearn.tree.DecisionTreeClassifier
-                            ) -> t.Dict[str, t.Any]:
+def serialize_decision_tree(
+        dt_model: t.
+        Union[sklearn.ensemble.forest.RandomForestClassifier, sklearn.ensemble.
+              forest.RandomForestRegressor, sklearn.tree.tree.
+              DecisionTreeRegressor, sklearn.tree.tree.DecisionTreeClassifier]
+) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
     new_model = {
         str(key): json_encoder_type_manager(value)
@@ -48,12 +57,19 @@ def serialize_decision_tree(dt_model: sklearn.tree.DecisionTreeClassifier
     return new_model
 
 
-def get_toy_model():
+def get_toy_model(forest: bool = False, regressor: bool = False):
     """Create a DT toy model for testing purposes."""
     from sklearn.datasets import load_iris
     iris = load_iris()  # type: sklearn.utils.Bunch
 
-    model = sklearn.tree.DecisionTreeClassifier()
+    ALGORITHMS = {
+        (False, False): sklearn.tree.DecisionTreeClassifier,
+        (False, True): sklearn.tree.DecisionTreeRegressor,
+        (True, False): sklearn.ensemble.RandomForestClassifier,
+        (True, True): sklearn.ensemble.RandomForestRegressor,
+    }
+
+    model = ALGORITHMS.get((forest, regressor))()
     model.fit(iris.data, iris.target)
 
     return model
