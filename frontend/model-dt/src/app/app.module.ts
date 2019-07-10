@@ -3,6 +3,9 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MdRadioModule } from '@angular/material';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DtModelComponent } from './dt-model/dt-model.component';
@@ -29,6 +32,7 @@ import { TreeD3ModelComponent } from './dt-model/tree-displayer/tree-d3-model/tr
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    BrowserAnimationsModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],

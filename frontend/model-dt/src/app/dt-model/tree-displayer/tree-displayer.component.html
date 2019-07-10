@@ -1,11 +1,11 @@
 <div id="model-control-pannel">
-  Model control pannel
+  <span id="pannel-text"> Model control pannel </span>
   <button *ngFor="let label of buttons; index as i" (click)="updateOption(i)">
     {{ label }}
   </button>
 </div>
 
-<div *ngIf="treeModel">
+<div *ngIf="treeModel; else noModelLoaded">
   <!-- Actual tree model. Should be visible no matter the option selected. -->
   <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel.tree_] : treeModel.estimators_"></app-tree-d3-model>
   
@@ -19,8 +19,12 @@
   
   <div *ngIf="curOption === 2" id="div-option-2" class="div-option">
   </div>
-  
-  <div *ngIf="curOption === 3" id="div-option-3" class="div-option">
-    <p> Notes for developers: new interesting functionalities can be easily added to this application simply by adding new options in "tree-displayer" component, and conditionally showing other components in "tree-displayer" template. </p>
-  </div>
 </div>
+  
+<div *ngIf="curOption === 3" id="div-option-3" class="div-option">
+  <pre> Notes for developers: new interesting functionalities can be easily added to this application simply by adding new options in "tree-displayer" component, and conditionally showing other components in "tree-displayer" template. </pre>
+</div>
+
+<ng-template #noModelLoaded>
+  <pre> So far, no model loaded to show (no connection to the server.) </pre>
+</ng-template>

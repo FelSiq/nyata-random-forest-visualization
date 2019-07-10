@@ -1,38 +1,33 @@
 <h2> Custom test instance </h2>
-<p> Current dataset dimension: {{ datasetDim }} </p>
+<div> Current dataset dimension: {{ datasetDim }} </div>
 <form #testInstForm="ngForm"
       id="div-test-instance-values"
       (ngSubmit)="onFormSubmit(testInstForm)">
-  <p>
-    <label for="sep-comma">
-      <input type="radio"
-             name="sep"
-             [ngModel]="testInstSep"
-             id="sep-comma"
-             value=",">
-      Comma
-    </label>
-    <label for="sep-space">
-      <input type="radio"
-             name="sep"
-             [ngModel]="testInstSep"
-             id="sep-space"
-             value=" ">
-      Space
-    </label>
+  <div>
+    <mat-radio-group aria-label="Select an option">
+      <mat-radio-button name="sep"
+                        labelPosition="after"
+                        [ngModel]="testInstSep"
+                        value=",">
+        Comma
+      </mat-radio-button>
+      <mat-radio-button name="sep"
+                        labelPosition="after"
+                        [ngModel]="testInstSep"
+                        value=" ">
+        Space
+      </mat-radio-button>
 
-    <label for="sep-custom">
-      <input type="radio"
-             name="sep"
-             [ngModel]="testInstSep"
-             id="sep-custom"
-             [value]="boxSep.value">
-      Custom
-    </label>
+      <mat-radio-button name="sep"
+                        labelPosition="after"
+                        [ngModel]="testInstSep"
+                        [value]="boxSep.value">
+        Custom
+      </mat-radio-button>
+    </mat-radio-group>
 
     <input #boxSep value="">
-
-  </p>
+  </div>
 
   <p>
     <label for="test-instance-attributes"> Test instance attributes:
