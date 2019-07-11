@@ -1,8 +1,14 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { PredictResults } from '../predict-results';
 import { TreePredictCallerService } from './tree-predict-caller.service';
+import { forbiddenNameValidator, checkInstanceDimension } from './forbidden-symbol-validator.directive';
+
+interface sepOption {
+  symb: string;
+  label: string; 
+};
 
 @Component({
   selector: 'app-data-loader-pannel',
@@ -11,57 +17,57 @@ import { TreePredictCallerService } from './tree-predict-caller.service';
 })
 export class DataLoaderPannelComponent implements OnInit {
   @Input() public datasetDim: number;
-  @Input() public testInstSep: string;
   public isValidFormSubmitted: boolean;
-  public testInstValues: string;
-  public errorMessage: string;
   public predictResults: PredictResults;
-  public readonly maxFileSize: number;
-  public readonly maxFileSizeUnit: string;
+  public readonly maxFileSize: number = 50;
+  public readonly maxFileSizeUnit: string = 'MB';
+  public readonly sepOptions: sepOption[] = [
+    { symb: ',', label: 'Comma' },
+    { symb: ' ', label: 'Blank space' },
+    { symb: ';', label: 'Semicolon' },
+  ];
 
-  constructor(public predictor: TreePredictCallerService) {
-    this.maxFileSize = 50;
-    this.maxFileSizeUnit = 'MB';
-  }
+  public testInstForm = this.fb.group({
+    sep: [',', [ Validators.required ]],
+    customSep: [
+        '',
+        forbiddenNameValidator(
+          new RegExp(this.sepOptions
+            .map(item => item.symb).join('|'), 'i')),
+    ],
+    attrs: ['', [ ]],
+  });
 
-  ngOnInit() { 
-    this.testInstValues = '';
-    this.testInstSep = ',';
-  }
+  constructor(public predictor: TreePredictCallerService,
+              private fb: FormBuilder) { }
 
-  onFormSubmit(form: NgForm): void {
-    this.isValidFormSubmitted = false;
+  ngOnInit() { }
 
-    if (form.invalid) {
-      return;
-    }
+  validateTestInstAttr(): void {
+    this.testInstForm
+      .controls['attrs']
+      .setValidators([
+        Validators.required,
+        checkInstanceDimension(
+          this.testInstForm.value['attrs'],
+          this.testInstForm.value['sep'],
+          this.datasetDim),
+    ]);
 
-    this.isValidFormSubmitted = true;
-    this.testInstValues = form.controls['attrs'].value;
-    this.testInstSep = form.controls['sep'].value;
-
-    this.predictTestInstValues();
-  }
-
-  clearErrorMessage(): void {
-    this.errorMessage = '';
+    this.testInstForm.get('attrs').updateValueAndValidity();
   }
 
   predictTestInstValues(): void {
-    let splittedValues: string[] = this.testInstValues.split(this.testInstSep);
+    const formAttrs = this.testInstForm.value['attrs'];
+    const formSep = this.testInstForm.value['sep'];
 
-    this.clearErrorMessage();
+    const splittedValues: string[] = formAttrs.split(formSep);
 
     if (splittedValues.length === this.datasetDim) {
       this.predictor.predictSingleInstance(splittedValues)
         .subscribe((results: PredictResults) => {
           this.predictResults = { ...results };
         });
-    } else {
-      this.errorMessage = `
-        Dimension of test instance (${splittedValues.length}) and
-        dataset (${this.datasetDim}) does not match!
-      `;
     }
   }
 

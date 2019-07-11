@@ -1,11 +1,13 @@
 <div *ngIf="treeNodes && treeNodes.length > 1">
-  Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
-  <select [(ngModel)]="chosenTree">
-    <option *ngFor="let tree of treeNodes; index as i;"
+  <mat-label>
+    Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
+  </mat-label>
+  <mat-select [(value)]="chosenTree">
+    <mat-option *ngFor="let tree of treeNodes; index as i;"
             value="{{ i }}">
             {{ i + 1 }} (size: {{ tree.tree_.node_count }})
-    </option>
-  </select>
+    </mat-option>
+  </mat-select>
 </div>
 
 <div *ngFor="let tree of treeNodes; index as i">

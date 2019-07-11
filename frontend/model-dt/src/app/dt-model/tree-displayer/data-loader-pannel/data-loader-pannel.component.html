@@ -1,54 +1,55 @@
-<h2> Custom test instance </h2>
-<div> Current dataset dimension: {{ datasetDim }} </div>
-<form #testInstForm="ngForm"
-      id="div-test-instance-values"
-      (ngSubmit)="onFormSubmit(testInstForm)">
-  <div>
-    <mat-radio-group aria-label="Select an option">
-      <mat-radio-button name="sep"
-                        labelPosition="after"
-                        [ngModel]="testInstSep"
-                        value=",">
-        Comma
-      </mat-radio-button>
-      <mat-radio-button name="sep"
-                        labelPosition="after"
-                        [ngModel]="testInstSep"
-                        value=" ">
-        Space
-      </mat-radio-button>
-
-      <mat-radio-button name="sep"
-                        labelPosition="after"
-                        [ngModel]="testInstSep"
-                        [value]="boxSep.value">
-        Custom
-      </mat-radio-button>
-    </mat-radio-group>
-
-    <input #boxSep value="">
+<div>
+  <h3> Custom test instance </h3>
+  <form (ngSubmit)="predictTestInstValues()" [formGroup]="testInstForm">
+    <div>
+      <mat-label> Instance attributes separator: </mat-label>
+  
+      <mat-radio-group formControlName="sep" required>
+        <mat-radio-button *ngFor="let sepOpt of sepOptions" value="{{ sepOpt.symb }}">
+          {{ sepOpt.label }}
+        </mat-radio-button>
+        <mat-radio-button [value]="testInstForm.value.customSep">
+          <mat-form-field
+              class="text-field-tiny-width"
+              appearance="outline"
+              floatLabel="never">
+            <input matInput
+                   formControlName="customSep"
+                   placeholder="Custom"
+                   type="text">
+          </mat-form-field>
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+  
+    <div>
+      <mat-form-field
+          class="text-field-full-width"
+          hideRequiredMarker="true"
+          floatLabel="never">
+        <input matInput
+               type="text"
+               formControlName="attrs"
+               placeholder="Test instance attribute values"
+               (input)="validateTestInstAttr()"
+               required>
+      </mat-form-field>
+    </div>
+  
+    <button mat-raised-button
+            type="submit"
+            [disabled]="testInstForm.invalid">
+      {{ testInstForm.valid ? "Predict" : ("Current instance dimension: " + (testInstForm.value.attrs ? testInstForm.value.attrs.split(testInstForm.value.sep).length : 0 ) + "/" + datasetDim) }}
+    </button>
+  </form>
+  
+  <div *ngIf="predictResults">
+    Prediction result: {{ predictResults.classes }}
   </div>
-
-  <p>
-    <label for="test-instance-attributes"> Test instance attributes:
-      <input name="attrs" [ngModel]="testInstValues" required #attrs="ngModel">
-      <div *ngIf="attrs.invalid && testInstForm.submitted && !isValidFormSubmitted" [ngClass]="'error'">
-          Test instance attribute values are required.
-      </div>
-    </label>
-  </p>
-
-  <button> Predict </button>
-</form>
-
-<div *ngIf="predictResults">
-  <p> Prediction result: {{ predictResults.classes }} </p>
 </div>
 
-<div *ngIf="errorMessage">
-  <p> {{ errorMessage }} </p>
+<div>
+  <h3> Load your own dataset </h3>
+  <p class="p-note"> Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}. </p>
+  <input type="file" />
 </div>
-
-<h2> Load your own dataset </h2>
-<p class="p-note"> Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}. </p>
-<input type="file" />

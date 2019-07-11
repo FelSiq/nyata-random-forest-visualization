@@ -4,7 +4,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MdRadioModule } from '@angular/material';
+import { MatRadioModule, MatInputModule } from '@angular/material';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button'; 
+import { MatSelectModule } from '@angular/material/select';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,6 +18,7 @@ import { InstanceBarComponent } from './instance-bar/instance-bar.component';
 import { TreeDisplayerComponent } from './dt-model/tree-displayer/tree-displayer.component';
 import { DataLoaderPannelComponent } from './dt-model/tree-displayer/data-loader-pannel/data-loader-pannel.component';
 import { TreeD3ModelComponent } from './dt-model/tree-displayer/tree-d3-model/tree-d3-model.component';
+import { ForbiddenSymbolValidatorDirective } from './dt-model/tree-displayer/data-loader-pannel/forbidden-symbol-validator.directive';
 
 
 @NgModule({
@@ -25,6 +29,7 @@ import { TreeD3ModelComponent } from './dt-model/tree-displayer/tree-d3-model/tr
     TreeDisplayerComponent,
     DataLoaderPannelComponent,
     TreeD3ModelComponent,
+    ForbiddenSymbolValidatorDirective,
   ],
   imports: [
     BrowserModule,
@@ -33,6 +38,11 @@ import { TreeD3ModelComponent } from './dt-model/tree-displayer/tree-d3-model/tr
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
+    MatRadioModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],

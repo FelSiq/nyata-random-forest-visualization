@@ -1,9 +1,12 @@
 <div id="model-control-pannel">
   <span id="pannel-text"> Model control pannel </span>
-  <button *ngFor="let label of buttons; index as i" (click)="updateOption(i)">
+  <button mat-raised-button *ngFor="let label of buttons; index as i" (click)="updateOption(i)">
     {{ label }}
   </button>
 </div>
+
+<!-- TODO: remove -->
+<app-data-loader-pannel [datasetDim]="5"></app-data-loader-pannel>
 
 <div *ngIf="treeModel; else noModelLoaded">
   <!-- Actual tree model. Should be visible no matter the option selected. -->

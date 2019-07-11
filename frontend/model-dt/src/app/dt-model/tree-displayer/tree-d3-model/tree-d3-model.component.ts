@@ -11,11 +11,11 @@ import { TreeInterface } from '../../../dt-interface';
 export class TreeD3ModelComponent implements OnInit, OnChanges {
   @Input() treeNodes: TreeInterface[];
   public d3Model: any;
-  public chosenTree: number;
+  public chosenTree: string | number;
 
   constructor() { }
 
-  ngOnInit() { this.chosenTree = 0; }
+  ngOnInit() { this.chosenTree = '0'; }
 
   ngOnChanges(): void {
     if (!this.treeNodes) {

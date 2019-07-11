@@ -7,7 +7,14 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "check": "gts check",
+    "clean": "gts clean",
+    "compile": "tsc -p .",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run check"
   },
   "private": true,
   "dependencies": {
@@ -24,10 +31,11 @@
     "@angular/router": "^8.1.1",
     "@types/d3": "^5.7.2",
     "core-js": "^2.5.4",
-    "d3": "^5.9.2",
+    "d3": "^5.9.7",
     "d3-ng2-service": "^2.2.0",
-    "rxjs": "~6.3.3",
+    "rxjs": "^6.5.2",
     "tslib": "^1.9.0",
+    "zone": "^0.3.4",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
@@ -49,6 +57,7 @@
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.11.0",
-    "typescript": "^3.4.5"
+    "typescript": "3.4.5",
+    "gts": "^1.0.0"
   }
 }

@@ -1,0 +1,13 @@
+.mat-radio-button ~ .mat-radio-button {
+  margin-left: 16px;
+}
+
+.text-field-tiny-width {
+  min-width: 100px;
+  max-width: 150px;
+  width: 20%;
+}
+
+.text-field-full-width {
+  width: 100%;
+}
