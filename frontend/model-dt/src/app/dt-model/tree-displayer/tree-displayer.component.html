@@ -1,12 +1,15 @@
 <div id="model-control-pannel">
-  <span id="pannel-text"> Model control pannel </span>
-  <button mat-raised-button *ngFor="let label of buttons; index as i" (click)="updateOption(i)">
-    {{ label }}
-  </button>
+  <mat-toolbar color="accent">
+    <span> Model control pannel </span>
+    <span class="bar-fill-remaining-space"></span> 
+    <button mat-raised-button
+            class="main-bar-button"
+            *ngFor="let label of buttons; index as i"
+            (click)="updateOption(i)">
+      {{ label }}
+    </button>
+  </mat-toolbar>
 </div>
-
-<!-- TODO: remove -->
-<app-data-loader-pannel [datasetDim]="5"></app-data-loader-pannel>
 
 <div *ngIf="treeModel; else noModelLoaded">
   <!-- Actual tree model. Should be visible no matter the option selected. -->
@@ -29,5 +32,5 @@
 </div>
 
 <ng-template #noModelLoaded>
-  <pre> So far, no model loaded to show (no connection to the server.) </pre>
+  <mat-spinner class="waiting-spinner"></mat-spinner>
 </ng-template>

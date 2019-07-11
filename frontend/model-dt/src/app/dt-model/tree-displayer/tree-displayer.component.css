@@ -1,0 +1,13 @@
+.bar-fill-remaining-space {
+  flex: 1 1 auto;
+}
+
+.main-bar-button {
+  margin-left: 2%;
+}
+
+.waiting-spinner {
+  margin-left: 48%;
+  margin-top: 4%;
+  margin-bottom: 4%;
+}

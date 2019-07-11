@@ -1,5 +1,6 @@
-.mat-radio-button ~ .mat-radio-button {
-  margin-left: 16px;
+.mat-radio-button {
+  margin-left: 0.5%;
+  margin-right: 1.5%;
 }
 
 .text-field-tiny-width {
@@ -9,5 +10,18 @@
 }
 
 .text-field-full-width {
-  width: 100%;
+  width: 98%;
+}
+
+.minor-header {
+}
+
+.predict-button {
+  min-width: 25%;
+  max-width: 50%;
+  width: 300px;
+}
+
+.form-separator-section {
+  vertical-align: center;
 }

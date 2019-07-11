@@ -8,6 +8,9 @@ import { MatRadioModule, MatInputModule } from '@angular/material';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button'; 
 import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCardModule } from '@angular/material/card';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -43,6 +46,9 @@ import { ForbiddenSymbolValidatorDirective } from './dt-model/tree-displayer/dat
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatProgressSpinnerModule,
+    MatToolbarModule,
+    MatCardModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],

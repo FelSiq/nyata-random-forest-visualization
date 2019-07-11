@@ -1,55 +1,73 @@
-<div>
-  <h3> Custom test instance </h3>
-  <form (ngSubmit)="predictTestInstValues()" [formGroup]="testInstForm">
-    <div>
-      <mat-label> Instance attributes separator: </mat-label>
-  
-      <mat-radio-group formControlName="sep" required>
-        <mat-radio-button *ngFor="let sepOpt of sepOptions" value="{{ sepOpt.symb }}">
-          {{ sepOpt.label }}
-        </mat-radio-button>
-        <mat-radio-button [value]="testInstForm.value.customSep">
-          <mat-form-field
-              class="text-field-tiny-width"
-              appearance="outline"
-              floatLabel="never">
-            <input matInput
-                   formControlName="customSep"
-                   placeholder="Custom"
-                   type="text">
-          </mat-form-field>
-        </mat-radio-button>
-      </mat-radio-group>
-    </div>
-  
-    <div>
-      <mat-form-field
-          class="text-field-full-width"
-          hideRequiredMarker="true"
-          floatLabel="never">
-        <input matInput
-               type="text"
-               formControlName="attrs"
-               placeholder="Test instance attribute values"
-               (input)="validateTestInstAttr()"
-               required>
-      </mat-form-field>
-    </div>
-  
-    <button mat-raised-button
-            type="submit"
-            [disabled]="testInstForm.invalid">
-      {{ testInstForm.valid ? "Predict" : ("Current instance dimension: " + (testInstForm.value.attrs ? testInstForm.value.attrs.split(testInstForm.value.sep).length : 0 ) + "/" + datasetDim) }}
-    </button>
-  </form>
-  
-  <div *ngIf="predictResults">
-    Prediction result: {{ predictResults.classes }}
-  </div>
-</div>
+<mat-card>
+  <mat-card-title class="minor-header">
+    Custom test instance
+  </mat-card-title>
 
-<div>
-  <h3> Load your own dataset </h3>
-  <p class="p-note"> Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}. </p>
+  <mat-card-content>
+    <form (ngSubmit)="predictTestInstValues()" [formGroup]="testInstForm">
+      <div class="form-separator-section">
+        <mat-label> Instance attributes separator: </mat-label>
+    
+        <mat-radio-group formControlName="sep" required>
+          <mat-radio-button *ngFor="let sepOpt of sepOptions" value="{{ sepOpt.symb }}">
+            {{ sepOpt.label }}
+          </mat-radio-button>
+          <mat-radio-button [value]="testInstForm.value.customSep">
+            <mat-form-field
+                class="text-field-tiny-width"
+                floatLabel="never">
+              <input matInput
+                     formControlName="customSep"
+                     placeholder="Custom"
+                     type="text">
+            </mat-form-field>
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+    
+      <div>
+        <mat-form-field
+            class="text-field-full-width"
+            hideRequiredMarker="true"
+            floatLabel="never">
+          <input matInput
+                 type="text"
+                 formControlName="attrs"
+                 placeholder="Test instance attribute values"
+                 (input)="validateTestInstAttr()"
+                 required>
+        </mat-form-field>
+      </div>
+    
+      <button mat-raised-button
+              color="accent"
+              class="predict-button"
+              type="submit"
+              [disabled]="testInstForm.invalid">
+        {{
+          testInstForm.valid ? "Predict" : (
+          "Current instance dimension: " +
+          (testInstForm.value.attrs ?
+            testInstForm.value.attrs.split(testInstForm.value.sep).length : 0 ) +
+          "/" + datasetDim)
+        }}
+      </button>
+    </form>
+  
+    <div *ngIf="predictResults">
+      Prediction result: {{ predictResults.classes }}
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card>
+  <mat-card-title class="minor-header">
+    Load your own dataset
+  </mat-card-title>
+
+  <mat-card-subtitle class="p-note">
+    Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}.
+  </mat-card-subtitle>
+
   <input type="file" />
-</div>
+</mat-card>
