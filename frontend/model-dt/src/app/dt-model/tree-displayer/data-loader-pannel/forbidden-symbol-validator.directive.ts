@@ -2,7 +2,7 @@ import { Directive } from '@angular/core';
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 
 @Directive({
-  selector: '[appForbiddenSymbolValidator]'
+  selector: '[appForbiddenSymbolValidator]',
 })
 export class ForbiddenSymbolValidatorDirective {
 
@@ -24,6 +24,6 @@ export function checkInstanceDimension(
     datasetDim: number | string): ValidatorFn {
   return (control: AbstractControl): {[key: string]: any} | null => {
     const correctDim = attrs ? attrs.split(sep).length : 0;
-    return correctDim != datasetDim ? {'instanceDimension': {value: control.value}} : null;
+    return correctDim !== datasetDim ? {'instanceDimension': {value: control.value}} : null;
   };
 }

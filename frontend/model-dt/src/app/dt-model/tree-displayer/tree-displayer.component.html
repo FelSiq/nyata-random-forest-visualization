@@ -11,6 +11,9 @@
   </mat-toolbar>
 </div>
 
+<!-- TODO: to be removed -->
+<!-- <app-data-loader-pannel [datasetDim]="6"></app-data-loader-pannel> -->
+
 <div *ngIf="treeModel; else noModelLoaded">
   <!-- Actual tree model. Should be visible no matter the option selected. -->
   <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel.tree_] : treeModel.estimators_"></app-tree-d3-model>

@@ -12,7 +12,7 @@ export interface TreeInterface {
   n_outputs: number;
   node_count: number;
   threshold: number[];
-  value: Array<any>;
+  value: any[];
   weighted_n_node_samples: number[];
 }
 

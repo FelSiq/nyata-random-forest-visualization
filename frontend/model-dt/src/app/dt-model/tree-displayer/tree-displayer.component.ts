@@ -4,12 +4,12 @@ import { DTInterface } from '../../dt-interface';
 @Component({
   selector: 'app-tree-displayer',
   templateUrl: './tree-displayer.component.html',
-  styleUrls: ['./tree-displayer.component.css']
+  styleUrls: ['./tree-displayer.component.css'],
 })
 export class TreeDisplayerComponent implements OnInit {
-  public curOption: number;
-  public buttons: string[];
-  @Input() public treeModel: DTInterface;
+  curOption: number;
+  buttons: string[];
+  @Input() treeModel: DTInterface;
 
   constructor() { }
 

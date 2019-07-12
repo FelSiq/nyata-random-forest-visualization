@@ -6,20 +6,20 @@ import { catchError, retry } from 'rxjs/operators';
 import { PredictResults } from '../predict-results';
 
 const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
 };
 
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TreePredictCallerService {
-  private url_post_instance = 'http://127.0.0.1:5000/predict-single-instance/'
+  private urlPostInstance = 'http://127.0.0.1:5000/predict-single-instance/';
 
   constructor(private http: HttpClient) { }
 
   predictSingleInstance(instance: Array<number | string>): Observable<PredictResults> {
-    return this.http.get<PredictResults>(this.url_post_instance + instance.toString(), httpOptions)
+    return this.http.get<PredictResults>(this.urlPostInstance + instance.toString(), httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)
@@ -36,6 +36,6 @@ export class TreePredictCallerService {
     }
     return throwError(
       'Something went wrong while predicting a single instance.');
-    };
+    }
 
 }

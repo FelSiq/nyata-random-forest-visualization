@@ -6,12 +6,12 @@ import { TreeInterface } from '../../../dt-interface';
 @Component({
   selector: 'app-tree-d3-model',
   templateUrl: './tree-d3-model.component.html',
-  styleUrls: ['./tree-d3-model.component.css']
+  styleUrls: ['./tree-d3-model.component.css'],
 })
 export class TreeD3ModelComponent implements OnInit, OnChanges {
   @Input() treeNodes: TreeInterface[];
-  public d3Model: any;
-  public chosenTree: string | number;
+  d3Model: any;
+  chosenTree: string | number;
 
   constructor() { }
 

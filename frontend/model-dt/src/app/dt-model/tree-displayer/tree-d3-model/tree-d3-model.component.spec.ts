@@ -8,7 +8,7 @@ describe('TreeD3ModelComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TreeD3ModelComponent ]
+      declarations: [ TreeD3ModelComponent ],
     })
     .compileComponents();
   }));

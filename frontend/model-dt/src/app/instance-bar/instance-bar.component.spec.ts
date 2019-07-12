@@ -8,7 +8,7 @@ describe('InstanceBarComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InstanceBarComponent ]
+      declarations: [ InstanceBarComponent ],
     })
     .compileComponents();
   }));

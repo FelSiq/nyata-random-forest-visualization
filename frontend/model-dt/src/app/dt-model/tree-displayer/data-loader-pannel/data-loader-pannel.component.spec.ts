@@ -8,7 +8,7 @@ describe('DataLoaderPannelComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DataLoaderPannelComponent ]
+      declarations: [ DataLoaderPannelComponent ],
     })
     .compileComponents();
   }));

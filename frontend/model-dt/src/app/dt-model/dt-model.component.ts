@@ -17,32 +17,24 @@ import {
 @Component({
   selector: 'app-dt-model',
   templateUrl: './dt-model.component.html',
-  styleUrls: ['./dt-model.component.css']
+  styleUrls: ['./dt-model.component.css'],
 })
 export class DtModelComponent implements OnInit, OnDestroy {
-    public treeModel: DTInterface;
+    treeModel: DTInterface;
     private d3: D3;
-    private parentNativeElement: any;
-    private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
 
   constructor(
       private modelService: GetModelService,
       element: ElementRef,
       private ngZone: NgZone,
       d3Service: D3Service) { 
-    this.d3 = d3Service.getD3();
-    this.parentNativeElement = element.nativeElement;
   }
 
   ngOnInit() {
     this.getDTModel();
   }
 
-  ngOnDestroy() {
-    if (this.d3Svg.empty && !this.d3Svg.empty()) {
-      this.d3Svg.selectAll('*').remove();
-    }
-  }
+  ngOnDestroy() { }
 
   getDTModel(): void {
     this.modelService.getDTModel()

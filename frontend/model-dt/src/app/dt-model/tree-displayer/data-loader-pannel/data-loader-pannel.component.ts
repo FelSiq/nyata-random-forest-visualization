@@ -5,29 +5,29 @@ import { PredictResults } from '../predict-results';
 import { TreePredictCallerService } from './tree-predict-caller.service';
 import { forbiddenNameValidator, checkInstanceDimension } from './forbidden-symbol-validator.directive';
 
-interface sepOption {
+interface SepOption {
   symb: string;
   label: string; 
-};
+}
 
 @Component({
   selector: 'app-data-loader-pannel',
   templateUrl: './data-loader-pannel.component.html',
-  styleUrls: ['./data-loader-pannel.component.css']
+  styleUrls: ['./data-loader-pannel.component.css'],
 })
 export class DataLoaderPannelComponent implements OnInit {
-  @Input() public datasetDim: number;
-  public isValidFormSubmitted: boolean;
-  public predictResults: PredictResults;
-  public readonly maxFileSize: number = 50;
-  public readonly maxFileSizeUnit: string = 'MB';
-  public readonly sepOptions: sepOption[] = [
+  @Input() datasetDim: number;
+  isValidFormSubmitted: boolean;
+  predictResults: PredictResults;
+  readonly maxFileSize: number = 50;
+  readonly maxFileSizeUnit: string = 'MB';
+  readonly sepOptions: SepOption[] = [
     { symb: ',', label: 'Comma' },
     { symb: ' ', label: 'Blank space' },
     { symb: ';', label: 'Semicolon' },
   ];
 
-  public testInstForm = this.fb.group({
+  testInstForm = this.fb.group({
     sep: [',', [ Validators.required ]],
     customSep: [
         '',
