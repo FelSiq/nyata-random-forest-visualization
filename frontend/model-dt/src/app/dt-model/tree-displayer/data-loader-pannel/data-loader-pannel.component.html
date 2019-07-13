@@ -1,73 +1,90 @@
-<mat-card>
-  <mat-card-title class="minor-header">
-    Custom test instance
-  </mat-card-title>
-
-  <mat-card-content>
-    <form (ngSubmit)="predictTestInstValues()" [formGroup]="testInstForm">
-      <div class="form-separator-section">
-        <mat-label> Instance attributes separator: </mat-label>
-    
-        <mat-radio-group formControlName="sep" required>
-          <mat-radio-button *ngFor="let sepOpt of sepOptions" value="{{ sepOpt.symb }}">
-            {{ sepOpt.label }}
-          </mat-radio-button>
-          <mat-radio-button [value]="testInstForm.value.customSep">
-            <mat-form-field
-                class="text-field-tiny-width"
-                floatLabel="never">
-              <input matInput
-                     formControlName="customSep"
-                     placeholder="Custom"
-                     type="text">
-            </mat-form-field>
-          </mat-radio-button>
-        </mat-radio-group>
-      </div>
-    
-      <div>
-        <mat-form-field
-            class="text-field-full-width"
-            hideRequiredMarker="true"
-            floatLabel="never">
-          <input matInput
-                 type="text"
-                 formControlName="attrs"
-                 placeholder="Test instance attribute values"
-                 (input)="validateTestInstAttr()"
-                 required>
-        </mat-form-field>
-      </div>
-    
-      <button mat-raised-button
-              color="accent"
-              class="predict-button"
-              type="submit"
-              [disabled]="testInstForm.invalid">
-        {{
-          testInstForm.valid ? "Predict" : (
-          "Current instance dimension: " +
-          (testInstForm.value.attrs ?
-            testInstForm.value.attrs.split(testInstForm.value.sep).length : 0 ) +
-          "/" + datasetDim)
-        }}
-      </button>
-    </form>
+<mat-accordion>
+  <mat-expansion-panel>
+    <mat-expansion-panel-header
+          matTooltip="Create a single custom test instance for predictions with the current model.">
+      <mat-panel-title>
+        Custom test instance
+      </mat-panel-title>
+    </mat-expansion-panel-header>
   
-    <div *ngIf="predictResults">
-      Prediction result: {{ predictResults.classes }}
+    <ng-template matExpansionPanelContent>
+      <form (ngSubmit)="predictTestInstValues()" [formGroup]="testInstForm">
+        <div>
+          <mat-form-field
+              class="text-field-full-width"
+              hideRequiredMarker="true"
+              floatLabel="never">
+            <input matInput
+                   type="text"
+                   formControlName="attrs"
+                   placeholder="Test instance attribute values"
+                   (input)="validateTestInstAttr()"
+                   required>
+          </mat-form-field>
+        </div>
+  
+        <div class="form-separator-section">
+          <mat-label> Attributes separator: </mat-label>
+      
+          <mat-radio-group
+                (change)="validateTestInstAttr()"
+                matTooltip="Select the symbol used to separate each attribute of the test instance"
+                formControlName="sep"
+                required>
+            <mat-radio-button *ngFor="let sepOpt of sepOptions" value="{{ sepOpt.symb }}">
+              {{ sepOpt.label }}
+            </mat-radio-button>
+            <mat-radio-button [value]="testInstForm.value.customSep">
+              <mat-form-field
+                  class="text-field-tiny-width"
+                  floatLabel="never">
+                <input matInput
+                       formControlName="customSep"
+                       placeholder="Custom"
+                       type="text">
+              </mat-form-field>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+      
+        <mat-action-row>
+          <button mat-raised-button
+                  matTooltip="Use the current model to make predictions"
+                  color="accent"
+                  class="predict-button"
+                  type="submit"
+                  [disabled]="testInstForm.invalid">
+            {{
+              testInstForm.valid ? "Predict" : (
+              "Current instance dimension: " +
+              (testInstForm.value.attrs ?
+                testInstForm.value.attrs.split(testInstForm.value.sep).length : 0 ) +
+              "/" + datasetDim)
+            }}
+          </button>
+        </mat-action-row>
+      </form>
+    </ng-template>
+  </mat-expansion-panel>
+  
+  <mat-expansion-panel>
+    <mat-expansion-panel-header
+          matTooltip="Load your own test dataset to make predictions with the current model.">
+      <mat-panel-title>
+        Load test dataset
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+  
+    <ng-template matExpansionPanelContent>
+      <p> Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}. </p>
+      <input type="file" />
+    </ng-template>
+  </mat-expansion-panel>
+    
+  <mat-card *ngIf="predictResults">
+    <h3> Prediction results: </h3>
+    <div *ngFor="let item of predictResults | keyvalue">
+      {{ item.key }}: {{ item.value }}
     </div>
-  </mat-card-content>
-</mat-card>
-
-<mat-card>
-  <mat-card-title class="minor-header">
-    Load your own dataset
-  </mat-card-title>
-
-  <mat-card-subtitle class="p-note">
-    Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}.
-  </mat-card-subtitle>
-
-  <input type="file" />
-</mat-card>
+  </mat-card>
+</mat-accordion>

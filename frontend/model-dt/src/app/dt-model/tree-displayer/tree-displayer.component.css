@@ -11,3 +11,11 @@
   margin-top: 4%;
   margin-bottom: 4%;
 }
+
+.tree-model-drawer {
+  width: 40%;
+}
+
+.tree-model-content {
+  height: 100%;
+}

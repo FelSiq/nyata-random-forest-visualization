@@ -11,6 +11,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTableModule } from '@angular/material/table';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -49,6 +55,12 @@ import { ForbiddenSymbolValidatorDirective } from './dt-model/tree-displayer/dat
     MatProgressSpinnerModule,
     MatToolbarModule,
     MatCardModule,
+    MatExpansionModule,
+    MatTabsModule,
+    MatGridListModule,
+    MatSidenavModule,
+    MatTooltipModule,
+    MatTableModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],

@@ -1,39 +1,48 @@
-<div id="model-control-pannel">
-  <mat-toolbar color="accent">
-    <span> Model control pannel </span>
-    <span class="bar-fill-remaining-space"></span> 
-    <button mat-raised-button
-            class="main-bar-button"
-            *ngFor="let label of buttons; index as i"
-            (click)="updateOption(i)">
-      {{ label }}
-    </button>
-  </mat-toolbar>
-</div>
+<mat-drawer-container *ngIf="treeModel; else noModelLoaded">
+  <mat-drawer-content class="tree-model-content">
+    <!-- Actual tree model. Should be visible no matter the option selected. -->
+    <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel.tree_] : (treeModel.estimators_ ? treeModel.estimators_ : undefined)"></app-tree-d3-model>
+  </mat-drawer-content>
 
-<!-- TODO: to be removed -->
-<!-- <app-data-loader-pannel [datasetDim]="6"></app-data-loader-pannel> -->
-
-<div *ngIf="treeModel; else noModelLoaded">
-  <!-- Actual tree model. Should be visible no matter the option selected. -->
-  <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel.tree_] : treeModel.estimators_"></app-tree-d3-model>
+  <mat-drawer mode="side"
+              opened
+              disableClose
+              position="end"
+              class="tree-model-drawer">
+    <mat-tab-group>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          Model information
+        </ng-template>
+    
+        <ng-template matTabContent>
+          <pre> Data Obtained is: {{ treeModel | json }} </pre>
+        </ng-template>
+      </mat-tab>
+    
+      <mat-tab>
+        <ng-template mat-tab-label>
+          Make predictions
+        </ng-template>
+    
+        <ng-template matTabContent>
+          <app-data-loader-pannel [datasetDim]="treeModel.n_features_"></app-data-loader-pannel>
+        </ng-template>
+      </mat-tab>
+    
+      <mat-tab>
+        <ng-template mat-tab-label>
+          Notes
+        </ng-template>
+    
+        <ng-template matTabContent>
+          <p> Notes for developers: new interesting functionalities can be easily added to this application simply by adding new options in "tree-displayer" component, and conditionally showing other components in "tree-displayer" template. </p>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-drawer>
+</mat-drawer-container>
   
-  <div *ngIf="curOption === 0" id="div-option-0" class="div-option">
-    <pre> Data Obtained is: {{ treeModel | json }} </pre>
-  </div>
-  
-  <div *ngIf="curOption === 1" id="div-option-1" class="div-option">
-    <app-data-loader-pannel [datasetDim]="treeModel.n_features_"></app-data-loader-pannel>
-  </div>
-  
-  <div *ngIf="curOption === 2" id="div-option-2" class="div-option">
-  </div>
-</div>
-  
-<div *ngIf="curOption === 3" id="div-option-3" class="div-option">
-  <pre> Notes for developers: new interesting functionalities can be easily added to this application simply by adding new options in "tree-displayer" component, and conditionally showing other components in "tree-displayer" template. </pre>
-</div>
-
 <ng-template #noModelLoaded>
   <mat-spinner class="waiting-spinner"></mat-spinner>
 </ng-template>

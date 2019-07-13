@@ -1,14 +1,14 @@
-<div *ngIf="treeNodes && treeNodes.length > 1">
-  <mat-label>
+<mat-form-field class="current-tree-selector" *ngIf="treeNodes && treeNodes.length > 1">
+  <mat-label class="forest-label">
     Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
   </mat-label>
   <mat-select [(value)]="chosenTree">
     <mat-option *ngFor="let tree of treeNodes; index as i;"
             value="{{ i }}">
-            {{ i + 1 }} (size: {{ tree.tree_.node_count }})
+            {{ i + 1 }} (node count: {{ tree.tree_.node_count }})
     </mat-option>
   </mat-select>
-</div>
+</mat-form-field>
 
 <div *ngFor="let tree of treeNodes; index as i">
   <div *ngIf="chosenTree == i">
