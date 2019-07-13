@@ -10,7 +10,7 @@
   </mat-select>
 </mat-form-field>
 
-<div *ngFor="let tree of treeNodes; index as i">
+<div *ngFor="let tree of treeNodes; index as i" class="d3-tree-model">
   <div *ngIf="chosenTree == i">
     {{ tree | json }}
   </div>

@@ -16,7 +16,13 @@
         </ng-template>
     
         <ng-template matTabContent>
-          <pre> Data Obtained is: {{ treeModel | json }} </pre>
+          <mat-list dense>
+            <ng-container *ngFor="let item of treeModel | keyvalue">
+              <mat-list-item *ngIf="item.value === 0 || item.value === false || item.value">
+                {{ item.key }}: {{ item.value }}
+              </mat-list-item>
+            </ng-container>
+          </mat-list>
         </ng-template>
       </mat-tab>
     
@@ -26,7 +32,8 @@
         </ng-template>
     
         <ng-template matTabContent>
-          <app-data-loader-pannel [datasetDim]="treeModel.n_features_"></app-data-loader-pannel>
+          <app-data-loader-pannel
+              [datasetDim]="treeModel.n_features_ ? treeModel.n_features_ : 0"></app-data-loader-pannel>
         </ng-template>
       </mat-tab>
     
@@ -36,7 +43,8 @@
         </ng-template>
     
         <ng-template matTabContent>
-          <p> Notes for developers: new interesting functionalities can be easily added to this application simply by adding new options in "tree-displayer" component, and conditionally showing other components in "tree-displayer" template. </p>
+          <p> This option will be removed in the final version. </p>
+          <p> New interesting functionalities can be easily added to this application simply by adding new options in "tree-displayer" component, and conditionally showing other components in "tree-displayer" template. </p>
         </ng-template>
       </mat-tab>
     </mat-tab-group>

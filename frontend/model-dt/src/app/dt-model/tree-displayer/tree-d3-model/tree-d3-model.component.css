@@ -1,3 +1,7 @@
 .current-tree-selector {
   width: 98%;
 }
+
+.d3-tree-model {
+  height: 100%;
+}
