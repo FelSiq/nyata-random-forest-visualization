@@ -67,7 +67,13 @@ def serialize_decision_tree(
 ) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
     new_model = {
-        preprocess_key(str(key)): json_encoder_type_manager(value)
+        preprocess_key(str(key)): {
+            "value": json_encoder_type_manager(value),
+            "description": (
+              "Description for key {}. TODO: get description "
+              "directly from sklearn documentation.".format(key)
+            ),
+        }
         for key, value in dt_model.__dict__.items()
     }
     return new_model

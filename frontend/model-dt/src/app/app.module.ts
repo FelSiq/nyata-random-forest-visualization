@@ -17,6 +17,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -61,6 +62,7 @@ import { ForbiddenSymbolValidatorDirective } from './dt-model/tree-displayer/dat
     MatSidenavModule,
     MatTooltipModule,
     MatListModule, 
+    MatIconModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],

@@ -13,7 +13,11 @@ export class TreeDisplayerComponent implements OnInit {
 
   ngOnInit() { }
 
-  filter_empty(item) {
+  filter_empty(item): boolean {
     return item === 0 || item;
+  }
+
+  isArray(item): boolean {
+    return item in Array;
   }
 }
