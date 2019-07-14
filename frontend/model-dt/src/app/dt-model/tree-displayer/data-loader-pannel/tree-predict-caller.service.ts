@@ -16,10 +16,11 @@ const httpOptions = {
 export class TreePredictCallerService {
   private urlPostInstance = 'http://127.0.0.1:5000/predict-single-instance/';
 
-  constructor(private http: HttpClient) { }
+  constructor(private httpClient: HttpClient) { }
 
   predictSingleInstance(instance: Array<number | string>): Observable<PredictResults> {
-    return this.http.get<PredictResults>(this.urlPostInstance + instance.toString(), httpOptions)
+    return this.httpClient
+      .get<PredictResults>(this.urlPostInstance + instance.toString(), httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)

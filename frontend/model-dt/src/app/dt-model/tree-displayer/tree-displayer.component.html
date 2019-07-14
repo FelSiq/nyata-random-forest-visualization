@@ -19,7 +19,8 @@
           <mat-list dense>
             <ng-container *ngFor="let item of treeModel | keyvalue">
               <mat-list-item *ngIf="item.value === 0 || item.value === false || item.value">
-                {{ item.key }}: {{ item.value }}
+                <b> {{ (item.key | titlecase).split('_').filter(filter_empty).join(' ') }}: </b>
+                {{ item.value }}
               </mat-list-item>
             </ng-container>
           </mat-list>
@@ -33,7 +34,7 @@
     
         <ng-template matTabContent>
           <app-data-loader-pannel
-              [datasetDim]="treeModel.n_features_ ? treeModel.n_features_ : 0"></app-data-loader-pannel>
+              [datasetDim]="treeModel.number_of_features_ ? treeModel.number_of_features_ : 0"></app-data-loader-pannel>
         </ng-template>
       </mat-tab>
     

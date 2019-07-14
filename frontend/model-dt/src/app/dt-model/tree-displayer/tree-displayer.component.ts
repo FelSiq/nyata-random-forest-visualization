@@ -13,4 +13,7 @@ export class TreeDisplayerComponent implements OnInit {
 
   ngOnInit() { }
 
+  filter_empty(item) {
+    return item === 0 || item;
+  }
 }

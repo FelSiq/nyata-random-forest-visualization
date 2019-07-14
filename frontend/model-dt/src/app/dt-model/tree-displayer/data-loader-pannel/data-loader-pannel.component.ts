@@ -3,6 +3,7 @@ import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms'
 
 import { PredictResults } from '../predict-results';
 import { TreePredictCallerService } from './tree-predict-caller.service';
+import { DatasetUploadService } from './dataset-upload.service';
 import { forbiddenNameValidator, checkInstanceDimension } from './forbidden-symbol-validator.directive';
 
 interface SepOption {
@@ -26,6 +27,7 @@ export class DataLoaderPannelComponent implements OnInit {
     { symb: ' ', label: 'Blank space' },
     { symb: ';', label: 'Semicolon' },
   ];
+  fileToUpload: File = null;
 
   testInstForm = this.fb.group({
     sep: [',', [ Validators.required ]],
@@ -39,6 +41,7 @@ export class DataLoaderPannelComponent implements OnInit {
   });
 
   constructor(public predictor: TreePredictCallerService,
+              public fileUploadService: DatasetUploadService,
               private fb: FormBuilder) { }
 
   ngOnInit() { }
@@ -69,6 +72,18 @@ export class DataLoaderPannelComponent implements OnInit {
           this.predictResults = { ...results };
         });
     }
+  }
+
+  handleFileInput(files: FileList) {
+      this.fileToUpload = files.item(0);
+  }
+
+  uploadFileToActivity() {
+    this.fileUploadService.postFile(this.fileToUpload).subscribe(data => {
+      // do something, if upload success
+      }, error => {
+        console.log(error);
+      });
   }
 
 }

@@ -1,10 +1,26 @@
 """Module dedicated to the visualization of a Decision Tree."""
 import typing as t
 import inspect
+import re
 
 import sklearn.tree
 import sklearn.ensemble
 import numpy as np
+
+RE_KEY_NUMBEROF = re.compile(r"\bn \b")
+RE_KEY_MIN = re.compile(r"\bmin\b")
+RE_KEY_MAX = re.compile(r"\bmax\b")
+RE_KEY_PARAMS = re.compile(r"\bparams\b")
+
+def preprocess_key(key: str) -> str:
+    """Transform the sklearn model dict keys into a more user-readable value."""
+    key = key.replace("_", " ")
+    key = RE_KEY_NUMBEROF.sub("number of ", key)
+    key = RE_KEY_MAX.sub("maximum", key)
+    key = RE_KEY_MIN.sub("minimum", key)
+    key = RE_KEY_PARAMS.sub("parameters", key)
+    key = key.replace(" ", "_")
+    return key
 
 
 def get_tree_structure(tree: sklearn.tree._tree.Tree) -> t.Dict[str, t.Any]:
@@ -51,7 +67,7 @@ def serialize_decision_tree(
 ) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
     new_model = {
-        str(key): json_encoder_type_manager(value)
+        preprocess_key(str(key)): json_encoder_type_manager(value)
         for key, value in dt_model.__dict__.items()
     }
     return new_model
