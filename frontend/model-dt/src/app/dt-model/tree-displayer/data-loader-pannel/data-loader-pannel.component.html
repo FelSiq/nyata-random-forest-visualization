@@ -90,7 +90,10 @@
   <mat-card *ngIf="predictResults">
     <h3> Prediction results: </h3>
     <div *ngFor="let item of predictResults | keyvalue">
-      {{ item.key }}: {{ item.value }}
+      <strong>
+        {{ item.key }}:
+      </strong>
+      {{ item.value }}
     </div>
   </mat-card>
 </mat-accordion>

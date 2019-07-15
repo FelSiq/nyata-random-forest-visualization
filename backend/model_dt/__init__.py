@@ -21,8 +21,19 @@ class PredictSingleInstance(flask_restful.Resource):
 
     def get(self, instance: str):
         inst_proc = self._preprocess_instance(instance)
-        preds = self.model.predict(inst_proc)
-        return flask.jsonify({'classes': model_dt.json_encoder_type_manager(preds)})
+
+        pred_vals = {
+          'classes': self.model.predict(inst_proc),
+          'decision_path': self.model.decision_path(inst_proc),
+          'leaf_id': self.model.apply(inst_proc),
+        }
+
+        ret = {
+          key: model_dt.json_encoder_type_manager(val)
+          for key, val in pred_vals.items()
+        }
+
+        return flask.jsonify(ret)
 
 def create_app():
     """DT visualization application factory."""

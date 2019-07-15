@@ -6,6 +6,7 @@ import re
 import sklearn.tree
 import sklearn.ensemble
 import numpy as np
+import scipy.sparse
 
 RE_KEY_NUMBEROF = re.compile(r"\bn \b")
 RE_KEY_MIN = re.compile(r"\bmin\b")
@@ -47,7 +48,7 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
                         sklearn.tree.tree.DecisionTreeRegressor)):
         return serialize_decision_tree(obj)
 
-    if isinstance(obj, (np.ndarray, list)):
+    if isinstance(obj, (np.ndarray, list, tuple)):
         return list(map(json_encoder_type_manager, obj))
 
     if isinstance(obj, (np.int8, np.int16, np.int32, np.int64)):
@@ -55,6 +56,9 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
 
     if isinstance(obj, sklearn.tree._tree.Tree):
         return get_tree_structure(obj)
+
+    if isinstance(obj, scipy.sparse.csr.csr_matrix):
+        return "TODO"
 
     return obj
 
