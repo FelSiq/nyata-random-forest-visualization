@@ -81,7 +81,9 @@
       <input type="file"
              id="file-upload-input"
              (change)="handleFileInput($event.target.files)"/>
-      <button mat-raised-button> Submit </button>
+      <mat-action-row>
+        <button mat-raised-button> Submit </button>
+      </mat-action-row>
     </ng-template>
   </mat-expansion-panel>
     
