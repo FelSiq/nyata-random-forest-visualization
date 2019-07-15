@@ -15,6 +15,8 @@ export class TreeDisplayerComponent implements OnInit {
   ngOnInit() {
     this.bannedModelAttrs = [
       'estimators_',
+      'base_estimator_',
+      'tree_',
     ];
   }
 
