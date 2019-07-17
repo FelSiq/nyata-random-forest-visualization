@@ -1,3 +1,8 @@
+interface descVal<T> {
+  description: string;
+  value: T;
+}
+
 export interface TreeInterface {
   capacity: number;
   children_left: number[];
@@ -12,7 +17,7 @@ export interface TreeInterface {
   n_outputs: number;
   node_count: number;
   threshold: number[];
-  value: any[];
+  value: number[];
   weighted_n_node_samples: number[];
 }
 
@@ -33,36 +38,36 @@ export interface BaseEstimator {
 }
 
 export interface DTInterface {
-  criterion: string;
-  min_samples_split: string;
-  min_samples_leaf: string;
-  min_weight_fraction_leaf: string;
-  max_features: string;
-  max_leaf_nodes: string;
-  class_weight: string;
+  criterion: descVal<string>;
+  min_samples_split: descVal<string>;
+  min_samples_leaf: descVal<string>;
+  min_weight_fraction_leaf: descVal<string>;
+  max_features: descVal<string>;
+  max_leaf_nodes: descVal<string>;
+  class_weight: descVal<string>;
 
-  max_depth: number;
-  random_state: number;
-  min_impurity_decrease: number;
-  min_impurity_split: number;
-  n_features_: number;
-  n_outputs_: number;
-  classes_: Array<number | string>;
-  n_classes_: number;
+  max_depth: descVal<number>;
+  random_state: descVal<number>;
+  min_impurity_decrease: descVal<number>;
+  min_impurity_split: descVal<number>;
+  n_features_: descVal<number>;
+  n_outputs_: descVal<number>;
+  classes_: descVal<Array<number | string>>;
+  n_classes_: descVal<number>;
 
-  tree_?: TreeInterface;
-  estimators_?: DTInterface[];
+  tree_?: descVal<TreeInterface>;
+  estimators_?: descVal<DTInterface[]>;
 
-  presort?: boolean;
-  splitter?: string;
-  warm_start?: boolean;
-  n_estimators?: string;
-  estimator_params?: any[];
-  oob_score?: boolean;
-  verbose?: boolean;
-  base_estimator?: BaseEstimator;
-  base_estimator_?: BaseEstimator;
-  bootstrap?: boolean;
-  n_jobs?: number;
-  max_features_?: number;
+  presort?: descVal<boolean>;
+  splitter?: descVal<string>;
+  warm_start?: descVal<boolean>;
+  n_estimators?: descVal<string>;
+  estimator_params?: descVal<string[]>;
+  oob_score?: descVal<boolean>;
+  verbose?: descVal<boolean>;
+  base_estimator?: descVal<BaseEstimator>;
+  base_estimator_?: descVal<BaseEstimator>;
+  bootstrap?: descVal<boolean>;
+  n_jobs?: descVal<number>;
+  max_features_?: descVal<number>;
 }

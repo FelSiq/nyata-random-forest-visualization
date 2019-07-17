@@ -2,7 +2,7 @@
   <mat-label class="forest-label">
     Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
   </mat-label>
-  <mat-select [(value)]="chosenTree">
+  <mat-select (blur)="changesHandler()" [(value)]="chosenTree">
     <mat-option *ngFor="let tree of treeNodes; index as i;"
             value="{{ i }}">
             {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }})
@@ -10,8 +10,10 @@
   </mat-select>
 </mat-form-field>
 
+<svg width="100%" height="512" class="current-tree-model"></svg>
+
 <div *ngFor="let tree of treeNodes; index as i" class="d3-tree-model">
-  <div *ngIf="chosenTree == i">
-    {{ tree | json }}
+  <div *ngIf="+chosenTree === i">
+    {{ tree.tree_.value | json }}
   </div>
 </div>

@@ -1,7 +1,7 @@
 <mat-drawer-container *ngIf="treeModel; else noModelLoaded">
   <mat-drawer-content class="tree-model-content">
     <!-- Actual tree model. Should be visible no matter the option selected. -->
-    <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel.tree_.value] : (treeModel.estimators_ ? treeModel.estimators_.value : undefined)"></app-tree-d3-model>
+    <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel.tree_.value] : (treeModel.estimators_ ? treeModel.estimators_.value : [])"></app-tree-d3-model>
   </mat-drawer-content>
 
   <mat-drawer mode="side"
@@ -24,7 +24,7 @@
                   <mat-icon aria-hidden="false"
                             attr.aria-label="Description for the {{ item.key }} attribute."
                             matTooltip="{{ item.value.description ? item.value.description : 'No description found.' }}">
-                    help
+                    help_outline
                   </mat-icon>
                   <strong>
                     {{ (item.key | titlecase).split('_').filter(filter_empty).join(' ') }}:
@@ -38,7 +38,7 @@
                       <mat-icon aria-hidden="false"
                                 attr.aria-label="Description for the {{ item.key }} attribute."
                                 matTooltip="{{ item.value.description ? item.value.description : 'No description found.' }}">
-                        help
+                        help_outline
                       </mat-icon>
                       <strong>
                         {{ (item.key | titlecase).split('_').filter(filter_empty).join(' ') }}:
@@ -63,7 +63,7 @@
                             <mat-icon aria-hidden="false"
                                       attr.aria-label="Description for the {{ element.key }} attribute."
                                       matTooltip="{{ element.value.description ? element.value.description : 'No description found.' }}">
-                              help
+                              help_outline
                             </mat-icon>
                             <strong>
                               {{ element.key }}:
