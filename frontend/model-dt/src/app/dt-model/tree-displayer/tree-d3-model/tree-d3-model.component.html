@@ -2,7 +2,7 @@
   <mat-label class="forest-label">
     Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
   </mat-label>
-  <mat-select (blur)="changesHandler()" [(value)]="chosenTree">
+  <mat-select [(ngModel)]="chosenTree" (ngModelChange)="changesHandler()">
     <mat-option *ngFor="let tree of treeNodes; index as i;"
             value="{{ i }}">
             {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }})
