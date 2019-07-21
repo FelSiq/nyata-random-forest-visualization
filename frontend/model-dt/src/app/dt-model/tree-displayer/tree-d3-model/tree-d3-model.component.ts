@@ -132,7 +132,7 @@ export class TreeD3ModelComponent implements OnInit {
       (criterion === 'entropy' ? Math.log2(curTree.maximum_number_of_classes) :
       (Math.max(...curTree.impurity))));
 
-    this.impurityColors = d3Scale.scaleLinear()
+    this.impurityColors = d3Scale.scaleLinear<string>()
         .domain([0.0, maxImpurity])
         .range(['white', 'black']);
 
@@ -238,10 +238,21 @@ export class TreeD3ModelComponent implements OnInit {
           const sonLeftId = +node.attr('sonLeftId');
           const sonRightId = +node.attr('sonRightId');
 
+          d3.select('.group-nodes').append('circle')
+            .classed('node placeholder-node', true)
+            .attr('id', 'placeholder-node-' + nodeId)
+            .attr('r', 1.1 * +node.attr('r'))
+            .attr('cx', node.attr('cx'))
+            .attr('cy', node.attr('cy'))
+            .attr('fill', 'none')
+            .style('stroke', 'gray')
+            .style('stroke-width', 1)
+            .style('stroke-dasharray', ('3, 3'));
+
           node
             .raise()
             .classed('node-active', true)
-            .attr('r', 1.25 * radius);
+            .attr('r', 1.1 * radius);
 
           d3.selectAll([
                 TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
@@ -262,6 +273,9 @@ export class TreeD3ModelComponent implements OnInit {
           node
             .classed('node-active', false)
             .attr('r', radius);
+
+          d3.select('#placeholder-node-' + nodeId)
+            .remove();
 
           d3.selectAll([
                 TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
@@ -334,7 +348,7 @@ export class TreeD3ModelComponent implements OnInit {
             sonLeftId,
             nodeId,
             cxSonLeft,
-            cxDelta / 2,
+            0.5 * cxDelta,
             cySonLeft,
             cyDelta);
 
@@ -350,7 +364,7 @@ export class TreeD3ModelComponent implements OnInit {
             sonRightId,
             nodeId,
             cxSonRight,
-            cxDelta / 2,
+            0.5 * cxDelta,
             cySonRight,
             cyDelta);
 

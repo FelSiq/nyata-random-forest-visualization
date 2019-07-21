@@ -5,7 +5,7 @@
   <mat-select [(ngModel)]="chosenTree" (ngModelChange)="changesHandler()">
     <mat-option *ngFor="let tree of treeNodes; index as i;"
             value="{{ i }}">
-            {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }}, depth: {{ tree.tree_.value.maximum_depth }} )
+            {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }}, depth: {{ tree.tree_.value.maximum_depth }})
     </mat-option>
   </mat-select>
 </mat-form-field>
