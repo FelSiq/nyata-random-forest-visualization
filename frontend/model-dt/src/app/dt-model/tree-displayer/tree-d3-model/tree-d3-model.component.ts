@@ -3,6 +3,7 @@ import { Component, OnInit, Input, ElementRef } from '@angular/core';
 import * as d3 from 'd3-selection';
 import * as d3Zoom from 'd3-zoom';
 import * as d3Drag from 'd3-drag';
+import * as d3Scale from 'd3-scale';
 
 import { DTInterface, TreeInterface } from '../../../dt-interface';
 
@@ -18,10 +19,12 @@ export class TreeD3ModelComponent implements OnInit {
   private svg: any;
   private links: any;
   private nodes: any;
+  private depthMarkers: any;
+  private impurityColors: any;
   private width: number;
   private height: number;
   private readonly radiusMinimum: number = 8;
-  private readonly radiusScaleFactor: number = 16;
+  private readonly radiusScaleFactor: number = 24;
   private static readonly styleColorLinkDefault = 'rgb(128, 128, 128)';
   private static readonly styleColorLinkSelected = 'rgb(0, 0, 0)';
 
@@ -52,11 +55,14 @@ export class TreeD3ModelComponent implements OnInit {
 
     this.cleanSvg();
 
+    this.depthMarkers = this.svg.append('g')
+        .classed('group-depth-markers cleanable', true);
+
     this.links = this.svg.append('g')
-        .attr('class', 'group-links');
+        .classed('group-links cleanable', true);
 
     this.nodes = this.svg.append('g')
-        .attr('class', 'group-nodes');
+        .classed('group-nodes cleanable', true);
 
     this.width = (
         +this.svg.attr('width') ?
@@ -82,12 +88,27 @@ export class TreeD3ModelComponent implements OnInit {
   }
 
   private cleanSvg(): void {
-    if (this.nodes) {
-      this.nodes.selectAll('*').remove();
-    }
+    this.svg.selectAll('.cleanable')
+      .selectAll('*').remove();
+  }
 
-    if (this.links) {
-      this.links.selectAll('*').remove();
+  private buildDepthMarkers(x1: number,
+                            x2: number,
+                            yStart: number,
+                            cyDelta: number,
+                            maxDepth: number): void {
+    let curY = yStart;
+
+    for (let i = 0; i <= maxDepth; i++) {
+      this.depthMarkers.append('line')
+        .attr('x1', x1)
+        .attr('x2', x2)
+        .attr('y1', curY)
+        .attr('y2', curY)
+        .style('stroke', 'rgb(200,200,200)')
+        .style('stroke-dasharray', ('2, 4'));
+
+      curY += cyDelta;
     }
   }
 
@@ -96,8 +117,7 @@ export class TreeD3ModelComponent implements OnInit {
       return;
     }
 
-    const chosenTree = +this.chosenTree;
-    const curTreeNodes = this.treeNodes[chosenTree];
+    const curTreeNodes = this.treeNodes[+this.chosenTree];
 
     if (!(curTreeNodes.hasOwnProperty('tree_'))) {
       return;
@@ -105,14 +125,39 @@ export class TreeD3ModelComponent implements OnInit {
 
     const curTree = curTreeNodes.tree_.value as TreeInterface;
 
+    const criterion = curTreeNodes.criterion.value;
+
+    const maxImpurity = (
+      criterion === 'gini' ? 1.0 :
+      (criterion === 'entropy' ? Math.log2(curTree.maximum_number_of_classes) :
+      (Math.max(...curTree.impurity))));
+
+    this.impurityColors = d3Scale.scaleLinear()
+        .domain([0.0, maxImpurity])
+        .range(['white', 'black']);
+
+    const cxDelta = this.width / 4.05;
+    const cyDelta = 0.98 * this.height / (1 + curTree.maximum_depth);
+    const rootYCoord = (
+        this.radiusMinimum +
+        this.radiusScaleFactor +
+        0.01 * this.height);
+
+    this.buildDepthMarkers(
+        0.01 * this.width,
+        0.99 * this.width,
+        rootYCoord,
+        cyDelta,
+        curTree.maximum_depth);
+
     this.buildNode(
         curTree,
         0,
         -1,
-        this.width / 2,
-        this.width / 4.1,
-        this.radiusMinimum + this.radiusScaleFactor + 0.01 * this.height,
-        0.98 * this.height / (1 + curTree.maximum_depth));
+        0.5 * this.width,
+        cxDelta,
+        rootYCoord,
+        cyDelta);
 
   }
 
@@ -148,6 +193,7 @@ export class TreeD3ModelComponent implements OnInit {
   }
 
   private generateNode(nodeId: number,
+                       impurity: number,
                        cx: number,
                        cy: number,
                        radius: number,
@@ -159,7 +205,7 @@ export class TreeD3ModelComponent implements OnInit {
       .attr('id', TreeD3ModelComponent.formatNodeId(nodeId)) 
       .attr('index', nodeId)
       .attr('stroke', 'gray')
-      .attr('fill', 'white')
+      .attr('fill', this.impurityColors(impurity))
       .attr('cx', cx)
       .attr('cy', cy)
       .attr('r', radius)
@@ -170,7 +216,7 @@ export class TreeD3ModelComponent implements OnInit {
         const node = d3.select(this);
 
         node.attr('stroke-width', 2)
-            .attr('stroke', 'black');
+            .attr('stroke', 'rgb(96,96,96)');
 
         d3.select('#node-info-pannel')
           .attr('selected-node', node.attr('index'));
@@ -261,6 +307,7 @@ export class TreeD3ModelComponent implements OnInit {
 
       const sonLeftId = +curTree.children_left[nodeId];
       const sonRightId = +curTree.children_right[nodeId];
+      const impurity = +curTree.impurity[nodeId];
 
       const radius = (
         this.radiusMinimum +
@@ -270,6 +317,7 @@ export class TreeD3ModelComponent implements OnInit {
 
       this.generateNode(
           nodeId,
+          impurity,
           cx,
           cy,
           radius,
