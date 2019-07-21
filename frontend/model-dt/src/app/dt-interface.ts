@@ -1,4 +1,4 @@
-interface descVal<T> {
+interface DescVal<T> {
   description: string;
   value: T;
 }
@@ -9,65 +9,65 @@ export interface TreeInterface {
   children_right: number[];
   feature: number[];
   impurity: number[];
-  max_depth: number;
-  max_n_classes: number;
-  n_classes: number[];
-  n_features: number;
-  n_node_samples: number[];
-  n_outputs: number;
+  maximum_depth: number;
+  maximum_number_of_classes: number;
+  number_of_classes: number[];
+  number_of_features: number;
+  number_of_node_samples: number[];
+  number_of_outputs: number;
   node_count: number;
   threshold: number[];
   value: number[];
-  weighted_n_node_samples: number[];
+  weighted_number_of_node_samples: number[];
 }
 
 export interface BaseEstimator {
   class_weight: number[];
   criterion: string;
-  max_depth: number;
-  max_features: number;
-  max_leaf_nodes: number;
-  min_impurity_decrease: number;
-  min_impurity_split: number;
-  min_samples_leaf: number;
-  min_samples_split: number;
-  min_weight_fraction_leaf: number;
+  maximum_depth: number;
+  maximum_features: number;
+  maximum_leaf_nodes: number;
+  minimum_impurity_decrease: number;
+  minimum_impurity_split: number;
+  minimum_samples_leaf: number;
+  minimum_samples_split: number;
+  minimum_weight_fraction_leaf: number;
   presort: boolean;
   random_state: number;
   splitter: string;
 }
 
 export interface DTInterface {
-  criterion: descVal<string>;
-  min_samples_split: descVal<string>;
-  min_samples_leaf: descVal<string>;
-  min_weight_fraction_leaf: descVal<string>;
-  max_features: descVal<string>;
-  max_leaf_nodes: descVal<string>;
-  class_weight: descVal<string>;
+  criterion: DescVal<string>;
+  minimum_samples_split: DescVal<string>;
+  minimum_samples_leaf: DescVal<string>;
+  minimum_weight_fraction_leaf: DescVal<string>;
+  maximum_features: DescVal<string>;
+  maximum_leaf_nodes: DescVal<string>;
+  class_weight: DescVal<string>;
 
-  max_depth: descVal<number>;
-  random_state: descVal<number>;
-  min_impurity_decrease: descVal<number>;
-  min_impurity_split: descVal<number>;
-  n_features_: descVal<number>;
-  n_outputs_: descVal<number>;
-  classes_: descVal<Array<number | string>>;
-  n_classes_: descVal<number>;
+  maximum_depth: DescVal<number>;
+  random_state: DescVal<number>;
+  minimum_impurity_decrease: DescVal<number>;
+  minimum_impurity_split: DescVal<number>;
+  number_of_features_: DescVal<number>;
+  number_of_outputs_: DescVal<number>;
+  classes_: DescVal<Array<number | string>>;
+  number_of_classes_: DescVal<number>;
 
-  tree_?: descVal<TreeInterface>;
-  estimators_?: descVal<DTInterface[]>;
+  tree_?: DescVal<TreeInterface>;
+  estimators_?: DescVal<DTInterface[]>;
 
-  presort?: descVal<boolean>;
-  splitter?: descVal<string>;
-  warm_start?: descVal<boolean>;
-  n_estimators?: descVal<string>;
-  estimator_params?: descVal<string[]>;
-  oob_score?: descVal<boolean>;
-  verbose?: descVal<boolean>;
-  base_estimator?: descVal<BaseEstimator>;
-  base_estimator_?: descVal<BaseEstimator>;
-  bootstrap?: descVal<boolean>;
-  n_jobs?: descVal<number>;
-  max_features_?: descVal<number>;
+  presort?: DescVal<boolean>;
+  splitter?: DescVal<string>;
+  warm_start?: DescVal<boolean>;
+  number_of_estimators?: DescVal<string>;
+  estimator_parameters?: DescVal<string[]>;
+  oob_score?: DescVal<boolean>;
+  verbose?: DescVal<boolean>;
+  base_estimator?: DescVal<BaseEstimator>;
+  base_estimator_?: DescVal<BaseEstimator>;
+  bootstrap?: DescVal<boolean>;
+  number_of_jobs?: DescVal<number>;
+  maximum_features_?: DescVal<number>;
 }

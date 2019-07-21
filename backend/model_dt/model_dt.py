@@ -34,7 +34,7 @@ def get_tree_structure(tree: sklearn.tree._tree.Tree) -> t.Dict[str, t.Any]:
                                     lambda attr: not inspect.isroutine(attr))
 
     encoded_tree = {
-        attr_name: json_encoder_type_manager(attr_val)
+        preprocess_key(attr_name): json_encoder_type_manager(attr_val)
         for attr_name, attr_val in attributes
         if not (attr_name.startswith('__') and attr_name.endswith('__'))
     }

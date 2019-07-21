@@ -9,7 +9,7 @@ const httpOptions = {
 
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DatasetUploadService {
   // private urlPostInstance = 'http://127.0.0.1:5000/predict-dataset/';

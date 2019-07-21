@@ -1,7 +1,7 @@
 <mat-drawer-container *ngIf="treeModel; else noModelLoaded">
   <mat-drawer-content class="tree-model-content">
     <!-- Actual tree model. Should be visible no matter the option selected. -->
-    <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel.tree_.value] : (treeModel.estimators_ ? treeModel.estimators_.value : [])"></app-tree-d3-model>
+    <app-tree-d3-model [treeNodes]="treeModel.tree_ ? [treeModel] : (treeModel.estimators_ ? treeModel.estimators_.value : [])"></app-tree-d3-model>
   </mat-drawer-content>
 
   <mat-drawer mode="side"
@@ -88,7 +88,7 @@
     
         <ng-template matTabContent>
           <app-data-loader-pannel
-              [datasetDim]="treeModel.number_of_features_ ? treeModel.number_of_features_.value : 0"></app-data-loader-pannel>
+              [datasetDim]="treeModel.number_of_features_ ? +treeModel.number_of_features_.value : 0"></app-data-loader-pannel>
         </ng-template>
       </mat-tab>
     

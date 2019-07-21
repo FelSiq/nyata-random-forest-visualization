@@ -39,11 +39,11 @@ export class TreeD3ModelComponent implements OnInit {
 
   private static formatLinkId(nodeAId: number,
                        nodeBId: number,
-                       addIdHash: boolean = false): string {
+                       addIdHash = false): string {
     return (addIdHash ? '#' : '') + 'link-' + nodeAId + '-' + nodeBId;
   }
 
-  private static formatNodeId(nodeId: number, addIdHash: boolean = false): string {
+  private static formatNodeId(nodeId: number, addIdHash = false): string {
     return (addIdHash ? '#' : '') + 'node-' + nodeId;
   }
 
@@ -56,15 +56,7 @@ export class TreeD3ModelComponent implements OnInit {
         .attr('class', 'group-links');
 
     this.nodes = this.svg.append('g')
-        .attr('class', 'group-nodes')
-
-    this.svg.call(d3Zoom.zoom()
-      .scaleExtent([0.5, 3])
-      .translateExtent([[0, 0], [this.width, this.height]])
-      .on('zoom', () => {
-        this.svg
-          .attr('transform', d3.event.transform);
-      }));
+        .attr('class', 'group-nodes');
 
     this.width = (
         +this.svg.attr('width') ?
@@ -77,6 +69,16 @@ export class TreeD3ModelComponent implements OnInit {
         +this.svg.attr('height') :
         this.eleRef.nativeElement.offsetHeight
     );
+
+    /*
+    this.svg.call(d3Zoom.zoom()
+      .scaleExtent([0.5, 3])
+      .translateExtent([[0, 0], [this.width, this.height]])
+      .on('zoom', () => {
+        this.svg
+          .attr('transform', d3.event.transform);
+      }));
+    */
   }
 
   private cleanSvg(): void {
@@ -108,9 +110,9 @@ export class TreeD3ModelComponent implements OnInit {
         0,
         -1,
         this.width / 2,
-        this.width / 4,
-        0.02 * this.height,
-        0.98 * this.height / (1 + curTree.max_depth));
+        this.width / 4.1,
+        this.radiusMinimum + this.radiusScaleFactor + 0.01 * this.height,
+        0.98 * this.height / (1 + curTree.maximum_depth));
 
   }
 
@@ -263,8 +265,8 @@ export class TreeD3ModelComponent implements OnInit {
       const radius = (
         this.radiusMinimum +
         this.radiusScaleFactor *
-        (+curTree.weighted_n_node_samples[nodeId] /
-        +curTree.weighted_n_node_samples[0]));
+        (+curTree.weighted_number_of_node_samples[nodeId] /
+        +curTree.weighted_number_of_node_samples[0]));
 
       this.generateNode(
           nodeId,
