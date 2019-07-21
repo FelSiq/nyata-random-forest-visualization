@@ -20,6 +20,10 @@ export class TreeD3ModelComponent implements OnInit {
   private nodes: any;
   private width: number;
   private height: number;
+  private readonly radiusMinimum: number = 8;
+  private readonly radiusScaleFactor: number = 16;
+  private static readonly styleColorLinkDefault = 'rgb(128, 128, 128)';
+  private static readonly styleColorLinkSelected = 'rgb(0, 0, 0)';
 
   constructor(private eleRef: ElementRef) { }
 
@@ -31,6 +35,16 @@ export class TreeD3ModelComponent implements OnInit {
   changesHandler(): void {
     this.initSvg();
     this.createTree();
+  }
+
+  private static formatLinkId(nodeAId: number,
+                       nodeBId: number,
+                       addIdHash: boolean = false): string {
+    return (addIdHash ? '#' : '') + 'link-' + nodeAId + '-' + nodeBId;
+  }
+
+  private static formatNodeId(nodeId: number, addIdHash: boolean = false): string {
+    return (addIdHash ? '#' : '') + 'node-' + nodeId;
   }
 
   private initSvg() {
@@ -46,6 +60,7 @@ export class TreeD3ModelComponent implements OnInit {
 
     this.svg.call(d3Zoom.zoom()
       .scaleExtent([0.5, 3])
+      .translateExtent([[0, 0], [this.width, this.height]])
       .on('zoom', () => {
         this.svg
           .attr('transform', d3.event.transform);
@@ -91,7 +106,7 @@ export class TreeD3ModelComponent implements OnInit {
     this.buildNode(
         curTree,
         0,
-        10,
+        -1,
         this.width / 2,
         this.width / 4,
         0.02 * this.height,
@@ -107,19 +122,19 @@ export class TreeD3ModelComponent implements OnInit {
                        y2: number): void {
 
     this.links.append('line')
-      .attr('class', 'link')
-      .attr('id', 'link-' + nodeAId + '-' + nodeBId)
+      .classed('link', true)
+      .attr('id', TreeD3ModelComponent.formatLinkId(nodeAId, nodeBId))
       .attr('x1', x1)
       .attr('x2', x2)
       .attr('y1', y1)
       .attr('y2', y2)
-      .style('stroke', 'rgb(64,64,64)')
-      .style('stroke-width', 2);
+      .style('stroke-width', 2)
+      .style('stroke', TreeD3ModelComponent.styleColorLinkDefault);
   }
 
   private connectNodes(nodeAId: number, nodeBId: number): void {
-    const nodeA = this.nodes.select("#node-" + nodeAId);
-    const nodeB = this.nodes.select("#node-" + nodeBId);
+    const nodeA = this.nodes.select(TreeD3ModelComponent.formatNodeId(nodeAId, true));
+    const nodeB = this.nodes.select(TreeD3ModelComponent.formatNodeId(nodeBId, true));
 
     this.generateLink(
       nodeAId,
@@ -133,38 +148,110 @@ export class TreeD3ModelComponent implements OnInit {
   private generateNode(nodeId: number,
                        cx: number,
                        cy: number,
-                       radius: number): void {
+                       radius: number,
+                       parentId: number,
+                       sonLeftId: number,
+                       sonRightId: number): void {
     this.nodes.append('circle')
-      .attr('class', 'node')
-      .attr('id', 'node-' + nodeId) 
+      .classed('node', true)
+      .attr('id', TreeD3ModelComponent.formatNodeId(nodeId)) 
+      .attr('index', nodeId)
       .attr('stroke', 'gray')
       .attr('fill', 'white')
       .attr('cx', cx)
       .attr('cy', cy)
       .attr('r', radius)
+      .attr('sonLeftId', sonLeftId)
+      .attr('sonRightId', sonRightId)
+      .attr('parentId', parentId)
+      .on('mouseenter', function() {
+        const node = d3.select(this);
+
+        node.attr('stroke-width', 2)
+            .attr('stroke', 'black');
+
+        d3.select('#node-info-pannel')
+          .attr('selected-node', node.attr('index'));
+      })
+      .on('mouseleave', function() {
+        d3.select(this)
+          .attr('stroke-width', 1)
+          .attr('stroke', 'gray');
+
+        d3.select('#node-info-pannel')
+          .attr('selected-node', -1);
+      })
       .call(d3Drag.drag()
         .on('start', function() {
-          d3.select(this)
+          const node = d3.select(this);
+
+          const nodeId = +node.attr('index');
+          const parentId = +node.attr('parentId');
+          const sonLeftId = +node.attr('sonLeftId');
+          const sonRightId = +node.attr('sonRightId');
+
+          node
             .raise()
-            .classed('active', true)
-            .attr('r', 2 * radius);
+            .classed('node-active', true)
+            .attr('r', 1.25 * radius);
+
+          d3.selectAll([
+                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
+                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
+                TreeD3ModelComponent.formatLinkId(parentId, nodeId, true),
+            ].join(','))
+              .classed('link-active', true)
+              .style('stroke', TreeD3ModelComponent.styleColorLinkSelected);
         })
         .on('end', function() {
-          d3.select(this)
-            .classed('active', false)
+          const node = d3.select(this);
+
+          const nodeId = +node.attr('index');
+          const parentId = +node.attr('parentId');
+          const sonLeftId = +node.attr('sonLeftId');
+          const sonRightId = +node.attr('sonRightId');
+
+          node
+            .classed('node-active', false)
             .attr('r', radius);
+
+          d3.selectAll([
+                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
+                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
+                TreeD3ModelComponent.formatLinkId(parentId, nodeId, true),
+            ].join(','))
+              .classed('link-active', false)
+              .style('stroke', TreeD3ModelComponent.styleColorLinkDefault);
         })
         .on('drag', function() {
-          d3.select(this)
+          const node = d3.select(this);
+
+          const nodeId = +node.attr('index');
+          const parentId = +node.attr('parentId');
+          const sonLeftId = +node.attr('sonLeftId');
+          const sonRightId = +node.attr('sonRightId');
+
+          node
             .attr('cx', d3.event.x)
             .attr('cy', d3.event.y);
+
+          d3.selectAll([
+                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
+                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
+            ].join(','))
+              .attr('x1', d3.event.x)
+              .attr('y1', d3.event.y);
+
+          d3.select(TreeD3ModelComponent.formatLinkId(parentId, nodeId, true))
+            .attr('x2', d3.event.x)
+            .attr('y2', d3.event.y);
         }));
   }
 
   private buildNode(
         curTree: TreeInterface,
         nodeId: number,
-        radius: number,
+        parentId: number,
         cx: number,
         cxDelta: number,
         cy: number,
@@ -173,7 +260,20 @@ export class TreeD3ModelComponent implements OnInit {
       const sonLeftId = +curTree.children_left[nodeId];
       const sonRightId = +curTree.children_right[nodeId];
 
-      this.generateNode(nodeId, cx, cy, radius);
+      const radius = (
+        this.radiusMinimum +
+        this.radiusScaleFactor *
+        (+curTree.weighted_n_node_samples[nodeId] /
+        +curTree.weighted_n_node_samples[0]));
+
+      this.generateNode(
+          nodeId,
+          cx,
+          cy,
+          radius,
+          parentId,
+          sonLeftId,
+          sonRightId);
 
       if (sonLeftId >= 0 && sonLeftId < curTree.capacity) {
         const cxSonLeft = cx - cxDelta;
@@ -182,7 +282,7 @@ export class TreeD3ModelComponent implements OnInit {
         this.buildNode(
             curTree,
             sonLeftId,
-            radius,
+            nodeId,
             cxSonLeft,
             cxDelta / 2,
             cySonLeft,
@@ -198,7 +298,7 @@ export class TreeD3ModelComponent implements OnInit {
         this.buildNode(
             curTree,
             sonRightId,
-            radius,
+            nodeId,
             cxSonRight,
             cxDelta / 2,
             cySonRight,
