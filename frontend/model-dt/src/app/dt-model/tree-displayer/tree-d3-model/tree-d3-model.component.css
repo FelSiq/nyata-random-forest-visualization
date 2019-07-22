@@ -9,3 +9,6 @@
 .zoom-slider {
   width: calc(100% - 2 * 24px - 2px);
 }
+
+.zoom-icon {
+}

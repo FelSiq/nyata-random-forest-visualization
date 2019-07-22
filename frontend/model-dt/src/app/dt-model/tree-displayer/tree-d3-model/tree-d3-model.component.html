@@ -13,14 +13,24 @@
 <svg width="100%" height="512" class="current-tree-model"></svg>
 
 <div>
-  <mat-icon>zoom_out</mat-icon>
+  <mat-icon (click)="updateZoomValue(-0.25)"
+            (dblclick)="updateZoomValue(-0.75)"
+            [style.cursor]="zoomValue <= zoomMin ? 'not-allowed' : 'pointer'"
+            class="zoom-icon">
+    zoom_out
+  </mat-icon>
   <mat-slider [min]="zoomMin"
               [max]="zoomMax"
-              value="0"
+              [(value)]="zoomValue"
               step="0.01"
               class="zoom-slider">
   </mat-slider>
-  <mat-icon>zoom_in</mat-icon>
+  <mat-icon (click)="updateZoomValue(+0.25)"
+            (dblclick)="updateZoomValue(+0.75)"
+            [style.cursor]="zoomValue >= zoomMax ? 'not-allowed' : 'pointer'"
+            class="zoom-icon">
+    zoom_in
+  </mat-icon>
 </div>
 
 <div *ngIf="treeNodes && (chosenTree || chosenTree === 0)">

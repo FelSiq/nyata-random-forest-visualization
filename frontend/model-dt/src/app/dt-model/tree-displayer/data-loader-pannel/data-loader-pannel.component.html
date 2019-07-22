@@ -53,6 +53,7 @@
                   color="accent"
                   class="predict-button"
                   type="submit"
+                  [style.cursor]="testInstForm.valid ? 'default' : 'not-allowed'"
                   [disabled]="testInstForm.invalid">
             {{
               testInstForm.valid ? "Predict" : (

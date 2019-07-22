@@ -15,6 +15,7 @@ import { DTInterface, TreeInterface } from '../../../dt-interface';
 export class TreeD3ModelComponent implements OnInit {
   @Input() treeNodes: DTInterface[];
   chosenTree: string | number;
+  zoomValue: number = 0;
 
   readonly zoomMin: number = 0;
   readonly zoomMax: number = 3;
@@ -51,6 +52,11 @@ export class TreeD3ModelComponent implements OnInit {
 
   private static formatNodeId(nodeId: number, addIdHash = false): string {
     return (addIdHash ? '#' : '') + 'node-' + nodeId;
+  }
+
+  updateZoomValue(increment: number): void {
+    let aux = this.zoomValue + increment;
+    this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
   }
 
   private initSvg() {
@@ -205,6 +211,7 @@ export class TreeD3ModelComponent implements OnInit {
                        sonRightId: number): void {
     this.nodes.append('circle')
       .classed('node', true)
+      .style('cursor', 'move')
       .attr('id', TreeD3ModelComponent.formatNodeId(nodeId)) 
       .attr('index', nodeId)
       .attr('stroke', 'gray')
