@@ -16,6 +16,9 @@ export class TreeD3ModelComponent implements OnInit {
   @Input() treeNodes: DTInterface[];
   chosenTree: string | number;
 
+  readonly zoomMin: number = 0;
+  readonly zoomMax: number = 3;
+
   private svg: any;
   private links: any;
   private nodes: any;

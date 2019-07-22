@@ -5,3 +5,7 @@
 .d3-tree-model {
   height: 100%;
 }
+
+.zoom-slider {
+  width: calc(100% - 2 * 24px - 2px);
+}

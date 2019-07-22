@@ -18,6 +18,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSliderModule } from '@angular/material/slider';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -63,6 +64,7 @@ import { ForbiddenSymbolValidatorDirective } from './dt-model/tree-displayer/dat
     MatTooltipModule,
     MatListModule, 
     MatIconModule,
+    MatSliderModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],
