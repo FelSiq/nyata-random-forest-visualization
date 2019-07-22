@@ -4,6 +4,7 @@ import * as d3 from 'd3-selection';
 import * as d3Zoom from 'd3-zoom';
 import * as d3Drag from 'd3-drag';
 import * as d3Scale from 'd3-scale';
+import * as d3Shape from 'd3-shape';
 
 import { DTInterface, TreeInterface } from '../../../dt-interface';
 
@@ -209,19 +210,114 @@ export class TreeD3ModelComponent implements OnInit {
                        parentId: number,
                        sonLeftId: number,
                        sonRightId: number): void {
-    this.nodes.append('circle')
+    const g = this.nodes.append('g')
       .classed('node', true)
       .style('cursor', 'move')
       .attr('id', TreeD3ModelComponent.formatNodeId(nodeId)) 
       .attr('index', nodeId)
+      .attr('sonLeftId', sonLeftId)
+      .attr('sonRightId', sonRightId)
+      .attr('parentId', parentId)
+      .attr('cx', cx)
+      .attr('cy', cy)
+      .call(d3Drag.drag()
+        .on('start', function() {
+          const node = d3.select(this);
+          const circle = node.select('circle');
+
+          const nodeId = +node.attr('index');
+          const parentId = +node.attr('parentId');
+          const sonLeftId = +node.attr('sonLeftId');
+          const sonRightId = +node.attr('sonRightId');
+
+          d3.select('.group-nodes').append('circle')
+            .classed('node placeholder-node', true)
+            .attr('id', 'placeholder-node-' + nodeId)
+            .attr('r', 1.1 * +circle.attr('r'))
+            .attr('cx', circle.attr('cx'))
+            .attr('cy', circle.attr('cy'))
+            .attr('fill', 'none')
+            .style('stroke', 'gray')
+            .style('stroke-width', 1)
+            .style('stroke-dasharray', ('3, 3'));
+
+          node
+            .raise()
+            .classed('node-active', true)
+
+          circle
+            .attr('r', 1.1 * radius);
+
+          d3.selectAll([
+                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
+                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
+                TreeD3ModelComponent.formatLinkId(parentId, nodeId, true),
+            ].join(','))
+              .classed('link-active', true)
+              .style('stroke', TreeD3ModelComponent.styleColorLinkSelected);
+        })
+        .on('end', function() {
+          const node = d3.select(this);
+          const circle = node.select('circle');
+
+          const nodeId = +node.attr('index');
+          const parentId = +node.attr('parentId');
+          const sonLeftId = +node.attr('sonLeftId');
+          const sonRightId = +node.attr('sonRightId');
+
+          node
+            .classed('node-active', false)
+
+          circle
+            .attr('r', radius);
+
+          d3.select('#placeholder-node-' + nodeId)
+            .remove();
+
+          d3.selectAll([
+                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
+                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
+                TreeD3ModelComponent.formatLinkId(parentId, nodeId, true),
+            ].join(','))
+              .classed('link-active', false)
+              .style('stroke', TreeD3ModelComponent.styleColorLinkDefault);
+        })
+        .on('drag', function() {
+          const node = d3.select(this);
+          const circle = node.select('circle');
+
+          const nodeId = +node.attr('index');
+          const parentId = +node.attr('parentId');
+          const sonLeftId = +node.attr('sonLeftId');
+          const sonRightId = +node.attr('sonRightId');
+
+          node
+            .attr('cx', d3.event.x)
+            .attr('cy', d3.event.y);
+
+          node.selectAll('.draggable')
+            .attr('cx', function() { return +d3.select(this).attr('cx') + d3.event.dx; })
+            .attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; });
+
+          d3.selectAll([
+                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
+                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
+            ].join(','))
+              .attr('x1', circle.attr('cx'))
+              .attr('y1', circle.attr('cy'));
+
+          d3.select(TreeD3ModelComponent.formatLinkId(parentId, nodeId, true))
+            .attr('x2', circle.attr('cx'))
+            .attr('y2', circle.attr('cy'));
+        }));
+
+    g.append('circle')
+      .classed('draggable', true)
       .attr('stroke', 'gray')
       .attr('fill', this.impurityColors(impurity))
       .attr('cx', cx)
       .attr('cy', cy)
       .attr('r', radius)
-      .attr('sonLeftId', sonLeftId)
-      .attr('sonRightId', sonRightId)
-      .attr('parentId', parentId)
       .on('mouseenter', function() {
         const node = d3.select(this);
 
@@ -238,86 +334,7 @@ export class TreeD3ModelComponent implements OnInit {
 
         d3.select('#node-info-pannel')
           .attr('selected-node', -1);
-      })
-      .call(d3Drag.drag()
-        .on('start', function() {
-          const node = d3.select(this);
-
-          const nodeId = +node.attr('index');
-          const parentId = +node.attr('parentId');
-          const sonLeftId = +node.attr('sonLeftId');
-          const sonRightId = +node.attr('sonRightId');
-
-          d3.select('.group-nodes').append('circle')
-            .classed('node placeholder-node', true)
-            .attr('id', 'placeholder-node-' + nodeId)
-            .attr('r', 1.1 * +node.attr('r'))
-            .attr('cx', node.attr('cx'))
-            .attr('cy', node.attr('cy'))
-            .attr('fill', 'none')
-            .style('stroke', 'gray')
-            .style('stroke-width', 1)
-            .style('stroke-dasharray', ('3, 3'));
-
-          node
-            .raise()
-            .classed('node-active', true)
-            .attr('r', 1.1 * radius);
-
-          d3.selectAll([
-                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
-                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
-                TreeD3ModelComponent.formatLinkId(parentId, nodeId, true),
-            ].join(','))
-              .classed('link-active', true)
-              .style('stroke', TreeD3ModelComponent.styleColorLinkSelected);
-        })
-        .on('end', function() {
-          const node = d3.select(this);
-
-          const nodeId = +node.attr('index');
-          const parentId = +node.attr('parentId');
-          const sonLeftId = +node.attr('sonLeftId');
-          const sonRightId = +node.attr('sonRightId');
-
-          node
-            .classed('node-active', false)
-            .attr('r', radius);
-
-          d3.select('#placeholder-node-' + nodeId)
-            .remove();
-
-          d3.selectAll([
-                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
-                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
-                TreeD3ModelComponent.formatLinkId(parentId, nodeId, true),
-            ].join(','))
-              .classed('link-active', false)
-              .style('stroke', TreeD3ModelComponent.styleColorLinkDefault);
-        })
-        .on('drag', function() {
-          const node = d3.select(this);
-
-          const nodeId = +node.attr('index');
-          const parentId = +node.attr('parentId');
-          const sonLeftId = +node.attr('sonLeftId');
-          const sonRightId = +node.attr('sonRightId');
-
-          node
-            .attr('cx', d3.event.x)
-            .attr('cy', d3.event.y);
-
-          d3.selectAll([
-                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
-                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
-            ].join(','))
-              .attr('x1', d3.event.x)
-              .attr('y1', d3.event.y);
-
-          d3.select(TreeD3ModelComponent.formatLinkId(parentId, nodeId, true))
-            .attr('x2', d3.event.x)
-            .attr('y2', d3.event.y);
-        }));
+      });
   }
 
   private buildNode(
