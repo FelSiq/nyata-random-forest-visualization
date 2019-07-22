@@ -1,9 +1,25 @@
+import typing as t
+import re
+
 import flask
 import flask_cors
 import flask_restful
 import numpy as np
 
 from . import model_dt
+
+NULL_VALUES = {
+    'null',
+    'nan',
+    'na',
+    'none',
+    'noone',
+    '',
+    'nil',
+}
+
+RE_EMPTY_SPACE = re.compile(r'\s+|%20')
+
 
 class DecisionTree(flask_restful.Resource):
     def __init__(self, model):
@@ -12,28 +28,51 @@ class DecisionTree(flask_restful.Resource):
     def get(self):
         return flask.jsonify(model_dt.serialize_decision_tree(self.model))
 
+
 class PredictSingleInstance(flask_restful.Resource):
     def __init__(self, model):
         self.model = model
 
-    def _preprocess_instance(self, instance: str) -> np.ndarray:
-        return np.array(instance.split(','), dtype=np.float).reshape(1, -1)
+    def _preprocess_instance(self, instance: str,
+                             sep: str = ',') -> t.Optional[np.ndarray]:
+        preproc_inst = np.array(RE_EMPTY_SPACE.sub('', instance).split(sep))
+
+        if not set(map(str.lower, preproc_inst)).isdisjoint(NULL_VALUES):
+            return None
+
+        return preproc_inst.astype(np.float).reshape(1, -1)
+
+    def _handle_errors(self, err_code: t.Sequence[str]) -> t.Dict[str, str]:
+        err_msg = {}
+
+        if 'NA_ERROR' in err_code:
+            err_msg['na_error'] = 'Currently missing values are not supported.'
+
+        return err_msg
 
     def get(self, instance: str):
         inst_proc = self._preprocess_instance(instance)
+        err_code = []
+
+        if inst_proc is None:
+            err_code.append('NA_ERROR')
+
+        if err_code:
+            return flask.jsonify(self._handle_errors(err_code))
 
         pred_vals = {
-          'classes': self.model.predict(inst_proc),
-          'decision_path': self.model.decision_path(inst_proc),
-          'leaf_id': self.model.apply(inst_proc),
+            'classes': self.model.predict(inst_proc),
+            'decision_path': self.model.decision_path(inst_proc),
+            'leaf_id': self.model.apply(inst_proc),
         }
 
         ret = {
-          key: model_dt.json_encoder_type_manager(val)
-          for key, val in pred_vals.items()
+            key: model_dt.json_encoder_type_manager(val)
+            for key, val in pred_vals.items()
         }
 
         return flask.jsonify(ret)
+
 
 def create_app():
     """DT visualization application factory."""
@@ -47,9 +86,7 @@ def create_app():
     common_kwargs = {'model': dt_model}
 
     api.add_resource(
-        DecisionTree,
-        '/dt-visualization',
-        resource_class_kwargs=common_kwargs)
+        DecisionTree, '/dt-visualization', resource_class_kwargs=common_kwargs)
 
     api.add_resource(
         PredictSingleInstance,
