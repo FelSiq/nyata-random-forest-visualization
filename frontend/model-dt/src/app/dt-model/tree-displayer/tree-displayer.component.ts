@@ -20,19 +20,4 @@ export class TreeDisplayerComponent implements OnInit {
     ];
   }
 
-  filter_empty(item): boolean {
-    return item === 0 || item;
-  }
-
-  isSingleValue(item): boolean {
-    return (
-      (typeof item === 'string') || (item instanceof String) ||
-      (typeof item === 'number') || (item instanceof Number) ||
-      (typeof item === 'boolean') || (item instanceof Boolean)
-    );
-  }
-
-  isBannedAttr(attr: string): boolean {
-    return this.bannedModelAttrs.indexOf(attr) > -1;
-  }
 }

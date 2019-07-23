@@ -89,12 +89,11 @@
   </mat-expansion-panel>
     
   <mat-card *ngIf="predictResults">
-    <h3> Prediction results: </h3>
-    <div *ngFor="let item of predictResults | keyvalue">
-      <strong>
-        {{ item.key }}:
-      </strong>
-      {{ item.value }}
-    </div>
+    <mat-card-title>
+      Prediction results
+    </mat-card-title>
+    <mat-card-content>
+      <app-iterable-displayer [data]="predictResults" [banList]="[]"></app-iterable-displayer>
+    </mat-card-content>
   </mat-card>
 </mat-accordion>

@@ -1,0 +1,65 @@
+<mat-list>
+  <ng-container *ngFor="let item of data | keyvalue">
+    <span *ngIf="isElegibleAttr(item.key, item.value.value)">
+      <mat-list-item *ngIf="isSingleValue(item.value.value)">
+        &nbsp;&nbsp;
+        <mat-icon aria-hidden="false"
+                  class="large-icon"
+                  attr.aria-label="Description for the {{ item.key }} attribute."
+                  matTooltip="{{ item.value.description ? item.value.description : noDescMsg }}">
+          help_outline
+        </mat-icon>
+        <strong>
+          {{ format(item.key | titlecase) }}:
+        </strong>
+        &nbsp;{{ item.value.value }}
+      </mat-list-item>
+
+      <mat-expansion-panel *ngIf="!isSingleValue(item.value.value)">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon aria-hidden="false"
+                      class="large-icon"
+                      attr.aria-label="Description for the {{ item.key }} attribute."
+                      matTooltip="{{ item.value.description ? item.value.description : noDescMsg }}">
+              help_outline
+            </mat-icon>
+            <strong>
+              {{ format(item.key | titlecase) }}:
+            </strong>
+          </mat-panel-title>
+          <mat-panel-description>
+            Click to expand
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          <span *ngIf="item.value.value.length">
+            <mat-list dense>
+              <mat-list-item *ngFor="let element of item.value.value">
+                {{ element }}
+              </mat-list-item>
+            </mat-list>
+          </span>
+          <span *ngIf="!item.value.value.length">
+            <mat-list dense>
+              <ng-container *ngFor="let element of item.value.value | keyvalue">
+                <mat-list-item *ngIf="isElegibleAttr(element.key, element.value.value)">
+                  <mat-icon aria-hidden="false"
+                            class="small-icon"
+                            attr.aria-label="Description for the {{ element.key }} attribute."
+                            matTooltip="{{ element.value.description ? element.value.description : noDescMsg }}">
+                    help_outline
+                  </mat-icon>
+                  <strong>
+                    {{ format(element.key | titlecase) }}:
+                  </strong>
+                  &nbsp;{{ element.value.value }}
+                </mat-list-item>
+              </ng-container>
+            </mat-list>
+          </span>
+        </ng-template>
+      </mat-expansion-panel>
+    </span>
+  </ng-container>
+</mat-list>

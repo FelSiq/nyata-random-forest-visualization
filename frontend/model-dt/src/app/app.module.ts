@@ -30,6 +30,7 @@ import { TreeDisplayerComponent } from './dt-model/tree-displayer/tree-displayer
 import { DataLoaderPannelComponent } from './dt-model/tree-displayer/data-loader-pannel/data-loader-pannel.component';
 import { TreeD3ModelComponent } from './dt-model/tree-displayer/tree-d3-model/tree-d3-model.component';
 import { ForbiddenSymbolValidatorDirective } from './dt-model/tree-displayer/data-loader-pannel/forbidden-symbol-validator.directive';
+import { IterableDisplayerComponent } from './dt-model/tree-displayer/iterable-displayer/iterable-displayer.component';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import { ForbiddenSymbolValidatorDirective } from './dt-model/tree-displayer/dat
     DataLoaderPannelComponent,
     TreeD3ModelComponent,
     ForbiddenSymbolValidatorDirective,
+    IterableDisplayerComponent,
   ],
   imports: [
     BrowserModule,

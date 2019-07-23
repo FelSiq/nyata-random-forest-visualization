@@ -16,68 +16,7 @@
         </ng-template>
     
         <ng-template matTabContent>
-          <mat-list>
-            <ng-container *ngFor="let item of treeModel | keyvalue">
-              <span *ngIf="!isBannedAttr(item.key) && (item.value.value || item.value.value === 0 || item.value.value === false)">
-                <mat-list-item *ngIf="isSingleValue(item.value.value)">
-                  &nbsp;&nbsp;
-                  <mat-icon aria-hidden="false"
-                            attr.aria-label="Description for the {{ item.key }} attribute."
-                            matTooltip="{{ item.value.description ? item.value.description : 'No description found.' }}">
-                    help_outline
-                  </mat-icon>
-                  <strong>
-                    {{ (item.key | titlecase).split('_').filter(filter_empty).join(' ') }}:
-                  </strong>
-                  {{ item.value.value }}
-                </mat-list-item>
-
-                <mat-expansion-panel *ngIf="!isSingleValue(item.value.value)">
-                  <mat-expansion-panel-header>
-                    <mat-panel-title>
-                      <mat-icon aria-hidden="false"
-                                attr.aria-label="Description for the {{ item.key }} attribute."
-                                matTooltip="{{ item.value.description ? item.value.description : 'No description found.' }}">
-                        help_outline
-                      </mat-icon>
-                      <strong>
-                        {{ (item.key | titlecase).split('_').filter(filter_empty).join(' ') }}:
-                      </strong>
-                    </mat-panel-title>
-                    <mat-panel-description>
-                      Click to expand
-                    </mat-panel-description>
-                  </mat-expansion-panel-header>
-                  <ng-template matExpansionPanelContent>
-                    <span *ngIf="item.value.value.length">
-                      <mat-list dense>
-                        <mat-list-item *ngFor="let element of item.value.value">
-                          {{ element }}
-                        </mat-list-item>
-                      </mat-list>
-                    </span>
-                    <span *ngIf="!item.value.value.length">
-                      <mat-list dense>
-                        <ng-container *ngFor="let element of item.value.value | keyvalue">
-                          <mat-list-item *ngIf="!isBannedAttr(element.key) && (element.value.value || element.value.value === 0 || element.value.value === false)">
-                            <mat-icon aria-hidden="false"
-                                      attr.aria-label="Description for the {{ element.key }} attribute."
-                                      matTooltip="{{ element.value.description ? element.value.description : 'No description found.' }}">
-                              help_outline
-                            </mat-icon>
-                            <strong>
-                              {{ (element.key | titlecase).split('_').filter(filter_empty).join(' ') }}:
-                            </strong>
-                            {{ element.value.value }}
-                          </mat-list-item>
-                        </ng-container>
-                      </mat-list>
-                    </span>
-                  </ng-template>
-                </mat-expansion-panel>
-              </span>
-            </ng-container>
-          </mat-list>
+          <app-iterable-displayer [data]="treeModel" [banList]="bannedModelAttrs"></app-iterable-displayer>
         </ng-template>
       </mat-tab>
     
