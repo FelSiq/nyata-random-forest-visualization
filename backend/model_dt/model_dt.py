@@ -63,6 +63,37 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     return obj
 
 
+def get_class_freqs(
+        dt_model: t.
+        Union[sklearn.ensemble.forest.RandomForestClassifier,
+              sklearn.tree.tree.DecisionTreeClassifier],
+        instance: np.ndarray) -> t.Dict[str, str]:
+    """."""
+    class_by_tree = {
+        str(class_label): 0
+        for class_label in dt_model.classes_
+    }  # type: t.Dict[str, int]
+
+    estimators = []  # type: t.Union[np.ndarray, list]
+
+    if isinstance(dt_model, sklearn.tree.tree.DecisionTreeClassifier):
+      estimators = [dt_model]
+
+    else:
+      estimators = dt_model.estimators_
+
+    for tree in estimators:
+      pred_class = tree.predict(instance).astype(dt_model.classes_.dtype)
+      class_by_tree[str(pred_class[0])] += 1
+
+    ret = {
+      key: "{} ({:.1f}%)".format(value, 100.0 * value / dt_model.n_estimators)
+      for key, value in class_by_tree.items()
+    }
+
+    return ret
+
+
 def serialize_decision_tree(
         dt_model: t.
         Union[sklearn.ensemble.forest.RandomForestClassifier, sklearn.ensemble.

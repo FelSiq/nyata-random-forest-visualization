@@ -1,5 +1,6 @@
 import typing as t
 import re
+import collections
 
 import flask
 import flask_cors
@@ -40,7 +41,7 @@ class PredictSingleInstance(flask_restful.Resource):
         if not set(map(str.lower, preproc_inst)).isdisjoint(NULL_VALUES):
             return None
 
-        return preproc_inst.astype(np.float).reshape(1, -1)
+        return preproc_inst.astype(np.float32).reshape(1, -1)
 
     def _handle_errors(self, err_code: t.Sequence[str]) -> t.Dict[str, str]:
         err_msg = {}
@@ -60,11 +61,12 @@ class PredictSingleInstance(flask_restful.Resource):
         if err_code:
             return flask.jsonify(self._handle_errors(err_code))
 
-        pred_vals = {
-            'classes': self.model.predict(inst_proc),
-            'decision_path': self.model.decision_path(inst_proc),
-            'leaf_id': self.model.apply(inst_proc),
-        }
+        pred_vals = collections.OrderedDict((
+            ('predicted_class', self.model.predict(inst_proc)),
+            ('classes_by_tree', model_dt.get_class_freqs(self.model, inst_proc)),
+            ('decision_path', self.model.decision_path(inst_proc)),
+            ('leaf_id', self.model.apply(inst_proc)),
+        ))
 
         ret = {
             key: model_dt.json_encoder_type_manager(val)
