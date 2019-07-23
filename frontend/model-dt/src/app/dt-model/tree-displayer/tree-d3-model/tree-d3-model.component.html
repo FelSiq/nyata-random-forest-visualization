@@ -1,55 +1,83 @@
-<mat-form-field class="current-tree-selector" *ngIf="treeNodes && treeNodes.length > 1">
-  <mat-label class="forest-label">
-    Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
-  </mat-label>
-  <mat-select [(ngModel)]="chosenTree" (ngModelChange)="changesHandler()">
-    <mat-option *ngFor="let tree of treeNodes; index as i;"
-            value="{{ i }}">
-            {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }}, depth: {{ tree.tree_.value.maximum_depth }})
-    </mat-option>
-  </mat-select>
-</mat-form-field>
+<mat-accordion>
+  <mat-expansion-panel class="visual-settings-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        Visual settings
+      </mat-panel-title>
+    </mat-expansion-panel-header>
 
-<svg width="100%" height="512" class="current-tree-model"></svg>
+    <div>
+      <mat-slide-toggle color="primary"
+                        [checked]="showImpurity"
+                        (change)="toggleImpurity()">
+        Show impurity
+      </mat-slide-toggle>
+    </div>
+  </mat-expansion-panel>
+</mat-accordion>
 
-<div>
-  <mat-icon (click)="updateZoomValue(-0.25)"
-            (dblclick)="updateZoomValue(-0.75)"
-            [style.cursor]="zoomValue <= zoomMin ? 'not-allowed' : 'pointer'"
-            class="zoom-icon">
-    zoom_out
-  </mat-icon>
-  <mat-slider [min]="zoomMin"
-              [max]="zoomMax"
-              [(value)]="zoomValue"
-              step="0.01"
-              class="zoom-slider">
-  </mat-slider>
-  <mat-icon (click)="updateZoomValue(+0.25)"
-            (dblclick)="updateZoomValue(+0.75)"
-            [style.cursor]="zoomValue >= zoomMax ? 'not-allowed' : 'pointer'"
-            class="zoom-icon">
-    zoom_in
-  </mat-icon>
-</div>
-
-<div *ngIf="treeNodes && (chosenTree || chosenTree === 0)">
-  <mat-card>
-    <mat-card-title>
-      Current tree characteristics
-    </mat-card-title>
-
-    <mat-card-content>
-      <mat-list>
-        <span *ngFor="let attr of treeNodes[+chosenTree].tree_.value | keyvalue">
-          <mat-list-item *ngIf="!attr.value.length">
-            <strong>
-              {{ (attr.key | titlecase).split('_').join(' ') }}:
-            </strong>
-            {{ attr.value }}
-          </mat-list-item>
-        </span>
-      </mat-list>
-    </mat-card-content>
-  </mat-card>
-</div>
+<mat-card>
+  <mat-card-actions>
+    <div>
+      <mat-form-field class="current-tree-selector" *ngIf="treeNodes && treeNodes.length > 1">
+        <mat-label class="forest-label">
+          Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
+        </mat-label>
+        <mat-select [(ngModel)]="chosenTree" (ngModelChange)="changesHandler()">
+          <mat-option *ngFor="let tree of treeNodes; index as i;"
+                  value="{{ i }}">
+                  {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }}, depth: {{ tree.tree_.value.maximum_depth }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card-actions>
+  
+  <mat-card-content>
+    <svg width="100%" height="512" class="current-tree-model"></svg>
+  </mat-card-content>
+  
+  <mat-card-footer>
+    <div>
+      <mat-icon (click)="updateZoomValue(-0.25)"
+                (dblclick)="updateZoomValue(-0.75)"
+                [style.cursor]="zoomValue <= zoomMin ? 'not-allowed' : 'pointer'"
+                class="zoom-icon">
+        zoom_out
+      </mat-icon>
+      <mat-slider [min]="zoomMin"
+                  [max]="zoomMax"
+                  [(value)]="zoomValue"
+                  step="0.01"
+                  class="zoom-slider">
+      </mat-slider>
+      <mat-icon (click)="updateZoomValue(+0.25)"
+                (dblclick)="updateZoomValue(+0.75)"
+                [style.cursor]="zoomValue >= zoomMax ? 'not-allowed' : 'pointer'"
+                class="zoom-icon">
+        zoom_in
+      </mat-icon>
+    </div>
+    
+    <div *ngIf="treeNodes && (chosenTree || chosenTree === 0)">
+      <mat-card>
+        <mat-card-title>
+          Current tree characteristics
+        </mat-card-title>
+    
+        <mat-card-content>
+          <mat-list>
+            <span *ngFor="let attr of treeNodes[+chosenTree].tree_.value | keyvalue">
+              <mat-list-item *ngIf="!attr.value.length">
+                <strong>
+                  {{ (attr.key | titlecase).split('_').join(' ') }}:
+                </strong>
+                {{ attr.value }}
+              </mat-list-item>
+            </span>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-card-footer>
+</mat-card>

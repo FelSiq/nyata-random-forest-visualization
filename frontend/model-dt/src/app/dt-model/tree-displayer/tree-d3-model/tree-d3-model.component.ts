@@ -15,6 +15,8 @@ import { DTInterface, TreeInterface } from '../../../dt-interface';
 })
 export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   @Input() treeNodes: DTInterface[];
+  @Input() showImpurity: boolean;
+
   chosenTree: string | number;
   zoomValue: number = 0;
 
@@ -28,6 +30,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private impurityColors: any;
   private width: number;
   private height: number;
+  private maxImpurity: number;
   private readonly radiusMinimum: number = 8;
   private readonly radiusScaleFactor: number = 24;
   private static readonly styleColorLinkDefault = 'rgb(128, 128, 128)';
@@ -140,13 +143,13 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
     const criterion = curTreeNodes.criterion.value;
 
-    const maxImpurity = (
+    this.maxImpurity = (
       criterion === 'gini' ? 1.0 :
       (criterion === 'entropy' ? Math.log2(curTree.maximum_number_of_classes) :
       (Math.max(...curTree.impurity))));
 
     this.impurityColors = d3Scale.scaleLinear<string>()
-        .domain([0.0, maxImpurity])
+        .domain([0.0, this.maxImpurity])
         .range(['white', 'black']);
 
     const cxDelta = this.width / 4.05;
@@ -172,6 +175,49 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         rootYCoord,
         cyDelta);
 
+    if (this.showImpurity) {
+      this.drawImpurity();
+    }
+
+  }
+
+  private drawImpurity(): void {
+    this.nodes.selectAll('.node').append('rect')
+      .classed('draggable node-label', true)
+      .attr('width', 64)
+      .attr('height', function() { return +d3.select(this.parentNode).attr('appended-info-num') * 16; })
+      .attr('x', function() { return +d3.select(this.parentNode).attr('cx') - 32; })
+      .attr('y', function() {
+          const node = d3.select(this.parentNode).select('circle');
+          return +node.attr('cy') + 1.5 * +node.attr('r') - 12;
+      })
+      .attr('rx', 5)
+      .attr('opacity', 0.7)
+      .attr('fill', 'black');
+
+    this.nodes.selectAll('.node').append('text')
+      .classed('draggable node-label label-impurity', true)
+      .attr('x', function() { return +d3.select(this.parentNode).attr('cx'); })
+      .attr('y', function() {
+          const node = d3.select(this.parentNode).select('circle');
+          return +node.attr('r') * 1.5 + +node.attr('cy');
+      })
+      .attr('visibility', 'visible')
+      .attr('font-size', 12)
+      .attr('fill', 'white')
+      .attr('text-anchor', 'middle')
+      .text( function() { return (+d3.select(this.parentNode).attr('impurity')).toFixed(2); } );
+  }
+
+  private toggleImpurity(): void {
+    if (!this.showImpurity) {
+      this.drawImpurity();
+    } else {
+      this.nodes.selectAll('.node-label')
+        .remove();
+    }
+
+    this.showImpurity = !this.showImpurity;
   }
 
   private generateLink(nodeAId: number,
@@ -221,6 +267,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       .attr('sonLeftId', sonLeftId)
       .attr('sonRightId', sonRightId)
       .attr('parentId', parentId)
+      .attr('appended-info-num', 1)
+      .attr('impurity', impurity)
       .attr('cx', cx)
       .attr('cy', cy)
       .call(d3Drag.drag()
@@ -300,7 +348,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
           node.selectAll('.draggable')
             .attr('cx', function() { return +d3.select(this).attr('cx') + d3.event.dx; })
-            .attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; });
+            .attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; })
+            .attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; })
+            .attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
 
           d3.selectAll([
                 TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),

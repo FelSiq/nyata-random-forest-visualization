@@ -1,5 +1,5 @@
 .current-tree-selector {
-  width: 98%;
+  width: 100%;
 }
 
 .d3-tree-model {
@@ -11,4 +11,8 @@
 }
 
 .zoom-icon {
+}
+
+.visual-settings-panel {
+  background-color: rgb(240, 240, 240);
 }

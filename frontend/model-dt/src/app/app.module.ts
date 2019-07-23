@@ -19,6 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -67,6 +68,7 @@ import { IterableDisplayerComponent } from './dt-model/tree-displayer/iterable-d
     MatListModule, 
     MatIconModule,
     MatSliderModule,
+    MatSlideToggleModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],
