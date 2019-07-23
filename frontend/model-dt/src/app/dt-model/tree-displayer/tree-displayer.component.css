@@ -7,7 +7,7 @@
 }
 
 .waiting-spinner {
-  margin-left: 48%;
+  margin-left: calc(50% - 0.5 * 45px);
   margin-top: 4%;
   margin-bottom: 4%;
 }

@@ -1,3 +1,16 @@
+<mat-card *ngIf="calledPredictService || predictResults">
+  <mat-card-title>
+    Prediction results
+  </mat-card-title>
+  <mat-card-content *ngIf="predictResults; else waitingPredictionResults">
+    <app-iterable-displayer [data]="predictResults" [banList]="predicResultsBanAttrs"></app-iterable-displayer>
+  </mat-card-content>
+
+  <ng-template #waitingPredictionResults>
+    <mat-spinner class="waiting-spinner"></mat-spinner>
+  </ng-template>
+</mat-card>
+
 <mat-accordion>
   <mat-expansion-panel>
     <mat-expansion-panel-header
@@ -87,13 +100,4 @@
       </mat-action-row>
     </ng-template>
   </mat-expansion-panel>
-    
-  <mat-card *ngIf="predictResults">
-    <mat-card-title>
-      Prediction results
-    </mat-card-title>
-    <mat-card-content>
-      <app-iterable-displayer [data]="predictResults" [banList]="[]"></app-iterable-displayer>
-    </mat-card-content>
-  </mat-card>
 </mat-accordion>

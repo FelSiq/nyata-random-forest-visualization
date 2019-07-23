@@ -20,6 +20,7 @@ export class DataLoaderPannelComponent implements OnInit {
   @Input() datasetDim: number;
   isValidFormSubmitted: boolean;
   predictResults: PredictResults;
+  calledPredictService: boolean = false;
   readonly maxFileSize: number = 50;
   readonly maxFileSizeUnit: string = 'MB';
   readonly sepOptions: SepOption[] = [
@@ -39,6 +40,11 @@ export class DataLoaderPannelComponent implements OnInit {
     ],
     attrs: ['', [ ]],
   });
+
+  readonly predicResultsBanAttrs: string[] = [
+    'decision_path',
+    'leaf_id',
+  ];
 
   constructor(public predictor: TreePredictCallerService,
               public fileUploadService: DatasetUploadService,
@@ -66,10 +72,15 @@ export class DataLoaderPannelComponent implements OnInit {
 
     const splittedValues: string[] = formAttrs.split(formSep);
 
+    this.predictResults = null;
+
     if (splittedValues.length === this.datasetDim) {
+      this.calledPredictService = true;
+
       this.predictor.predictSingleInstance(splittedValues)
         .subscribe((results: PredictResults) => {
           this.predictResults = { ...results };
+          this.calledPredictService = false;
         });
     }
   }

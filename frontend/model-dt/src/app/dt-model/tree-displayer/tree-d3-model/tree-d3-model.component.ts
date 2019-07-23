@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input, ElementRef } from '@angular/core';
 
 import * as d3 from 'd3-selection';
 import * as d3Zoom from 'd3-zoom';
@@ -13,7 +13,7 @@ import { DTInterface, TreeInterface } from '../../../dt-interface';
   templateUrl: './tree-d3-model.component.html',
   styleUrls: ['./tree-d3-model.component.css'],
 })
-export class TreeD3ModelComponent implements OnInit {
+export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   @Input() treeNodes: DTInterface[];
   chosenTree: string | number;
   zoomValue: number = 0;
@@ -37,6 +37,9 @@ export class TreeD3ModelComponent implements OnInit {
 
   ngOnInit() {
     this.chosenTree = '0';
+  }
+
+  ngAfterViewInit() {
     this.changesHandler();
   }
 
