@@ -13,6 +13,7 @@ RE_KEY_MIN = re.compile(r"\bmin\b")
 RE_KEY_MAX = re.compile(r"\bmax\b")
 RE_KEY_PARAMS = re.compile(r"\bparams\b")
 
+
 def preprocess_key(key: str) -> str:
     """Transform the sklearn model dict keys into a more user-readable value."""
     key = key.replace("_", " ")
@@ -60,35 +61,46 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     if isinstance(obj, scipy.sparse.csr.csr_matrix):
         return "TODO"
 
+    if isinstance(obj, dict):
+        return {
+            json_encoder_type_manager(key): json_encoder_type_manager(value)
+            for key, value in obj.items()
+        }
+
     return obj
 
 
-def get_class_freqs(
-        dt_model: t.
-        Union[sklearn.ensemble.forest.RandomForestClassifier,
-              sklearn.tree.tree.DecisionTreeClassifier],
-        instance: np.ndarray) -> t.Dict[str, str]:
+def get_class_freqs(dt_model: t.Union[sklearn.ensemble.forest.
+                                      RandomForestClassifier, sklearn.tree.
+                                      tree.DecisionTreeClassifier],
+                    instance: np.ndarray) -> t.Dict[str, str]:
     """."""
-    class_by_tree = {
-        str(class_label): 0
-        for class_label in dt_model.classes_
-    }  # type: t.Dict[str, int]
+    class_by_tree = {str(class_label): 0
+                     for class_label in dt_model.classes_
+                     }  # type: t.Dict[str, int]
 
     estimators = []  # type: t.Union[np.ndarray, list]
 
     if isinstance(dt_model, sklearn.tree.tree.DecisionTreeClassifier):
-      estimators = [dt_model]
+        estimators = [dt_model]
 
     else:
-      estimators = dt_model.estimators_
+        estimators = dt_model.estimators_
 
     for tree in estimators:
-      pred_class = tree.predict(instance).astype(dt_model.classes_.dtype)
-      class_by_tree[str(pred_class[0])] += 1
+        pred_class = tree.predict(instance).astype(dt_model.classes_.dtype)
+        class_by_tree[str(pred_class[0])] += 1
 
     ret = {
-      key: "{} ({:.1f}%)".format(value, 100.0 * value / dt_model.n_estimators)
-      for key, value in class_by_tree.items()
+        key: {
+            "value":
+            "{} ({:.1f}%)".format(value,
+                                  100.0 * value / dt_model.n_estimators),
+            "description":
+            "Number of trees in the forest that predicted class '{}'.".format(
+                key),
+        }
+        for key, value in class_by_tree.items()
     }
 
     return ret
@@ -103,11 +115,11 @@ def serialize_decision_tree(
     """Transform the given DT model into a serializable dictionary."""
     new_model = {
         preprocess_key(str(key)): {
-            "value": json_encoder_type_manager(value),
-            "description": (
-              "Description for key {}. TODO: get description "
-              "directly from sklearn documentation.".format(key)
-            ),
+            "value":
+            json_encoder_type_manager(value),
+            "description":
+            ("Description for key {}. TODO: get description "
+             "directly from sklearn documentation.".format(key)),
         }
         for key, value in dt_model.__dict__.items()
     }

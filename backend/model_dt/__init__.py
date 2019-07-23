@@ -61,19 +61,23 @@ class PredictSingleInstance(flask_restful.Resource):
         if err_code:
             return flask.jsonify(self._handle_errors(err_code))
 
-        pred_vals = collections.OrderedDict((
-            ('predicted_class', self.model.predict(inst_proc)),
-            ('classes_by_tree', model_dt.get_class_freqs(self.model, inst_proc)),
-            ('decision_path', self.model.decision_path(inst_proc)),
-            ('leaf_id', self.model.apply(inst_proc)),
-        ))
+        pred_vals = model_dt.json_encoder_type_manager(
+            collections.OrderedDict((
+                ('predicted_class', {
+                    'value': self.model.predict(inst_proc)[0]
+                }),
+                ('classes_by_tree', {
+                    'value': model_dt.get_class_freqs(self.model, inst_proc)
+                }),
+                ('decision_path', {
+                    'value': self.model.decision_path(inst_proc)
+                }),
+                ('leaf_id', {
+                    'value': self.model.apply(inst_proc)[0]
+                }),
+            )))
 
-        ret = {
-            key: model_dt.json_encoder_type_manager(val)
-            for key, val in pred_vals.items()
-        }
-
-        return flask.jsonify(ret)
+        return flask.jsonify(pred_vals)
 
 
 def create_app():
