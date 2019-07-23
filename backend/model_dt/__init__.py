@@ -63,7 +63,7 @@ class PredictSingleInstance(flask_restful.Resource):
 
         pred_vals = model_dt.json_encoder_type_manager(
             collections.OrderedDict((
-                ('predicted_class', {
+                ('prediction_result', {
                     'value': self.model.predict(inst_proc)[0]
                 }),
                 ('classes_by_tree', {
