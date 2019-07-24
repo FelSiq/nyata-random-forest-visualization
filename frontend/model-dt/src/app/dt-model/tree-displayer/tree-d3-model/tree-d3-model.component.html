@@ -13,6 +13,14 @@
         Show impurity
       </mat-slide-toggle>
     </div>
+
+    <div>
+      <mat-slide-toggle color="primary"
+                        [checked]="showLinkWeight"
+                        (change)="toggleLinkWeight()">
+        Show link weight
+      </mat-slide-toggle>
+    </div>
   </mat-expansion-panel>
 </mat-accordion>
 

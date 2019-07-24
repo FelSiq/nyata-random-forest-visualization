@@ -16,6 +16,7 @@ import { DTInterface, TreeInterface } from '../../../dt-interface';
 export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   @Input() treeNodes: DTInterface[];
   @Input() showImpurity: boolean;
+  @Input() showLinkWeight: boolean;
 
   chosenTree: string | number;
   zoomValue: number = 0;
@@ -179,11 +180,15 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       this.drawImpurity();
     }
 
+    if (this.showLinkWeight) {
+      this.drawLinkWeight();
+    }
+
   }
 
   private drawImpurity(): void {
     this.nodes.selectAll('.node').append('rect')
-      .classed('draggable node-label', true)
+      .classed('draggable node-label label-impurity', true)
       .attr('width', 64)
       .attr('height', function() { return +d3.select(this.parentNode).attr('appended-info-num') * 16; })
       .attr('x', function() { return +d3.select(this.parentNode).attr('cx') - 32; })
@@ -202,57 +207,87 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           const node = d3.select(this.parentNode).select('circle');
           return +node.attr('r') * 1.5 + +node.attr('cy');
       })
-      .attr('visibility', 'visible')
       .attr('font-size', 12)
       .attr('fill', 'white')
       .attr('text-anchor', 'middle')
       .text( function() { return (+d3.select(this.parentNode).attr('impurity')).toFixed(2); } );
   }
 
+  private drawLinkWeight(): void {
+    this.links.selectAll('.link').append('rect')
+      .classed('draggable link-label label-weight', true)
+      .attr('width', 64)
+      .attr('height', function() { return +d3.select(this.parentNode).attr('appended-info-num') * 16; })
+      .attr('x', function() {
+          const link = d3.select(this.parentNode).select('line');
+          return 0.5 * (+link.attr('x2') + +link.attr('x1')) - 32;
+      })
+      .attr('y', function() {
+          const link = d3.select(this.parentNode).select('line');
+          return 0.5 * (+link.attr('y2') + +link.attr('y1')) - 12;
+      })
+      .attr('rx', 5)
+      .attr('opacity', 0.5)
+      .attr('fill', 'red');
+
+    this.links.selectAll('.link').append('text')
+      .classed('draggable link-label label-weight', true)
+      .attr('x', function() {
+          const link = d3.select(this.parentNode).select('line');
+          return 0.5 * (+link.attr('x2') + +link.attr('x1'));
+      })
+      .attr('y', function() {
+          const link = d3.select(this.parentNode).select('line');
+          return 0.5 * (+link.attr('y2') + +link.attr('y1'));
+      })
+      .attr('font-size', 12)
+      .attr('fill', 'white')
+      .attr('text-anchor', 'middle')
+      .text( function() { return ((100 * +d3.select(this.parentNode).attr('weight'))).toFixed(1) + '%'; } );
+  }
+
   private toggleImpurity(): void {
     if (!this.showImpurity) {
       this.drawImpurity();
     } else {
-      this.nodes.selectAll('.node-label')
+      this.nodes.selectAll('.label-impurity')
         .remove();
     }
 
     this.showImpurity = !this.showImpurity;
   }
 
-  private generateLink(nodeAId: number,
-                       nodeBId: number,
-                       x1: number,
-                       x2: number,
-                       y1: number,
-                       y2: number): void {
+  private toggleLinkWeight(): void {
+    if (!this.showLinkWeight) {
+      this.drawLinkWeight();
+    } else {
+      this.links.selectAll('.label-weight')
+        .remove();
+    }
 
-    this.links.append('line')
-      .classed('link', true)
-      .attr('id', TreeD3ModelComponent.formatLinkId(nodeAId, nodeBId))
-      .attr('x1', x1)
-      .attr('x2', x2)
-      .attr('y1', y1)
-      .attr('y2', y2)
-      .style('stroke-width', 2)
-      .style('stroke', TreeD3ModelComponent.styleColorLinkDefault);
+    this.showLinkWeight = !this.showLinkWeight;
   }
-
   private connectNodes(nodeAId: number, nodeBId: number): void {
     const nodeA = this.nodes.select(TreeD3ModelComponent.formatNodeId(nodeAId, true));
     const nodeB = this.nodes.select(TreeD3ModelComponent.formatNodeId(nodeBId, true));
 
-    this.generateLink(
-      nodeAId,
-      nodeBId,
-      nodeA.attr('cx'),
-      nodeB.attr('cx'),
-      nodeA.attr('cy'),
-      nodeB.attr('cy'));
+    this.links.append('g')
+      .classed('link', true)
+      .attr('id', TreeD3ModelComponent.formatLinkId(nodeAId, nodeBId))
+      .attr('appended-info-num', 1)
+      .attr('weight', +nodeB.attr('num-inst') / +nodeA.attr('num-inst'))
+      .append('line')
+        .attr('x1', nodeA.attr('cx'))
+        .attr('x2', nodeB.attr('cx'))
+        .attr('y1', nodeA.attr('cy'))
+        .attr('y2', nodeB.attr('cy'))
+        .style('stroke-width', 2)
+        .style('stroke', TreeD3ModelComponent.styleColorLinkDefault);
   }
 
   private generateNode(nodeId: number,
                        impurity: number,
+                       numInstInNode: number,
                        cx: number,
                        cy: number,
                        radius: number,
@@ -269,6 +304,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       .attr('parentId', parentId)
       .attr('appended-info-num', 1)
       .attr('impurity', impurity)
+      .attr('num-inst', numInstInNode)
       .attr('cx', cx)
       .attr('cy', cy)
       .call(d3Drag.drag()
@@ -305,6 +341,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
                 TreeD3ModelComponent.formatLinkId(parentId, nodeId, true),
             ].join(','))
               .classed('link-active', true)
+              .select('line')
               .style('stroke', TreeD3ModelComponent.styleColorLinkSelected);
         })
         .on('end', function() {
@@ -331,6 +368,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
                 TreeD3ModelComponent.formatLinkId(parentId, nodeId, true),
             ].join(','))
               .classed('link-active', false)
+              .select('line')
               .style('stroke', TreeD3ModelComponent.styleColorLinkDefault);
         })
         .on('drag', function() {
@@ -342,6 +380,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           const sonLeftId = +node.attr('sonLeftId');
           const sonRightId = +node.attr('sonRightId');
 
+          const linkA = TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true);
+          const linkB = TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true);
+          const linkC = TreeD3ModelComponent.formatLinkId(parentId, nodeId, true);
+
           node
             .attr('cx', d3.event.x)
             .attr('cy', d3.event.y);
@@ -352,16 +394,22 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
             .attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; })
             .attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
 
-          d3.selectAll([
-                TreeD3ModelComponent.formatLinkId(nodeId, sonLeftId, true),
-                TreeD3ModelComponent.formatLinkId(nodeId, sonRightId, true),
-            ].join(','))
-              .attr('x1', circle.attr('cx'))
-              .attr('y1', circle.attr('cy'));
+          d3.selectAll([linkA, linkB].join(','))
+              .select('line')
+                .attr('x1', circle.attr('cx'))
+                .attr('y1', circle.attr('cy'));
 
-          d3.select(TreeD3ModelComponent.formatLinkId(parentId, nodeId, true))
-            .attr('x2', circle.attr('cx'))
-            .attr('y2', circle.attr('cy'));
+          d3.select(linkC)
+            .select('line')
+              .attr('x2', circle.attr('cx'))
+              .attr('y2', circle.attr('cy'));
+
+          d3.selectAll([linkA, linkB, linkC].join(','))
+            .selectAll('.draggable')
+              .attr('cx', function() { return +d3.select(this).attr('cx') + d3.event.dx; })
+              .attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; })
+              .attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; })
+              .attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
         }));
 
     g.append('circle')
@@ -402,16 +450,18 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       const sonLeftId = +curTree.children_left[nodeId];
       const sonRightId = +curTree.children_right[nodeId];
       const impurity = +curTree.impurity[nodeId];
+      const numInstInNode = +curTree.weighted_number_of_node_samples[nodeId];
 
       const radius = (
         this.radiusMinimum +
         this.radiusScaleFactor *
-        (+curTree.weighted_number_of_node_samples[nodeId] /
+        (numInstInNode /
         +curTree.weighted_number_of_node_samples[0]));
 
       this.generateNode(
           nodeId,
           impurity,
+          numInstInNode,
           cx,
           cy,
           radius,
