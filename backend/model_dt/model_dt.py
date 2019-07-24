@@ -116,6 +116,18 @@ def serialize_decision_tree(
         }
         for key, value in dt_model.__dict__.items()
     }
+
+    try:
+      new_model["feature_importances_"] = {
+          "value": json_encoder_type_manager(
+              list(map(lambda val: "{:.2f} %".format(100 * val),
+              dt_model.feature_importances_))),
+          "description": "TODO: this documentation properly."
+      }
+
+    except AttributeError:
+      pass
+
     return new_model
 
 
