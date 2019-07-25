@@ -32,3 +32,6 @@
   margin-bottom: 4%;
 }
 
+.file-error-messages-item {
+  color: red;
+}

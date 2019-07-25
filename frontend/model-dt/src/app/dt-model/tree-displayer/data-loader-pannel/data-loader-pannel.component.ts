@@ -22,6 +22,9 @@ export class DataLoaderPannelComponent implements OnInit {
   predictResults: PredictResults;
   isValidFormSubmitted: boolean;
   calledPredictService: boolean = false;
+  fileToUpload: File = null;
+  datasetErrorLogs: string[] = [];
+
   readonly maxFileSize: number = 50;
   readonly maxFileSizeUnit: string = 'MB';
   readonly sepOptions: SepOption[] = [
@@ -29,7 +32,6 @@ export class DataLoaderPannelComponent implements OnInit {
     { symb: ' ', label: 'Blank space' },
     { symb: ';', label: 'Semicolon' },
   ];
-  fileToUpload: File = null;
 
   testInstForm = this.fb.group({
     sep: [',', [ Validators.required ]],
@@ -88,7 +90,29 @@ export class DataLoaderPannelComponent implements OnInit {
   }
 
   handleFileInput(files: FileList) {
+      this.datasetErrorLogs = [];
+
       this.fileToUpload = files.item(0);
+
+      const fileSize = +this.fileToUpload.size / 1024 / 1024;
+      const fileType = this.fileToUpload.type;
+
+      if (fileSize > 50) {
+        this.datasetErrorLogs.push(
+          'This file is too large! (size: ' + fileSize.toFixed(2) + 'MB)'
+        );
+      }
+
+      if (this.fileToUpload.type != 'text/csv') {
+        this.datasetErrorLogs.push(
+          "The file must be a '.csv' text file! (received type: " +
+          (fileType ? fileType : 'unknown') + ')'
+        );
+      }
+
+      if (this.datasetErrorLogs.length) {
+        this.fileToUpload = null;
+      }
   }
 
   uploadFileToActivity() {

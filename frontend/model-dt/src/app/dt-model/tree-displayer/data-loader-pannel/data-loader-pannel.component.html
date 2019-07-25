@@ -95,8 +95,17 @@
       <input type="file"
              id="file-upload-input"
              (change)="handleFileInput($event.target.files)"/>
+
+      <mat-list class="file-error-messages">
+        <mat-list-item class="file-error-messages-item"
+                       *ngFor="let errorMsg of datasetErrorLogs">
+          <mat-icon matListIcon>error</mat-icon>
+          Error: {{ errorMsg }}.
+        </mat-list-item>
+      </mat-list>
+
       <mat-action-row>
-        <button mat-raised-button> Submit </button>
+        <button mat-raised-button [disabled]="datasetErrorLogs.length || !fileToUpload"> Submit </button>
       </mat-action-row>
     </ng-template>
   </mat-expansion-panel>
