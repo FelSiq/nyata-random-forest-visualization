@@ -16,3 +16,7 @@
 .visual-settings-panel {
   background-color: rgb(240, 240, 240);
 }
+
+.visual-settings-panel-icon {
+  margin-right: 8px;
+}

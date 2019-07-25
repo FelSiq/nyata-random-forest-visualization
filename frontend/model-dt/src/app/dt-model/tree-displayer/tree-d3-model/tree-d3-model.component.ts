@@ -98,7 +98,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         +this.svg.attr('width') ?
         +this.svg.attr('width') :
         this.eleRef.nativeElement.offsetWidth
-    );
+    ) - 2 * (this.radiusMinimum + this.radiusScaleFactor);
 
     this.height = (
         +this.svg.attr('height') ?
@@ -184,7 +184,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         curTree,
         0,
         -1,
-        0.5 * this.width,
+        0.5 * this.width + (this.radiusMinimum + this.radiusScaleFactor),
         cxDelta,
         rootYCoord,
         cyDelta);
@@ -205,6 +205,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private drawPredictionPaths(): void {
     this.links
       .selectAll('.link')
+      .classed('in-predict-path', false)
       .select('line')
         .style('stroke', TreeD3ModelComponent.styleColorLinkDefault)
         .style('stroke-width', TreeD3ModelComponent.styleWidthLinkDefault)
@@ -213,7 +214,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const curPath = this._decisionPath[+this.chosenTree];
 
     for (let i = 0; i < curPath.length - 1; i++) {
-      this.links.select(TreeD3ModelComponent.formatLinkId(curPath[i], curPath[i+1], true))
+      this.links
+        .select(TreeD3ModelComponent.formatLinkId(curPath[i], curPath[i+1], true))
+        .classed('in-predict-path', true)
         .select('line')
           .style('stroke', TreeD3ModelComponent.styleColorLinkPredict)
           .style('stroke-width', TreeD3ModelComponent.styleWidthLinkSelected)
@@ -413,7 +416,15 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
             ].join(','))
               .classed('link-active', false)
               .select('line')
-              .style('stroke', TreeD3ModelComponent.styleColorLinkDefault);
+                .style('stroke', function() {
+                  const predictPathLink = d3.select(this)
+                    .classed('in-predict-path');
+
+                  return (
+                    predictPathLink ? 
+                    TreeD3ModelComponent.styleColorLinkPredict :
+                    TreeD3ModelComponent.styleColorLinkDefault);
+                });
         })
         .on('drag', function() {
           const node = d3.select(this);
@@ -439,9 +450,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
             .attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
 
           d3.selectAll([linkA, linkB].join(','))
-              .select('line')
-                .attr('x1', circle.attr('cx'))
-                .attr('y1', circle.attr('cy'));
+            .select('line')
+              .attr('x1', circle.attr('cx'))
+              .attr('y1', circle.attr('cy'));
 
           d3.select(linkC)
             .select('line')

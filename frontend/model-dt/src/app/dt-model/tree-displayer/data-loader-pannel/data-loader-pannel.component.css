@@ -35,3 +35,7 @@
 .file-error-messages-item {
   color: red;
 }
+
+.panel-option-icon {
+  margin-right: 8px;
+}
