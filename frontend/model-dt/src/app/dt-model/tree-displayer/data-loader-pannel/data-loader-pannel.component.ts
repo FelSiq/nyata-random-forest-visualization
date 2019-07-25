@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { PredictResults } from '../predict-results';
@@ -18,8 +18,9 @@ interface SepOption {
 })
 export class DataLoaderPannelComponent implements OnInit {
   @Input() datasetDim: number;
-  isValidFormSubmitted: boolean;
+  @Output() resultsEmitter = new EventEmitter<PredictResults>();
   predictResults: PredictResults;
+  isValidFormSubmitted: boolean;
   calledPredictService: boolean = false;
   readonly maxFileSize: number = 50;
   readonly maxFileSizeUnit: string = 'MB';
@@ -81,6 +82,7 @@ export class DataLoaderPannelComponent implements OnInit {
         .subscribe((results: PredictResults) => {
           this.predictResults = { ...results };
           this.calledPredictService = false;
+          this.resultsEmitter.emit(this.predictResults);
         });
     }
   }

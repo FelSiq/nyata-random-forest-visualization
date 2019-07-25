@@ -1,5 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
+
 import { DTInterface } from '../../dt-interface';
+import { PredictResults } from './predict-results';
 
 @Component({
   selector: 'app-tree-displayer',
@@ -8,16 +10,21 @@ import { DTInterface } from '../../dt-interface';
 })
 export class TreeDisplayerComponent implements OnInit {
   @Input() treeModel: DTInterface;
-  bannedModelAttrs: string[];
+  predictResults: PredictResults;
+
+  readonly bannedModelAttrs: string[] = [
+    'estimators_',
+    'base_estimator_',
+    'tree_',
+  ];
 
   constructor() { }
 
   ngOnInit() {
-    this.bannedModelAttrs = [
-      'estimators_',
-      'base_estimator_',
-      'tree_',
-    ];
+  }
+
+  updatePredictionResults(value: PredictResults) {
+    this.predictResults = { ...value };
   }
 
 }
