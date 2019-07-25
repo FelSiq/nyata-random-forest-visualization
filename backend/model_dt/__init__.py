@@ -46,17 +46,34 @@ class PredictSingleInstance(flask_restful.Resource):
     def _handle_errors(self, err_code: t.Sequence[str]) -> t.Dict[str, str]:
         err_msg = {}
 
-        if 'NA_ERROR' in err_code:
+        if 'ERROR_MISSING_VAL' in err_code:
             err_msg['na_error'] = 'Currently missing values are not supported.'
 
         return err_msg
+
+    def _decision_path(self, inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
+        dec_path, indices = self.model.decision_path(inst_proc)
+        
+        nodes = []
+        base_index = 0
+        next_tree_id = 0
+        
+        for value in dec_path.indices:
+            if value == indices[next_tree_id]:
+                base_index = value
+                next_tree_id += 1
+                nodes.append([])
+
+            nodes[-1].append(value - base_index)
+
+        return nodes
 
     def get(self, instance: str):
         inst_proc = self._preprocess_instance(instance)
         err_code = []
 
         if inst_proc is None:
-            err_code.append('NA_ERROR')
+            err_code.append('ERROR_MISSING_VAL')
 
         if err_code:
             return flask.jsonify(self._handle_errors(err_code))
@@ -70,7 +87,7 @@ class PredictSingleInstance(flask_restful.Resource):
                     'value': model_dt.get_class_freqs(self.model, inst_proc)
                 }),
                 ('decision_path', {
-                    'value': self.model.decision_path(inst_proc)
+                    'value': self._decision_path(inst_proc)
                 }),
                 ('leaf_id', {
                     'value': self.model.apply(inst_proc)[0]

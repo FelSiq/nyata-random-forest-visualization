@@ -58,9 +58,6 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     if isinstance(obj, sklearn.tree._tree.Tree):
         return get_tree_structure(obj)
 
-    if isinstance(obj, scipy.sparse.csr.csr_matrix):
-        return "TODO"
-
     if isinstance(obj, dict):
         return {
             json_encoder_type_manager(key): json_encoder_type_manager(value)
