@@ -30,6 +30,14 @@ class DecisionTree(flask_restful.Resource):
         return flask.jsonify(model_dt.serialize_decision_tree(self.model))
 
 
+class PredictDataset(flask_restful.Resource):
+    def __init__(self, model):
+        self.model = model
+
+    def post(self):
+        print('hello beautiful')
+
+
 class PredictSingleInstance(flask_restful.Resource):
     def __init__(self, model):
         self.model = model
@@ -114,6 +122,11 @@ def create_app():
     api.add_resource(
         PredictSingleInstance,
         '/predict-single-instance/<string:instance>',
+        resource_class_kwargs=common_kwargs)
+
+    api.add_resource(
+        PredictDataset,
+        '/predict-dataset',
         resource_class_kwargs=common_kwargs)
 
     return app

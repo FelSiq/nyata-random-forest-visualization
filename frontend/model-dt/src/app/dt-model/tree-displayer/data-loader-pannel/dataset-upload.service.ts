@@ -12,13 +12,12 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class DatasetUploadService {
-  // private urlPostInstance = 'http://127.0.0.1:5000/predict-dataset/';
-  private urlPostInstance = '.';
+  private urlPostInstance = 'http://127.0.0.1:5000/predict-dataset';
 
   constructor(public httpClient: HttpClient) { }
 
   postFile(fileToUpload: File): Observable<Object> {
-    const endpoint = 'your-destination-url';
+    const endpoint = this.urlPostInstance;
     const formData: FormData = new FormData();
     formData.append('fileKey', fileToUpload, fileToUpload.name);
     return this.httpClient

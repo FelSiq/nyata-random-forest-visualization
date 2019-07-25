@@ -115,7 +115,11 @@ export class DataLoaderPannelComponent implements OnInit {
       }
   }
 
-  uploadFileToActivity() {
+  uploadDatasetToPredict() {
+    if (!this.fileToUpload) {
+      return;
+    }
+
     this.fileUploadService.postFile(this.fileToUpload).subscribe(data => {
       // do something, if upload success
       }, error => {
