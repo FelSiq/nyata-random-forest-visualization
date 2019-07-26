@@ -140,7 +140,7 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
         (True, True): sklearn.ensemble.RandomForestRegressor,
     }
 
-    model = ALGORITHMS.get((forest, regressor))()
+    model = ALGORITHMS.get((forest, regressor))(n_estimators=10)
     model.fit(iris.data, iris.target)
 
     return model

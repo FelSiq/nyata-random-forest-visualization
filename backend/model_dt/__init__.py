@@ -5,7 +5,10 @@ import collections
 import flask
 import flask_cors
 import flask_restful
+import flask_restful.reqparse
+import werkzeug
 import numpy as np
+import pandas as pd
 
 from . import model_dt
 
@@ -33,10 +36,46 @@ class DecisionTree(flask_restful.Resource):
 class PredictDataset(flask_restful.Resource):
     def __init__(self, model):
         self.model = model
+        self.reqparse = flask_restful.reqparse.RequestParser()
+
+        self.reqparse.add_argument(
+            'file',
+            type=werkzeug.datastructures.FileStorage,
+            location='files')
+
+        self.reqparse.add_argument(
+            'sep', type=str, location='form')
+
+        self.reqparse.add_argument(
+            'hasHeader', type=bool, location='form')
+
+        self.reqparse.add_argument(
+            'hasClasses', type=bool, location='form')
 
     def post(self):
-        print('hello beautiful')
+        args = self.reqparse.parse_args()
 
+        dataset_file = args['file']
+        sep = args['sep']
+        has_header = args['hasHeader']
+        has_classes = args['hasClasses']
+
+        data = pd.read_csv(
+            filepath_or_buffer=dataset_file,
+            sep=sep,
+            header="infer" if has_header else None)
+
+        if has_classes:
+            X = data.iloc[:, :-1].values
+            y = data.iloc[:,  -1].values
+
+        else:
+            X = data.values
+            y = None
+
+        preds = self.model.predict(X)
+        return flask.jsonify('test')
+        
 
 class PredictSingleInstance(flask_restful.Resource):
     def __init__(self, model):
