@@ -7,7 +7,6 @@ const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
 };
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -16,12 +15,20 @@ export class DatasetUploadService {
 
   constructor(public httpClient: HttpClient) { }
 
-  postFile(fileToUpload: File): Observable<Object> {
+  postFile(fileToUpload: File,
+           sep: string,
+           hasHeader: boolean,
+           hasClasses: boolean): Observable<Object> {
     const endpoint = this.urlPostInstance;
+
     const formData: FormData = new FormData();
-    formData.append('fileKey', fileToUpload, fileToUpload.name);
+    formData.append('file', fileToUpload);
+    formData.append('sep', sep);
+    formData.append('hasHeader', hasHeader ? 'True' : 'False');
+    formData.append('hasClasses', hasClasses ? 'True' : 'False');
+
     return this.httpClient
-      .post(endpoint, formData, httpOptions)
+      .post(endpoint, formData)
       .pipe(
         catchError((e) => this.handleError(e))
       );

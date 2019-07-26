@@ -93,20 +93,34 @@
   
     <ng-template matExpansionPanelContent>
       <form (ngSubmit)="uploadDatasetToPredict()">
-        <p> Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}. </p>
-        <label for="file-upload-input"> Choose your file: </label>
-        <input type="file"
-               id="file-upload-input"
-               (change)="handleFileInput($event.target.files)"/>
-
-        <mat-list class="file-error-messages">
-          <mat-list-item class="file-error-messages-item"
-                         *ngFor="let errorMsg of datasetErrorLogs">
-            <mat-icon matListIcon>error</mat-icon>
-            Error: {{ errorMsg }}.
-          </mat-list-item>
-        </mat-list>
-
+        <p>
+          Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}.
+        </p>
+        <div>
+          <mat-checkbox [checked]="datasetHasHeader"
+                        (change)="datasetHasHeader = !datasetHasHeader">
+            First row is the attribute labels
+          </mat-checkbox>
+          <mat-checkbox [checked]="datasetHasClasses"
+                        (change)="datasetHasClasses = !datasetHasClasses">
+            Last column is the dependent attribute
+          </mat-checkbox>
+        </div>
+        <div>
+          <label for="file-upload-input"> Choose your file: </label>
+          <input type="file"
+                 id="file-upload-input"
+                 (change)="handleFileInput($event.target.files)"/>
+        </div>
+        <div>
+          <mat-list class="file-error-messages">
+            <mat-list-item class="file-error-messages-item"
+                           *ngFor="let errorMsg of datasetErrorLogs">
+              <mat-icon matListIcon>error</mat-icon>
+              Error: {{ errorMsg }}.
+            </mat-list-item>
+          </mat-list>
+        </div>
         <mat-action-row>
           <button mat-raised-button [disabled]="datasetErrorLogs.length || !fileToUpload"> Submit </button>
         </mat-action-row>

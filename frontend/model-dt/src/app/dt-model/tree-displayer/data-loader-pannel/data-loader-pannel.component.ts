@@ -24,6 +24,9 @@ export class DataLoaderPannelComponent implements OnInit {
   calledPredictService: boolean = false;
   fileToUpload: File = null;
   datasetErrorLogs: string[] = [];
+  datasetHasHeader: boolean = false;
+  datasetHasClasses: boolean = true;
+  datasetSep: string = ',';
 
   readonly maxFileSize: number = 50;
   readonly maxFileSizeUnit: string = 'MB';
@@ -115,16 +118,27 @@ export class DataLoaderPannelComponent implements OnInit {
       }
   }
 
-  uploadDatasetToPredict() {
+  uploadDatasetToPredict(): void {
     if (!this.fileToUpload) {
       return;
     }
 
-    this.fileUploadService.postFile(this.fileToUpload).subscribe(data => {
-      // do something, if upload success
-      }, error => {
-        console.log(error);
-      });
+    this.predictResults = null;
+    this.calledPredictService = true;
+
+    this.fileUploadService.postFile(
+          this.fileToUpload,
+          this.datasetSep,
+          this.datasetHasHeader,
+          this.datasetHasClasses)
+          .subscribe((results) => {
+              console.log(results);
+              this.predictResults = { ...results };
+              this.calledPredictService = false;
+              // this.resultsEmitter.emit(this.predictResults);
+            }, error => {
+              console.log(error);
+            });
   }
 
 }
