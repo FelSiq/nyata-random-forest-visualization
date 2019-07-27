@@ -131,7 +131,7 @@ export class DataLoaderPannelComponent implements OnInit {
           this.datasetSep,
           this.datasetHasHeader,
           this.datasetHasClasses)
-          .subscribe((results) => {
+          .subscribe((results: PredictResults) => {
               console.log(results);
               this.predictResults = { ...results };
               this.calledPredictService = false;

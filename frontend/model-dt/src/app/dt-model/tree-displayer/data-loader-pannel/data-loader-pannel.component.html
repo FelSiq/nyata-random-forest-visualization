@@ -105,11 +105,17 @@
         </p>
         <div>
           <mat-checkbox [checked]="datasetHasHeader"
-                        (change)="datasetHasHeader = !datasetHasHeader">
+                        color="primary"
+                        (change)="datasetHasHeader = !datasetHasHeader"
+                        matTooltip="Select this option if the first row of your dataset is the attribute labels.">
             First row is the attribute labels
           </mat-checkbox>
+        <div>
+        </div>
           <mat-checkbox [checked]="datasetHasClasses"
-                        (change)="datasetHasClasses = !datasetHasClasses">
+                        color="primary"
+                        (change)="datasetHasClasses = !datasetHasClasses"
+                        matTooltip="Select this option if the last column of your dataset is the dependent attribute and, thus, should be used just for computing performance metrics.">
             Last column is the dependent attribute
           </mat-checkbox>
         </div>
