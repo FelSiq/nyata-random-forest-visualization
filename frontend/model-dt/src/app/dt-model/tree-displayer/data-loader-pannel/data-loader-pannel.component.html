@@ -5,6 +5,13 @@
   <mat-card-content *ngIf="predictResults; else waitingPredictionResults">
     <app-iterable-displayer [data]="predictResults" [banList]="predicResultsBanAttrs"></app-iterable-displayer>
   </mat-card-content>
+  <mat-card-actions align="end">
+    <button mat-button
+            (click)="cleanPredictResults()"
+            color="primary">
+      Dismiss
+    </button>
+  </mat-card-actions>
 
   <ng-template #waitingPredictionResults>
     <mat-spinner class="waiting-spinner"></mat-spinner>

@@ -16,6 +16,7 @@ export class TreeDisplayerComponent implements OnInit {
     'estimators_',
     'base_estimator_',
     'tree_',
+    'verbose',
   ];
 
   constructor() { }
@@ -24,7 +25,11 @@ export class TreeDisplayerComponent implements OnInit {
   }
 
   updatePredictionResults(value: PredictResults) {
-    this.predictResults = { ...value };
+    if (value) {
+      this.predictResults = { ...value };
+    } else {
+      this.predictResults = undefined;
+    }
   }
 
 }

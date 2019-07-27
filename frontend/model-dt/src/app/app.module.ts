@@ -27,7 +27,6 @@ import { AppComponent } from './app.component';
 import { DtModelComponent } from './dt-model/dt-model.component';
 
 import { D3Service } from 'd3-ng2-service';
-import { InstanceBarComponent } from './instance-bar/instance-bar.component';
 import { TreeDisplayerComponent } from './dt-model/tree-displayer/tree-displayer.component';
 import { DataLoaderPannelComponent } from './dt-model/tree-displayer/data-loader-pannel/data-loader-pannel.component';
 import { TreeD3ModelComponent } from './dt-model/tree-displayer/tree-d3-model/tree-d3-model.component';
@@ -39,7 +38,6 @@ import { IterableDisplayerComponent } from './dt-model/tree-displayer/iterable-d
   declarations: [
     AppComponent,
     DtModelComponent,
-    InstanceBarComponent,
     TreeDisplayerComponent,
     DataLoaderPannelComponent,
     TreeD3ModelComponent,

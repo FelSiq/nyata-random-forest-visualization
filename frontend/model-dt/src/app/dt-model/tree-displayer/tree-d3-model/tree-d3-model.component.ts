@@ -24,7 +24,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this._decisionPath = decisionPath;
 
     if (this._decisionPath && this.chosenTree) {
+      this.cleanPredictionPaths(true);
       this.drawPredictionPaths();
+    } else {
+      this.cleanPredictionPaths(false);
     }
   }
 
@@ -198,19 +201,24 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     }
 
     if (this._decisionPath && this.chosenTree) {
+      this.cleanPredictionPaths(true);
       this.drawPredictionPaths();
     }
   }
 
-  private drawPredictionPaths(): void {
-    this.links
-      .selectAll('.link')
-      .classed('in-predict-path', false)
-      .select('line')
-        .style('stroke', TreeD3ModelComponent.styleColorLinkDefault)
-        .style('stroke-width', TreeD3ModelComponent.styleWidthLinkDefault)
-        .style('stroke-dasharray', ('4, 4'));
+  private cleanPredictionPaths(dashed = false): void {
+    if (this.links) {
+      this.links
+        .selectAll('.link')
+        .classed('in-predict-path', false)
+        .select('line')
+          .style('stroke', TreeD3ModelComponent.styleColorLinkDefault)
+          .style('stroke-width', TreeD3ModelComponent.styleWidthLinkDefault)
+          .style('stroke-dasharray', dashed ? ('4, 4') : 'none');
+    }
+  }
 
+  private drawPredictionPaths(): void {
     const curPath = this._decisionPath[+this.chosenTree];
 
     for (let i = 0; i < curPath.length - 1; i++) {

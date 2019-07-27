@@ -141,4 +141,10 @@ export class DataLoaderPannelComponent implements OnInit {
             });
   }
 
+  cleanPredictResults(): void {
+    this.predictResults = null;
+    this.calledPredictService = false;
+    this.resultsEmitter.emit(null);
+  }
+
 }
