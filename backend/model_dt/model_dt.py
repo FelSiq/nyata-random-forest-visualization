@@ -5,6 +5,7 @@ import re
 
 import sklearn.tree
 import sklearn.ensemble
+import sklearn.metrics
 import numpy as np
 import scipy.sparse
 
@@ -12,6 +13,24 @@ RE_KEY_NUMBEROF = re.compile(r"\bn \b")
 RE_KEY_MIN = re.compile(r"\bmin\b")
 RE_KEY_MAX = re.compile(r"\bmax\b")
 RE_KEY_PARAMS = re.compile(r"\bparams\b")
+
+METRICS_CLASSIFICATION = {
+  "accuracy": sklearn.metrics.accuracy_score,
+  "log_loss": sklearn.metrics.log_loss,
+  "balanced_accuracy": sklearn.metrics.balanced_accuracy_score,
+  "average_precision": sklearn.metrics.average_precision_score,
+  "precision": sklearn.metrics.precision_score,
+  "recall": sklearn.metrics.recall_score,
+}
+
+METRICS_REGRESSION = {
+  "mean_absolute_error": sklearn.metrics.mean_absolute_error,
+  "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
+  "explained_variance_score": sklearn.metrics.explained_variance_score,
+  "mean_squared_error": sklearn.metrics.mean_squared_error,
+  "median_absolute_error": sklearn.metrics.median_absolute_error,
+  "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
+}
 
 
 def preprocess_key(key: str) -> str:
@@ -100,7 +119,8 @@ def serialize_decision_tree(
         dt_model: t.
         Union[sklearn.ensemble.forest.RandomForestClassifier, sklearn.ensemble.
               forest.RandomForestRegressor, sklearn.tree.tree.
-              DecisionTreeRegressor, sklearn.tree.tree.DecisionTreeClassifier]
+              DecisionTreeRegressor, sklearn.tree.tree.DecisionTreeClassifier],
+        attr_labels: t.Optional[t.Sequence[str]] = None,
 ) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
     new_model = {
@@ -115,10 +135,14 @@ def serialize_decision_tree(
     }
 
     try:
+      if attr_labels is None:
+          attr_num = len(dt_model.feature_importances_)
+          attr_labels = ["Attribute {}".format(i) for i in range(attr_num)]
+
       new_model["feature_importances_"] = {
           "value": json_encoder_type_manager(
-              list(map(lambda val: "{:.2f} %".format(100 * val),
-              dt_model.feature_importances_))),
+              list(map(lambda item: "{}: {:.2f} %".format(item[1], 100 * item[0]),
+              zip(dt_model.feature_importances_, attr_labels)))),
           "description": "TODO: this documentation properly."
       }
 
@@ -128,10 +152,50 @@ def serialize_decision_tree(
     return new_model
 
 
+def get_metrics(
+        dt_model: t.
+        Union[sklearn.ensemble.forest.RandomForestClassifier, sklearn.ensemble.
+              forest.RandomForestRegressor, sklearn.tree.tree.
+              DecisionTreeRegressor, sklearn.tree.tree.DecisionTreeClassifier],
+        preds: np.array,
+        true_labels: np.array,
+) -> t.Dict[str, t.Any]:
+    def safe_call_func(func, true_labels, preds):
+        try:
+          return func(true_labels, preds)
+
+        except ValueError as val_err:
+          return None
+
+    chosen_metrics = None
+
+    if isinstance(dt_model, (sklearn.ensemble.forest.RandomForestClassifier,
+                             sklearn.tree.tree.DecisionTreeClassifier)):
+        chosen_metrics = METRICS_CLASSIFICATION
+
+    if isinstance(dt_model, (sklearn.ensemble.forest.RandomForestRegressor,
+                             sklearn.tree.tree.DecisionTreeRegressor)):
+        chosen_metrics = METRICS_REGRESSION
+
+    if chosen_metrics:
+        return {
+            metric_name: {
+                "value": safe_call_func(metric_func, true_labels, preds),
+                "description": "Todo.",
+            }
+            for metric_name, metric_func in chosen_metrics.items()
+        }
+
+    return {}
+
 def get_toy_model(forest: bool = True, regressor: bool = False):
     """Create a DT toy model for testing purposes."""
     from sklearn.datasets import load_iris
     iris = load_iris()  # type: sklearn.utils.Bunch
+
+    X = iris.data
+    y = iris.target
+    attr_labels = iris.feature_names
 
     ALGORITHMS = {
         (False, False): sklearn.tree.DecisionTreeClassifier,
@@ -143,7 +207,7 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
     model = ALGORITHMS.get((forest, regressor))(n_estimators=10)
     model.fit(iris.data, iris.target)
 
-    return model
+    return model, X, y, attr_labels
 
 
 if __name__ == "__main__":

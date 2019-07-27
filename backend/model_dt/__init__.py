@@ -13,52 +13,69 @@ import pandas as pd
 from . import model_dt
 
 NULL_VALUES = {
-    'null',
-    'nan',
-    'na',
-    'none',
-    'noone',
-    '',
-    'nil',
+    "null",
+    "nan",
+    "na",
+    "none",
+    "noone",
+    "",
+    "nil",
 }
 
-RE_EMPTY_SPACE = re.compile(r'\s+|%20')
+RE_EMPTY_SPACE = re.compile(r"\s+|%20")
 
 
 class DecisionTree(flask_restful.Resource):
-    def __init__(self, model):
+    def __init__(self,
+                 model,
+                 X: np.ndarray,
+                 y: np.ndarray,
+                 attr_labels: t.Optional[t.Sequence[str]] = None):
         self.model = model
+        self.X = X
+        self.y = y
+        self.attr_labels = attr_labels
 
     def get(self):
-        return flask.jsonify(model_dt.serialize_decision_tree(self.model))
+        return flask.jsonify(model_dt.serialize_decision_tree(
+            dt_model=self.model,
+            attr_labels=self.attr_labels))
 
 
 class PredictDataset(flask_restful.Resource):
-    def __init__(self, model):
+    def __init__(self,
+                 model,
+                 X: np.ndarray,
+                 y: np.ndarray,
+                 attr_labels: t.Optional[t.Sequence[str]] = None):
         self.model = model
+        self.X = X
+        self.y = y
+        self.attr_labels = attr_labels
+
         self.reqparse = flask_restful.reqparse.RequestParser()
 
         self.reqparse.add_argument(
-            'file',
+            "file",
             type=werkzeug.datastructures.FileStorage,
-            location='files')
+            location="files")
 
         self.reqparse.add_argument(
-            'sep', type=str, location='form')
+            "sep", type=str, location="form")
 
         self.reqparse.add_argument(
-            'hasHeader', type=bool, location='form')
+            "hasHeader", type=bool, location="form")
 
         self.reqparse.add_argument(
-            'hasClasses', type=bool, location='form')
+            "hasClasses", type=bool, location="form")
 
     def post(self):
         args = self.reqparse.parse_args()
 
-        dataset_file = args['file']
-        sep = args['sep']
-        has_header = args['hasHeader']
-        has_classes = args['hasClasses']
+        dataset_file = args["file"]
+        sep = args["sep"]
+        has_header = args["hasHeader"]
+        has_classes = args["hasClasses"]
 
         data = pd.read_csv(
             filepath_or_buffer=dataset_file,
@@ -74,16 +91,27 @@ class PredictDataset(flask_restful.Resource):
             y = None
 
         preds = self.model.predict(X)
-        return flask.jsonify('test')
+
+        return flask.jsonify(model_dt.get_metrics(
+            dt_model=self.model,
+            preds=preds,
+            true_labels=y))
         
 
 class PredictSingleInstance(flask_restful.Resource):
-    def __init__(self, model):
+    def __init__(self,
+                 model,
+                 X: np.ndarray,
+                 y: np.ndarray,
+                 attr_labels: t.Optional[t.Sequence[str]] = None):
         self.model = model
+        self.X = X
+        self.y = y
+        self.attr_labels = attr_labels
 
     def _preprocess_instance(self, instance: str,
-                             sep: str = ',') -> t.Optional[np.ndarray]:
-        preproc_inst = np.array(RE_EMPTY_SPACE.sub('', instance).split(sep))
+                             sep: str = ",") -> t.Optional[np.ndarray]:
+        preproc_inst = np.array(RE_EMPTY_SPACE.sub("", instance).split(sep))
 
         if not set(map(str.lower, preproc_inst)).isdisjoint(NULL_VALUES):
             return None
@@ -93,8 +121,8 @@ class PredictSingleInstance(flask_restful.Resource):
     def _handle_errors(self, err_code: t.Sequence[str]) -> t.Dict[str, str]:
         err_msg = {}
 
-        if 'ERROR_MISSING_VAL' in err_code:
-            err_msg['na_error'] = 'Currently missing values are not supported.'
+        if "ERROR_MISSING_VAL" in err_code:
+            err_msg["na_error"] = "Currently missing values are not supported."
 
         return err_msg
 
@@ -120,24 +148,24 @@ class PredictSingleInstance(flask_restful.Resource):
         err_code = []
 
         if inst_proc is None:
-            err_code.append('ERROR_MISSING_VAL')
+            err_code.append("ERROR_MISSING_VAL")
 
         if err_code:
             return flask.jsonify(self._handle_errors(err_code))
 
         pred_vals = model_dt.json_encoder_type_manager(
             collections.OrderedDict((
-                ('prediction_result', {
-                    'value': self.model.predict(inst_proc)[0]
+                ("prediction_result", {
+                    "value": self.model.predict(inst_proc)[0]
                 }),
-                ('classes_by_tree', {
-                    'value': model_dt.get_class_freqs(self.model, inst_proc)
+                ("classes_by_tree", {
+                    "value": model_dt.get_class_freqs(self.model, inst_proc)
                 }),
-                ('decision_path', {
-                    'value': self._decision_path(inst_proc)
+                ("decision_path", {
+                    "value": self._decision_path(inst_proc)
                 }),
-                ('leaf_id', {
-                    'value': self.model.apply(inst_proc)[0]
+                ("leaf_id", {
+                    "value": self.model.apply(inst_proc)[0]
                 }),
             )))
 
@@ -151,21 +179,26 @@ def create_app():
     flask_cors.CORS(app)
     api = flask_restful.Api(app)
 
-    dt_model = model_dt.get_toy_model()
+    dt_model, X, y, attr_labels = model_dt.get_toy_model()
 
-    common_kwargs = {'model': dt_model}
+    common_kwargs = {
+        "model": dt_model,
+        "X": X,
+        "y": y,
+        "attr_labels": attr_labels,
+    }
 
     api.add_resource(
-        DecisionTree, '/dt-visualization', resource_class_kwargs=common_kwargs)
+        DecisionTree, "/dt-visualization", resource_class_kwargs=common_kwargs)
 
     api.add_resource(
         PredictSingleInstance,
-        '/predict-single-instance/<string:instance>',
+        "/predict-single-instance/<string:instance>",
         resource_class_kwargs=common_kwargs)
 
     api.add_resource(
         PredictDataset,
-        '/predict-dataset',
+        "/predict-dataset",
         resource_class_kwargs=common_kwargs)
 
     return app
