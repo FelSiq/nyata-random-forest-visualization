@@ -21,12 +21,12 @@ export class DataLoaderPannelComponent implements OnInit {
   @Output() resultsEmitter = new EventEmitter<PredictResults>();
   predictResults: PredictResults;
   isValidFormSubmitted: boolean;
-  calledPredictService: boolean = false;
+  calledPredictService = false;
   fileToUpload: File = null;
   datasetErrorLogs: string[] = [];
-  datasetHasHeader: boolean = false;
-  datasetHasClasses: boolean = true;
-  datasetSep: string = ',';
+  datasetHasHeader = false;
+  datasetHasClasses = true;
+  datasetSep = ',';
 
   readonly maxFileSize: number = 50;
   readonly maxFileSizeUnit: string = 'MB';
@@ -106,7 +106,7 @@ export class DataLoaderPannelComponent implements OnInit {
         );
       }
 
-      if (this.fileToUpload.type != 'text/csv') {
+      if (this.fileToUpload.type !== 'text/csv') {
         this.datasetErrorLogs.push(
           "The file must be a '.csv' text file! (received type: " +
           (fileType ? fileType : 'unknown') + ')'

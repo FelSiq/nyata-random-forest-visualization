@@ -5,7 +5,7 @@ import * as d3 from 'd3-selection';
 import { TreeExtraService } from './tree-extra.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TreeLinksService {
   static readonly styleColorLinkDefault = 'rgb(128, 128, 128)';
@@ -23,7 +23,7 @@ export class TreeLinksService {
     const width = curElem.attr('width') ? +curElem.attr('width') : 0.0;
 
     return 0.5 * (+link.attr('x2') + +link.attr('x1') - width);
-  }
+  };
 
   static funcLinkHalfYCoord = function() {
     const link = d3.select(this.parentNode).select('line');
@@ -32,7 +32,7 @@ export class TreeLinksService {
     const height = curElem.attr('height') ? +curElem.attr('height') : 0.0;
 
     return 0.5 * (+link.attr('y2') + +link.attr('y1') - height);
-  }
+  };
 
   connectNodes(links,
                nodes,

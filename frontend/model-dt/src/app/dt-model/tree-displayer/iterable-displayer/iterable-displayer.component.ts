@@ -3,7 +3,7 @@ import { Component, OnInit, Input } from '@angular/core';
 @Component({
   selector: 'app-iterable-displayer',
   templateUrl: './iterable-displayer.component.html',
-  styleUrls: ['./iterable-displayer.component.css']
+  styleUrls: ['./iterable-displayer.component.css'],
 })
 export class IterableDisplayerComponent implements OnInit {
   @Input() banList: string[];

@@ -37,7 +37,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   chosenTree: string | number;
-  zoomValue: number = 0;
+  zoomValue = 0;
 
   readonly zoomMin: number = 0;
   readonly zoomMax: number = 3;
@@ -70,7 +70,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   private updateZoomValue(increment: number): void {
-    let aux = this.zoomValue + increment;
+    const aux = this.zoomValue + increment;
     this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
   }
 

@@ -8,7 +8,7 @@ describe('IterableDisplayerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ IterableDisplayerComponent ]
+      declarations: [ IterableDisplayerComponent ],
     })
     .compileComponents();
   }));

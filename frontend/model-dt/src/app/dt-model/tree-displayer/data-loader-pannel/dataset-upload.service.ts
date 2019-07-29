@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
+import { PredictResults } from '../predict-results';
+
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
 };
@@ -18,7 +20,7 @@ export class DatasetUploadService {
   postFile(fileToUpload: File,
            sep: string,
            hasHeader: boolean,
-           hasClasses: boolean): Observable<Object> {
+           hasClasses: boolean): Observable<PredictResults> {
     const endpoint = this.urlPostInstance;
 
     const formData: FormData = new FormData();

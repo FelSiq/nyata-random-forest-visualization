@@ -7,7 +7,7 @@ import { TreeExtraService } from './tree-extra.service';
 import { TreeLinksService } from './tree-links.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TreeNodeService {
   static readonly radiusMinimum: number = 8;
@@ -38,7 +38,7 @@ export class TreeNodeService {
 
     node
       .raise()
-      .classed('node-active', true)
+      .classed('node-active', true);
 
     circle
       .attr('r', TreeNodeService.radiusSelectScaleFactor * radius);
@@ -51,7 +51,7 @@ export class TreeNodeService {
         .classed('link-active', true)
         .select('line')
           .style('stroke', TreeLinksService.styleColorLinkSelected);
-  }
+  };
 
   private funcDragOnEnd = function() {
     const node = d3.select(this);
@@ -64,7 +64,7 @@ export class TreeNodeService {
     const radius = +circle.attr('r');
 
     node
-      .classed('node-active', false)
+      .classed('node-active', false);
 
     circle
       .attr('r', radius / TreeNodeService.radiusSelectScaleFactor);
@@ -88,7 +88,7 @@ export class TreeNodeService {
               TreeLinksService.styleColorLinkPredict :
               TreeLinksService.styleColorLinkDefault);
           });
-  }
+  };
 
   private funcDragOnDrag = function() {
     const node = d3.select(this);
@@ -129,7 +129,7 @@ export class TreeNodeService {
         .attr('cy', TreeLinksService.funcLinkHalfYCoord)
         .attr('x', TreeLinksService.funcLinkHalfXCoord)
         .attr('y', TreeLinksService.funcLinkHalfYCoord);
-  }
+  };
 
   private funcMouseenter = function() {
     const node = d3.select(this);
@@ -139,7 +139,7 @@ export class TreeNodeService {
 
     d3.select('#node-info-pannel')
       .attr('selected-node', node.attr('index'));
-  }
+  };
 
   private funcMouseleave = function() {
     d3.select(this)
@@ -148,7 +148,7 @@ export class TreeNodeService {
 
     d3.select('#node-info-pannel')
       .attr('selected-node', -1);
-  }
+  };
 
   constructor() { }
 
@@ -166,9 +166,9 @@ export class TreeNodeService {
       .attr('index', nodeId)
       .attr('appended-info-num', 1)
       .attr('cx', cx)
-      .attr('cy', cy)
+      .attr('cy', cy);
 
-    for (let attr in nodeAttrs) {
+    for (const attr in nodeAttrs) {
       if (nodeAttrs.hasOwnProperty(attr)) {
         node.attr(attr, nodeAttrs[attr]);
       }
