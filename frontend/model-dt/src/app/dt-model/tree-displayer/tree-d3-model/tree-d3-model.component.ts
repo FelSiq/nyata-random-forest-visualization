@@ -18,8 +18,6 @@ import { DTInterface, TreeInterface } from '../../../dt-interface';
 })
 export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   @Input() treeNodes: DTInterface[];
-  @Input() showImpurity: boolean;
-  @Input() showLinkWeight: boolean;
 
   private _decisionPath: Array<Array<number | string>>;
 
@@ -72,28 +70,6 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private updateZoomValue(increment: number): void {
     const aux = this.zoomValue + increment;
     this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
-  }
-
-  private toggleImpurity(): void {
-    if (!this.showImpurity) {
-      this.nodeService.drawImpurity(this.nodes);
-    } else {
-      this.nodes.selectAll('.label-impurity')
-        .remove();
-    }
-
-    this.showImpurity = !this.showImpurity;
-  }
-
-  private toggleLinkWeight(): void {
-    if (!this.showLinkWeight) {
-      this.linkService.drawLinkWeight(this.links);
-    } else {
-      this.links.selectAll('.label-weight')
-        .remove();
-    }
-
-    this.showLinkWeight = !this.showLinkWeight;
   }
 
   private initSvg() {
@@ -187,14 +163,6 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         cxDelta,
         rootYCoord,
         cyDelta);
-
-    if (this.showImpurity) {
-      this.nodeService.drawImpurity(this.nodes);
-    }
-
-    if (this.showLinkWeight) {
-      this.linkService.drawLinkWeight(this.links);
-    }
 
     if (this._decisionPath && this.chosenTree) {
       this.linkService.cleanPredictionPaths(

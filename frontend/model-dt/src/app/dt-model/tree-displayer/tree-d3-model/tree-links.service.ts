@@ -14,9 +14,18 @@ export class TreeLinksService {
   static readonly styleWidthLinkDefault = 2;
   static readonly styleWidthLinkSelected = 6;
 
+  readonly visibleAttrs = [
+    'weight',
+    'relation',
+    'feature',
+    'threshold',
+  ];
+
+  activeAttrs: string[] = [];
+
   constructor() { }
 
-  static funcLinkHalfXCoord = function() {
+  static funcLinkHalfXCoord = function(): number {
     const link = d3.select(this.parentNode).select('line');
 
     const curElem = d3.select(this);
@@ -25,7 +34,7 @@ export class TreeLinksService {
     return 0.5 * (+link.attr('x2') + +link.attr('x1') - width);
   };
 
-  static funcLinkHalfYCoord = function() {
+  static funcLinkHalfYCoord = function(): number {
     const link = d3.select(this.parentNode).select('line');
 
     const curElem = d3.select(this);
@@ -42,6 +51,10 @@ export class TreeLinksService {
     const nodeA = nodes.select(TreeExtraService.formatNodeId(nodeAId, true));
     const nodeB = nodes.select(TreeExtraService.formatNodeId(nodeBId, true));
 
+    const weight: string = (
+      100 * +nodeB.attr('num-inst') / +nodeA.attr('num-inst')
+    ).toFixed(1) + '%';
+
     links.append('g')
       .classed('link', true)
       .attr('id', TreeExtraService.formatLinkId(nodeAId, nodeBId))
@@ -49,7 +62,9 @@ export class TreeLinksService {
       .attr('node-b-id', nodeBId)
       .attr('appended-info-num', 1)
       .attr('relation', relation)
-      .attr('weight', +nodeB.attr('num-inst') / +nodeA.attr('num-inst'))
+      .attr('threshold', nodeA.attr('threshold'))
+      .attr('feature', nodeA.attr('feature'))
+      .attr('weight', weight)
       .append('line')
         .attr('x1', nodeA.attr('cx'))
         .attr('x2', nodeB.attr('cx'))
@@ -81,32 +96,66 @@ export class TreeLinksService {
     }
   }
 
-  drawLinkWeight(links): void {
-    links.selectAll('.link')
-      .append('rect')
-        .classed('draggable link-label label-weight', true)
-        .attr('width', 64)
-        .attr('height', function() { return +d3.select(this.parentNode).attr('appended-info-num') * 16; })
-        .attr('x', TreeLinksService.funcLinkHalfXCoord)
-        .attr('y', TreeLinksService.funcLinkHalfYCoord)
-        .attr('rx', 5)
-        .attr('opacity', 0.5)
-        .attr('fill', 'red');
+  updateLinkLabel(links): void {
+    if (this.activeAttrs.length === 0) {
+      links.selectAll('.link')
+        .selectAll('.link-label')
+          .remove();
 
-    links
-      .selectAll('.link')
-      .append('text')
-        .classed('draggable link-label label-weight', true)
-        .attr('font-size', 12)
-        .attr('fill', 'white')
-        .attr('text-anchor', 'middle')
-        .attr('x', TreeLinksService.funcLinkHalfXCoord)
-        .attr('y', TreeLinksService.funcLinkHalfYCoord)
-        .text( function(): string {
-          return (
-            100 * +d3.select(this.parentNode).attr('weight')
-          ).toFixed(1) + '%';
-        });
+      return;
+
+    } else if (this.activeAttrs.length === 1 &&
+               links.select('.link').select('rect').empty()) {
+      links.selectAll('.link')
+        .append('rect')
+          .classed('draggable link-label', true)
+          .attr('width', 64)
+          .attr('height', 16 * this.activeAttrs.length)
+          .attr('x', TreeLinksService.funcLinkHalfXCoord)
+          .attr('y', TreeLinksService.funcLinkHalfYCoord)
+          .attr('rx', 5)
+          .attr('opacity', 0.5)
+          .attr('fill', 'red');
+
+    } else {
+      links.selectAll('.link')
+        .select('rect')
+          .attr('height', 16 * this.activeAttrs.length);
+    }
+
+    links.selectAll('.link')
+      .selectAll('text')
+        .remove();
+
+    for (let i = 0; i < this.activeAttrs.length; i++) {
+      const newText = (
+        (this.activeAttrs.length > 1 ? this.activeAttrs[i] + ': ' : '')
+         + 'value');
+
+      links.selectAll('.link')
+        .append('text')
+          .classed('draggable link-label', true)
+          .attr('font-size', 12)
+          .attr('fill', 'white')
+          .attr('text-anchor', 'middle')
+          .attr('x', TreeLinksService.funcLinkHalfXCoord)
+          .attr('y', TreeLinksService.funcLinkHalfYCoord)
+          .attr('transform', 'translate(0, ' + (4 + 16 * i) + ')')
+          .text(newText)
+          .each(function(i) {
+            const rect = d3.select(this.parentNode).select('rect');
+            rect.attr('width', Math.max(this.getComputedTextLength(), +rect.attr('width')))
+          });
+    }
+  }
+
+  toggleAttr(newValue: string): void {
+    const index: number = this.activeAttrs.indexOf(newValue);
+    if (index > -1) {
+      this.activeAttrs.splice(index, 1);
+    } else {
+      this.activeAttrs.push(newValue);
+    }
   }
 
 }

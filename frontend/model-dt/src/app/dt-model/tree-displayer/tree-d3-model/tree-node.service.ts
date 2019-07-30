@@ -14,6 +14,15 @@ export class TreeNodeService {
   static readonly radiusScaleFactor: number = 24;
   static readonly radiusSelectScaleFactor: number = 1.1;
 
+  readonly visibleAttrs = [
+    'impurity',
+    'feature',
+    'num-inst',
+    'threshold',
+  ];
+
+  activeAttrs: string[] = [];
+
   private funcDragOnStart = function() {
     const node = d3.select(this);
     const circle = node.select('circle');
@@ -192,24 +201,37 @@ export class TreeNodeService {
         .on('mouseleave', this.funcMouseleave);
   }
 
-  drawImpurity(nodes): void {
-    nodes.selectAll('.node')
-      .append('rect')
-        .classed('draggable node-label label-impurity', true)
-        .attr('width', 64)
-        .attr('height', function() { return +d3.select(this.parentNode).attr('appended-info-num') * 16; })
-        .attr('x', function() { return +d3.select(this.parentNode).attr('cx') - 32; })
-        .attr('y', function() {
-            const node = d3.select(this.parentNode).select('circle');
-            return +node.attr('cy') + 1.5 * +node.attr('r') - 12;
-        })
-        .attr('rx', 5)
-        .attr('opacity', 0.7)
-        .attr('fill', 'black');
+  updateNodeLabel(nodes): void {
+    if (this.activeAttrs.length === 0) {
+      nodes.selectAll('.node')
+        .selectAll('.node-label')
+          .remove();
+
+      return;
+
+    } else if (this.activeAttrs.length === 1) {
+      nodes.selectAll('.node')
+        .append('rect')
+          .classed('draggable node-label', true)
+          .attr('width', 64)
+          .attr('height', function() { return +d3.select(this.parentNode).attr('appended-info-num') * 16; })
+          .attr('x', function() { return +d3.select(this.parentNode).attr('cx') - 32; })
+          .attr('y', function() {
+              const node = d3.select(this.parentNode).select('circle');
+              return +node.attr('cy') + 1.5 * +node.attr('r') - 12;
+          })
+          .attr('rx', 5)
+          .attr('opacity', 0.7)
+          .attr('fill', 'black');
+    } else {
+      nodes.selectAll('node')
+        .select('rect')
+          .attr
+    }
 
     nodes.selectAll('.node')
       .append('text')
-        .classed('draggable node-label label-impurity', true)
+        .classed('draggable node-label', true)
         .attr('font-size', 12)
         .attr('fill', 'white')
         .attr('text-anchor', 'middle')
@@ -227,6 +249,15 @@ export class TreeNodeService {
               .attr('impurity')
           ).toFixed(2);
         } );
+  }
+
+  toggleAttr(newValue: string): void {
+    const index: number = this.activeAttrs.indexOf(newValue);
+    if (index > -1) {
+      this.activeAttrs.splice(index, 1);
+    } else {
+      this.activeAttrs.push(newValue);
+    }
   }
 
 }
