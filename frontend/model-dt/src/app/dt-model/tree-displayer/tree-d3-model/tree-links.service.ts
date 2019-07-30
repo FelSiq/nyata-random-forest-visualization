@@ -17,7 +17,7 @@ export class TreeLinksService {
   readonly visibleAttrs = [
     'weight',
     'relation',
-    'feature',
+    'decision-feature',
     'threshold',
   ];
 
@@ -63,7 +63,7 @@ export class TreeLinksService {
       .attr('appended-info-num', 1)
       .attr('relation', relation)
       .attr('threshold', nodeA.attr('threshold'))
-      .attr('feature', nodeA.attr('feature'))
+      .attr('decision-feature', nodeA.attr('decision-feature'))
       .attr('weight', weight)
       .append('line')
         .attr('x1', nodeA.attr('cx'))
@@ -104,21 +104,23 @@ export class TreeLinksService {
 
       return;
 
-    } else if (this.activeAttrs.length === 1 &&
-               links.select('.link').select('rect').empty()) {
-      links.selectAll('.link')
+    }
+
+    let rects = null;
+
+    if (links.select('.link').select('rect').empty()) {
+      rects = links.selectAll('.link')
         .append('rect')
+          .raise()
           .classed('draggable link-label', true)
           .attr('width', 64)
           .attr('height', 16 * this.activeAttrs.length)
-          .attr('x', TreeLinksService.funcLinkHalfXCoord)
-          .attr('y', TreeLinksService.funcLinkHalfYCoord)
           .attr('rx', 5)
           .attr('opacity', 0.5)
           .attr('fill', 'red');
 
     } else {
-      links.selectAll('.link')
+      rects = links.selectAll('.link')
         .select('rect')
           .attr('height', 16 * this.activeAttrs.length);
     }
@@ -128,9 +130,8 @@ export class TreeLinksService {
         .remove();
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
-      const newText = (
-        (this.activeAttrs.length > 1 ? this.activeAttrs[i] + ': ' : '')
-         + 'value');
+      const curAttr = this.activeAttrs[i];
+      const attrLabelPrefix = (this.activeAttrs.length > 1) ? (curAttr + ': ') : '';
 
       links.selectAll('.link')
         .append('text')
@@ -138,14 +139,32 @@ export class TreeLinksService {
           .attr('font-size', 12)
           .attr('fill', 'white')
           .attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'central')
           .attr('x', TreeLinksService.funcLinkHalfXCoord)
           .attr('y', TreeLinksService.funcLinkHalfYCoord)
-          .attr('transform', 'translate(0, ' + (4 + 16 * i) + ')')
-          .text(newText)
-          .each(function(i) {
-            const rect = d3.select(this.parentNode).select('rect');
-            rect.attr('width', Math.max(this.getComputedTextLength(), +rect.attr('width')))
+          .attr('transform', 'translate(0, ' + (12 + 16 * (i - 0.5 * this.activeAttrs.length)) + ')')
+          .text(function(): string {
+            let value: string | number = d3.select(this.parentNode).attr(curAttr);
+            if (+value) {
+              value = (+value).toFixed(2);
+            }
+            return attrLabelPrefix + value;
           });
+    }
+
+    if (rects) {
+      let labelWidth = 0;
+
+      links.selectAll('.link')
+        .selectAll('text')
+          .each(function(i) {
+            labelWidth = Math.max(4 + this.getComputedTextLength(), labelWidth);
+          });
+
+      rects
+        .attr('width', labelWidth)
+        .attr('x', TreeLinksService.funcLinkHalfXCoord)
+        .attr('y', TreeLinksService.funcLinkHalfYCoord);
     }
   }
 

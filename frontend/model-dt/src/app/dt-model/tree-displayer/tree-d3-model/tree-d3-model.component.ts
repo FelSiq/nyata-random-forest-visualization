@@ -172,6 +172,14 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         this.links,
         this._decisionPath[+this.chosenTree]);
     }
+
+    if (this.links) {
+      this.linkService.updateLinkLabel(this.links);
+    }
+
+    if (this.nodes) {
+      this.nodeService.updateNodeLabel(this.nodes);
+    }
   }
 
   private buildNode(
@@ -207,7 +215,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           circleColor,
           {
             'impurity': impurity,
-            'feature': feature,
+            'decision-feature': feature,
             'node-class-id': nodeClassId,
             'threshold': threshold,
             'num-inst': numInstInNode,

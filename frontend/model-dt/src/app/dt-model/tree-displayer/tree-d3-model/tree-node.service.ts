@@ -16,8 +16,8 @@ export class TreeNodeService {
 
   readonly visibleAttrs = [
     'impurity',
-    'feature',
-    'num-inst',
+    'decision-feature',
+    'number-of-instances',
     'threshold',
   ];
 
@@ -116,11 +116,23 @@ export class TreeNodeService {
       .attr('cx', d3.event.x)
       .attr('cy', d3.event.y);
 
-    node.selectAll('.draggable')
-      .attr('cx', function() { return +d3.select(this).attr('cx') + d3.event.dx; })
-      .attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; })
-      .attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; })
-      .attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
+    const nodeDraggables = node.selectAll('.draggable');
+
+    if (nodeDraggables.attr('cx')) {
+      nodeDraggables.attr('cx', function() { return +d3.select(this).attr('cx') + d3.event.dx; });
+    }
+
+    if (nodeDraggables.attr('cy')) {
+      nodeDraggables.attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; });
+    }
+
+    if (nodeDraggables.attr('x')) {
+      nodeDraggables.attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; });
+    }
+
+    if (nodeDraggables.attr('y')) {
+      nodeDraggables.attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
+    }
 
     d3.selectAll([linkA, linkB].join(','))
       .select('line')
@@ -132,12 +144,24 @@ export class TreeNodeService {
         .attr('x2', circle.attr('cx'))
         .attr('y2', circle.attr('cy'));
 
-    d3.selectAll([linkA, linkB, linkC].join(','))
+    const linkDraggables = d3.selectAll([linkA, linkB, linkC].join(','))
       .selectAll('.draggable')
-        .attr('cx', TreeLinksService.funcLinkHalfXCoord)
-        .attr('cy', TreeLinksService.funcLinkHalfYCoord)
-        .attr('x', TreeLinksService.funcLinkHalfXCoord)
-        .attr('y', TreeLinksService.funcLinkHalfYCoord);
+
+    if (linkDraggables.attr('cx')) {
+      linkDraggables.attr('cx', TreeLinksService.funcLinkHalfXCoord);
+    }
+
+    if (linkDraggables.attr('cy')) {
+      linkDraggables.attr('cy', TreeLinksService.funcLinkHalfYCoord);
+    }
+
+    if (linkDraggables.attr('x')) {
+      linkDraggables.attr('x', TreeLinksService.funcLinkHalfXCoord);
+    }
+
+    if (linkDraggables.attr('y')) {
+      linkDraggables.attr('y', TreeLinksService.funcLinkHalfYCoord);
+    }
   };
 
   private funcMouseenter = function() {
