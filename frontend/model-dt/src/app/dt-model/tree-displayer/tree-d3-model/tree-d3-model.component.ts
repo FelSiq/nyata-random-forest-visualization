@@ -140,7 +140,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       }
     } else {
       cyDelta = this.height / 4.05;
-      cxDelta = 0.98 * this.width / (1 + curTree.maximum_depth);
+      cxDelta = ((0.99 * this.width -
+                 TreeNodeService.radiusMinimum -
+                 TreeNodeService.radiusScaleFactor) / curTree.maximum_depth);
 
       rootYCoord = (
           0.5 * this.height +
@@ -195,13 +197,16 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
             cxDelta,
             cyDelta } = this.calcRootCoordAndDeltas(curTree);
 
+    const vertical = (this.treeAngle === 90 || this.treeAngle === 270);
+
     this.extraService.buildDepthMarkers(
         this.depthMarkers,
-        0.01 * this.width,
-        0.99 * this.width,
-        rootYCoord,
-        cyDelta,
-        curTree.maximum_depth);
+        0.01 * (vertical ? this.width : this.height),
+        0.99 * (vertical ? this.width : this.height),
+        vertical ? rootYCoord : rootXCoord,
+        vertical ? cyDelta : cxDelta,
+        curTree.maximum_depth,
+        vertical);
 
     this.buildNode(
         curTree,

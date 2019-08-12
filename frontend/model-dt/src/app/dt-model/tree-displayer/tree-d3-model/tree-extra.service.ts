@@ -19,23 +19,38 @@ export class TreeExtraService {
   }
 
   buildDepthMarkers(depthMarkers,
-                    x1: number,
-                    x2: number,
-                    yStart: number,
-                    cyDelta: number,
-                    maxDepth: number): void {
-    let curY = yStart;
+                    limMin: number,
+                    limMax: number,
+                    coordStart: number,
+                    coordDelta: number,
+                    maxDepth: number,
+                    vertical: boolean): void {
+    let curCoord = coordStart;
 
-    for (let i = 0; i <= maxDepth; i++) {
-      depthMarkers.append('line')
-        .attr('x1', x1)
-        .attr('x2', x2)
-        .attr('y1', curY)
-        .attr('y2', curY)
-        .style('stroke', 'rgb(200, 200, 200)')
-        .style('stroke-dasharray', ('2, 4'));
+    if (vertical) {
+      for (let i = 0; i <= maxDepth; i++) {
+        depthMarkers.append('line')
+          .attr('x1', limMin)
+          .attr('x2', limMax)
+          .attr('y1', curCoord)
+          .attr('y2', curCoord)
+          .style('stroke', 'rgb(200, 200, 200)')
+          .style('stroke-dasharray', ('2, 4'));
 
-      curY += cyDelta;
+        curCoord += coordDelta;
+      }
+    } else {
+      for (let i = 0; i <= maxDepth; i++) {
+        depthMarkers.append('line')
+          .attr('x1', curCoord)
+          .attr('x2', curCoord)
+          .attr('y1', limMin)
+          .attr('y2', limMax)
+          .style('stroke', 'rgb(200, 200, 200)')
+          .style('stroke-dasharray', ('2, 4'));
+
+        curCoord += coordDelta;
+      }
     }
   }
 
