@@ -19,23 +19,29 @@ export class TreeNodeService {
     'decision-feature',
     'number-of-instances',
     'threshold',
+    'node-class',
   ];
 
   activeAttrs: string[] = [];
 
   private funcDragOnStart = function() {
     const node = d3.select(this);
+
+    if (node.empty()) {
+      return;
+    }
+
     const circle = node.select('circle');
 
     const nodeId = +node.attr('index');
     const parentId = +node.attr('parent-id');
     const sonLeftId = +node.attr('son-left-id');
     const sonRightId = +node.attr('son-right-id');
-    const radius = +circle.attr('r');
+    const radius = !circle.empty() ? +circle.attr('r') : 0.0;
 
     d3.select('.group-nodes')
       .append('circle')
-        .classed('node placeholder-node', true)
+        .classed('placeholder-node', true)
         .attr('id', 'placeholder-node-' + nodeId)
         .attr('r', TreeNodeService.radiusSelectScaleFactor * radius)
         .attr('cx', circle.attr('cx'))
@@ -49,8 +55,10 @@ export class TreeNodeService {
       .raise()
       .classed('node-active', true);
 
-    circle
-      .attr('r', TreeNodeService.radiusSelectScaleFactor * radius);
+    if (!circle.empty()) {
+      circle
+        .attr('r', TreeNodeService.radiusSelectScaleFactor * radius);
+    }
 
     d3.selectAll([
           TreeExtraService.formatLinkId(nodeId, sonLeftId, true),
@@ -64,6 +72,11 @@ export class TreeNodeService {
 
   private funcDragOnEnd = function() {
     const node = d3.select(this);
+
+    if (node.empty()) {
+      return;
+    }
+
     const circle = node.select('circle');
 
     const nodeId = +node.attr('index');
@@ -101,6 +114,11 @@ export class TreeNodeService {
 
   private funcDragOnDrag = function() {
     const node = d3.select(this);
+
+    if (node.empty()) {
+      return;
+    }
+
     const circle = node.select('circle');
 
     const nodeId = +node.attr('index');
@@ -116,22 +134,13 @@ export class TreeNodeService {
       .attr('cx', d3.event.x)
       .attr('cy', d3.event.y);
 
-    const nodeDraggables = node.selectAll('.draggable');
+    const nodeDraggables = node.selectAll('.draggable')
+      .attr('cx', function() { return +d3.select(this).attr('cx') + d3.event.dx; })
+      .attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; })
+      .attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; })
+      .attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
 
-    if (nodeDraggables.attr('cx')) {
-      nodeDraggables.attr('cx', function() { return +d3.select(this).attr('cx') + d3.event.dx; });
-    }
-
-    if (nodeDraggables.attr('cy')) {
-      nodeDraggables.attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; });
-    }
-
-    if (nodeDraggables.attr('x')) {
-      nodeDraggables.attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; });
-    }
-
-    if (nodeDraggables.attr('y')) {
-      nodeDraggables.attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
+    if (!nodeDraggables.empty()) {
     }
 
     d3.selectAll([linkA, linkB].join(','))
@@ -145,27 +154,33 @@ export class TreeNodeService {
         .attr('y2', circle.attr('cy'));
 
     const linkDraggables = d3.selectAll([linkA, linkB, linkC].join(','))
-      .selectAll('.draggable')
+      .selectAll('.draggable');
 
-    if (linkDraggables.attr('cx')) {
-      linkDraggables.attr('cx', TreeLinksService.funcLinkHalfXCoord);
-    }
+    if (!linkDraggables.empty()) {
+      if (linkDraggables.attr('cx')) {
+        linkDraggables.attr('cx', TreeLinksService.funcLinkHalfXCoord);
+      }
 
-    if (linkDraggables.attr('cy')) {
-      linkDraggables.attr('cy', TreeLinksService.funcLinkHalfYCoord);
-    }
+      if (linkDraggables.attr('cy')) {
+        linkDraggables.attr('cy', TreeLinksService.funcLinkHalfYCoord);
+      }
 
-    if (linkDraggables.attr('x')) {
-      linkDraggables.attr('x', TreeLinksService.funcLinkHalfXCoord);
-    }
+      if (linkDraggables.attr('x')) {
+        linkDraggables.attr('x', TreeLinksService.funcLinkHalfXCoord);
+      }
 
-    if (linkDraggables.attr('y')) {
-      linkDraggables.attr('y', TreeLinksService.funcLinkHalfYCoord);
+      if (linkDraggables.attr('y')) {
+        linkDraggables.attr('y', TreeLinksService.funcLinkHalfYCoord);
+      }
     }
   };
 
   private funcMouseenter = function() {
     const node = d3.select(this);
+
+    if (node.empty()) {
+      return;
+    }
 
     node.attr('stroke-width', 2)
         .attr('stroke', 'rgb(96,96,96)');
@@ -185,6 +200,24 @@ export class TreeNodeService {
 
   constructor() { }
 
+  static funcNodeXCoord = function(): number {
+    const circle = d3.select(this.parentNode).select('circle');
+
+    const curElem = d3.select(this);
+    const width = curElem.attr('width') ? +curElem.attr('width') : 0.0;
+
+    return +circle.attr('cx') - 0.5 * width;
+  };
+
+  static funcNodeYCoord = function(): number {
+    const circle = d3.select(this.parentNode).select('circle');
+
+    const curElem = d3.select(this);
+    const height = curElem.attr('height') ? +curElem.attr('height') : 0.0;
+
+    return +circle.attr('r') + +circle.attr('cy') - 0.5 * height;
+  };
+
   generateNode(nodes,
                nodeId: number,
                cx: number,
@@ -197,7 +230,6 @@ export class TreeNodeService {
       .style('cursor', 'move')
       .attr('id', TreeExtraService.formatNodeId(nodeId)) 
       .attr('index', nodeId)
-      .attr('appended-info-num', 1)
       .attr('cx', cx)
       .attr('cy', cy);
 
@@ -232,47 +264,68 @@ export class TreeNodeService {
           .remove();
 
       return;
+    }
 
-    } else if (this.activeAttrs.length === 1) {
-      nodes.selectAll('.node')
+    let rects = null;
+
+    if (nodes.select('.node').select('rect').empty()) {
+      rects = nodes.selectAll('.node')
         .append('rect')
+          .raise()
           .classed('draggable node-label', true)
           .attr('width', 64)
-          .attr('height', function() { return +d3.select(this.parentNode).attr('appended-info-num') * 16; })
-          .attr('x', function() { return +d3.select(this.parentNode).attr('cx') - 32; })
-          .attr('y', function() {
-              const node = d3.select(this.parentNode).select('circle');
-              return +node.attr('cy') + 1.5 * +node.attr('r') - 12;
-          })
+          .attr('height', 16 * this.activeAttrs.length)
           .attr('rx', 5)
-          .attr('opacity', 0.7)
+          .attr('opacity', 0.5)
           .attr('fill', 'black');
+
     } else {
-      nodes.selectAll('node')
+      rects = nodes.selectAll('.node')
         .select('rect')
-          .attr
+          .attr('height', 16 * this.activeAttrs.length);
     }
 
     nodes.selectAll('.node')
-      .append('text')
-        .classed('draggable node-label', true)
-        .attr('font-size', 12)
-        .attr('fill', 'white')
-        .attr('text-anchor', 'middle')
-        .attr('x', function() {
-          return +d3.select(this.parentNode)
-            .attr('cx');
-          })
-        .attr('y', function() {
-            const node = d3.select(this.parentNode).select('circle');
-            return +node.attr('r') * 1.5 + +node.attr('cy');
-        })
-        .text( function() {
-          return (
-            +d3.select(this.parentNode)
-              .attr('impurity')
-          ).toFixed(2);
-        } );
+      .selectAll('text')
+        .remove();
+
+    for (let i = 0; i < this.activeAttrs.length; i++) {
+      const curAttr = this.activeAttrs[i];
+      const attrLabelPrefix = (this.activeAttrs.length > 1) ? (curAttr + ': ') : '';
+
+      nodes.selectAll('.node')
+        .append('text')
+          .classed('draggable node-label', true)
+          .attr('font-size', 12)
+          .attr('fill', 'white')
+          .attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'central')
+          .attr('x', TreeNodeService.funcNodeXCoord)
+          .attr('y', TreeNodeService.funcNodeYCoord)
+          .attr('transform', 'translate(0, ' + (12 + 16 * (i - 0.5 * this.activeAttrs.length)) + ')')
+          .text(function(): string {
+            let value: string | number = d3.select(this.parentNode).attr(curAttr);
+            if (+value && value.indexOf('.') > -1 && value.length > 4) {
+              value = (+value).toFixed(2);
+            }
+            return attrLabelPrefix + value;
+          });
+    }
+
+    if (rects) {
+      let labelWidth = 0;
+
+      nodes.selectAll('.node')
+        .selectAll('text')
+          .each(function(i) {
+            labelWidth = Math.max(4 + this.getComputedTextLength(), labelWidth);
+          });
+
+      rects
+        .attr('width', labelWidth)
+        .attr('x', TreeNodeService.funcNodeXCoord)
+        .attr('y', TreeNodeService.funcNodeYCoord);
+    }
   }
 
   toggleAttr(newValue: string): void {

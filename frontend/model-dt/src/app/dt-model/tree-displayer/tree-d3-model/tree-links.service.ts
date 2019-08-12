@@ -52,7 +52,7 @@ export class TreeLinksService {
     const nodeB = nodes.select(TreeExtraService.formatNodeId(nodeBId, true));
 
     const weight: string = (
-      100 * +nodeB.attr('num-inst') / +nodeA.attr('num-inst')
+      100 * +nodeB.attr('number-of-instances') / +nodeA.attr('number-of-instances')
     ).toFixed(1) + '%';
 
     links.append('g')
@@ -60,7 +60,6 @@ export class TreeLinksService {
       .attr('id', TreeExtraService.formatLinkId(nodeAId, nodeBId))
       .attr('node-a-id', nodeAId)
       .attr('node-b-id', nodeBId)
-      .attr('appended-info-num', 1)
       .attr('relation', relation)
       .attr('threshold', nodeA.attr('threshold'))
       .attr('decision-feature', nodeA.attr('decision-feature'))
@@ -145,7 +144,7 @@ export class TreeLinksService {
           .attr('transform', 'translate(0, ' + (12 + 16 * (i - 0.5 * this.activeAttrs.length)) + ')')
           .text(function(): string {
             let value: string | number = d3.select(this.parentNode).attr(curAttr);
-            if (+value) {
+            if (+value && value.indexOf('.') > -1 && value.length > 4) {
               value = (+value).toFixed(2);
             }
             return attrLabelPrefix + value;

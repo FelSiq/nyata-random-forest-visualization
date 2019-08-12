@@ -48,6 +48,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private width: number;
   private height: number;
   private maxImpurity: number;
+  private classes: Array<string | number>;
 
   constructor(private eleRef: ElementRef,
               private nodeService: TreeNodeService,
@@ -124,6 +125,11 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
     if (!(curTreeNodes.hasOwnProperty('tree_'))) {
       return;
+    }
+
+    this.classes = null;
+    if (curTreeNodes.hasOwnProperty('classes_')) {
+      this.classes = curTreeNodes.classes_.value;
     }
 
     const curTree = curTreeNodes.tree_.value as TreeInterface;
@@ -216,9 +222,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           {
             'impurity': impurity,
             'decision-feature': feature,
-            'node-class-id': nodeClassId,
+            'node-class': this.classes ? this.classes[+nodeClassId] : null,
             'threshold': threshold,
-            'num-inst': numInstInNode,
+            'number-of-instances': numInstInNode,
             'parent-id': parentId,
             'son-left-id': sonLeftId,
             'son-right-id': sonRightId,
