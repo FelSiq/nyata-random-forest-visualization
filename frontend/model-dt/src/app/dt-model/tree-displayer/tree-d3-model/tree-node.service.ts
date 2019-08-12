@@ -10,9 +10,12 @@ import { TreeLinksService } from './tree-links.service';
   providedIn: 'root',
 })
 export class TreeNodeService {
-  static readonly radiusMinimum: number = 8;
-  static readonly radiusScaleFactor: number = 24;
-  static readonly radiusSelectScaleFactor: number = 1.1;
+  static readonly radiusMinimum = 8;
+  static readonly radiusScaleFactor = 24;
+  static readonly radiusSelectScaleFactor = 1.1;
+  static readonly styleColorTextOutline = 'black';
+  static readonly styleTextFontSize = 16;
+  static readonly styleTextSpacing = 4;
 
   readonly visibleAttrs = [
     'impurity',
@@ -101,15 +104,7 @@ export class TreeNodeService {
       ].join(','))
         .classed('link-active', false)
         .select('line')
-          .style('stroke', function() {
-            const predictPathLink = d3.select(this.parentNode)
-              .classed('in-predict-path');
-
-            return (
-              predictPathLink ? 
-              TreeLinksService.styleColorLinkPredict :
-              TreeLinksService.styleColorLinkDefault);
-          });
+          .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
   };
 
   private funcDragOnDrag = function() {
@@ -274,7 +269,9 @@ export class TreeNodeService {
           .raise()
           .classed('draggable node-label', true)
           .attr('width', 64)
-          .attr('height', 16 * this.activeAttrs.length)
+          .attr('height', (TreeNodeService.styleTextFontSize +
+                           TreeNodeService.styleTextSpacing) *
+                           this.activeAttrs.length)
           .attr('rx', 5)
           .attr('opacity', 0.5)
           .attr('fill', 'black');
@@ -282,7 +279,9 @@ export class TreeNodeService {
     } else {
       rects = nodes.selectAll('.node')
         .select('rect')
-          .attr('height', 16 * this.activeAttrs.length);
+          .attr('height', (TreeNodeService.styleTextFontSize +
+                           TreeNodeService.styleTextSpacing) *
+                           this.activeAttrs.length);
     }
 
     nodes.selectAll('.node')
@@ -292,24 +291,31 @@ export class TreeNodeService {
     for (let i = 0; i < this.activeAttrs.length; i++) {
       const curAttr = this.activeAttrs[i];
       const attrLabelPrefix = (this.activeAttrs.length > 1) ? (curAttr + ': ') : '';
-
+      const translationValue = (TreeNodeService.styleTextFontSize +
+                                (TreeNodeService.styleTextFontSize +
+                                 TreeNodeService.styleTextSpacing) *
+                                (i - 0.5 * this.activeAttrs.length));
       nodes.selectAll('.node')
         .append('text')
           .classed('draggable node-label', true)
-          .attr('font-size', 12)
+          .attr('font-size', TreeNodeService.styleTextFontSize)
+          .attr('font-family', "'Roboto', sans-serif")
+          .attr('font-weight', 900)
           .attr('fill', 'white')
           .attr('text-anchor', 'middle')
           .attr('alignment-baseline', 'central')
           .attr('x', TreeNodeService.funcNodeXCoord)
           .attr('y', TreeNodeService.funcNodeYCoord)
-          .attr('transform', 'translate(0, ' + (12 + 16 * (i - 0.5 * this.activeAttrs.length)) + ')')
+          .attr('transform', 'translate(0, ' + translationValue + ')')
           .text(function(): string {
             let value: string | number = d3.select(this.parentNode).attr(curAttr);
             if (+value && value.indexOf('.') > -1 && value.length > 4) {
               value = (+value).toFixed(2);
             }
-            return attrLabelPrefix + value;
-          });
+            return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
+          })
+          .style('stroke', TreeLinksService.styleColorTextOutline)
+          .style('stroke-width', '1px');
     }
 
     if (rects) {

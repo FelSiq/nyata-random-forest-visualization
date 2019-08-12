@@ -13,10 +13,13 @@ export class TreeLinksService {
   static readonly styleColorLinkPredict = 'rgb(255, 0, 0)';
   static readonly styleWidthLinkDefault = 2;
   static readonly styleWidthLinkSelected = 6;
+  static readonly styleColorTextOutline = 'black';
+  static readonly styleTextFontSize = 16;
+  static readonly styleTextSpacing = 4;
 
   readonly visibleAttrs = [
     'weight',
-    'relation',
+    'decision',
     'decision-feature',
     'threshold',
   ];
@@ -43,11 +46,21 @@ export class TreeLinksService {
     return 0.5 * (+link.attr('y2') + +link.attr('y1') - height);
   };
 
+  static funcDragEndSelectStrokeStyle = function(): string {
+    const predictPathLink = d3.select(this.parentNode)
+      .classed('in-predict-path');
+
+    return (
+      predictPathLink ? 
+      TreeLinksService.styleColorLinkPredict :
+      TreeLinksService.styleColorLinkDefault);
+  }
+
   connectNodes(links,
                nodes,
                nodeAId: number,
                nodeBId: number,
-               relation: string): void {
+               decision: string): void {
     const nodeA = nodes.select(TreeExtraService.formatNodeId(nodeAId, true));
     const nodeB = nodes.select(TreeExtraService.formatNodeId(nodeBId, true));
 
@@ -60,7 +73,7 @@ export class TreeLinksService {
       .attr('id', TreeExtraService.formatLinkId(nodeAId, nodeBId))
       .attr('node-a-id', nodeAId)
       .attr('node-b-id', nodeBId)
-      .attr('relation', relation)
+      .attr('decision', decision)
       .attr('threshold', nodeA.attr('threshold'))
       .attr('decision-feature', nodeA.attr('decision-feature'))
       .attr('weight', weight)
@@ -113,7 +126,9 @@ export class TreeLinksService {
           .raise()
           .classed('draggable link-label', true)
           .attr('width', 64)
-          .attr('height', 16 * this.activeAttrs.length)
+          .attr('height', (TreeLinksService.styleTextFontSize +
+                           TreeLinksService.styleTextSpacing) *
+                           this.activeAttrs.length)
           .attr('rx', 5)
           .attr('opacity', 0.5)
           .attr('fill', 'red');
@@ -121,7 +136,9 @@ export class TreeLinksService {
     } else {
       rects = links.selectAll('.link')
         .select('rect')
-          .attr('height', 16 * this.activeAttrs.length);
+          .attr('height', (TreeLinksService.styleTextFontSize +
+                           TreeLinksService.styleTextSpacing) *
+                           this.activeAttrs.length);
     }
 
     links.selectAll('.link')
@@ -131,24 +148,31 @@ export class TreeLinksService {
     for (let i = 0; i < this.activeAttrs.length; i++) {
       const curAttr = this.activeAttrs[i];
       const attrLabelPrefix = (this.activeAttrs.length > 1) ? (curAttr + ': ') : '';
-
+      const translationValue = (TreeLinksService.styleTextFontSize +
+                                (TreeLinksService.styleTextFontSize +
+                                 TreeLinksService.styleTextSpacing) *
+                                (i - 0.5 * this.activeAttrs.length));
       links.selectAll('.link')
         .append('text')
           .classed('draggable link-label', true)
-          .attr('font-size', 12)
+          .attr('font-size', TreeLinksService.styleTextFontSize)
+          .attr('font-family', "'Roboto', sans-serif")
+          .attr('font-weight', 900)
           .attr('fill', 'white')
           .attr('text-anchor', 'middle')
           .attr('alignment-baseline', 'central')
           .attr('x', TreeLinksService.funcLinkHalfXCoord)
           .attr('y', TreeLinksService.funcLinkHalfYCoord)
-          .attr('transform', 'translate(0, ' + (12 + 16 * (i - 0.5 * this.activeAttrs.length)) + ')')
+          .attr('transform', 'translate(0, ' + translationValue + ')')
           .text(function(): string {
             let value: string | number = d3.select(this.parentNode).attr(curAttr);
             if (+value && value.indexOf('.') > -1 && value.length > 4) {
               value = (+value).toFixed(2);
             }
-            return attrLabelPrefix + value;
-          });
+            return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
+          })
+          .style('stroke', TreeLinksService.styleColorTextOutline)
+          .style('stroke-width', '1px');
     }
 
     if (rects) {
