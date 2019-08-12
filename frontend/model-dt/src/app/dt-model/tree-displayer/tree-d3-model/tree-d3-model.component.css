@@ -21,3 +21,10 @@
 .visual-settings-panel-icon {
   margin-right: 8px;
 }
+
+.depth-visualization-control-icon {
+}
+
+.depth-visualization-slider {
+  width: 50%;
+}

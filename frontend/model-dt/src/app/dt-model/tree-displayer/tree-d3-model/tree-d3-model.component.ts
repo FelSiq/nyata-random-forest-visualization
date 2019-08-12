@@ -50,6 +50,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private maxImpurity: number;
   private treeAngle: number = 180;
   private classes: Array<string | number>;
+  private maxDepth: number;
+  private visualDepthFromRoot: number;
+  private visualDepthFromLeaves: number;
 
   constructor(private eleRef: ElementRef,
               private nodeService: TreeNodeService,
@@ -142,7 +145,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       cyDelta = this.height / 4.05;
       cxDelta = ((0.99 * this.width -
                  TreeNodeService.radiusMinimum -
-                 TreeNodeService.radiusScaleFactor) / curTree.maximum_depth);
+                 TreeNodeService.radiusScaleFactor) / +curTree.maximum_depth);
 
       rootYCoord = (
           0.5 * this.height +
@@ -180,6 +183,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     }
 
     const curTree = curTreeNodes.tree_.value as TreeInterface;
+
+    this.maxDepth = +curTree.maximum_depth;
+    this.visualDepthFromRoot = Math.ceil(0.5 * this.maxDepth);
+    this.visualDepthFromLeaves = Math.floor(0.5 * this.maxDepth);
 
     const criterion = curTreeNodes.criterion.value;
 
@@ -271,7 +278,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           circleColor,
           {
             'impurity': impurity,
-            'decision-feature': feature,
+            'decision-feature': feature >= 0 ? feature : null,
             'node-class': this.classes ? this.classes[+nodeClassId] : null,
             'threshold': threshold,
             'number-of-instances': numInstInNode,
