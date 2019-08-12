@@ -27,6 +27,8 @@ export class TreeNodeService {
 
   activeAttrs: string[] = [];
 
+  completeAttrName = false;
+
   private funcDragOnStart = function() {
     const node = d3.select(this);
 
@@ -289,8 +291,14 @@ export class TreeNodeService {
         .remove();
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
-      const curAttr = this.activeAttrs[i];
-      const attrLabelPrefix = (this.activeAttrs.length > 1) ? (curAttr + ': ') : '';
+      let curAttr = this.activeAttrs[i];
+
+      const formatedAttrLabel = (
+          this.completeAttrName ?
+          curAttr :
+          TreeExtraService.abbreviateAttrLabel(curAttr));
+
+      const attrLabelPrefix = (this.activeAttrs.length > 1) ? (formatedAttrLabel + ': ') : '';
       const translationValue = (TreeNodeService.styleTextFontSize +
                                 (TreeNodeService.styleTextFontSize +
                                  TreeNodeService.styleTextSpacing) *

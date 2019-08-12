@@ -18,6 +18,14 @@ export class TreeExtraService {
     return (addIdHash ? '#' : '') + 'node-' + nodeId;
   }
 
+  static abbreviateAttrLabel(attrLabel: string, separator = '-'): string {
+    let letters: string[] = [];
+    for (let token of attrLabel.split(separator)) {
+      letters.push(token[0].toUpperCase());
+    }
+    return letters.join('');
+  }
+
   buildDepthMarkers(depthMarkers,
                     limMin: number,
                     limMax: number,

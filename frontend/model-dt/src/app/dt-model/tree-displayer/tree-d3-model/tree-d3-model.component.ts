@@ -77,6 +77,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
   }
 
+  private abbreviateAttrLabel(attrLabel: string, separator = '-'): string {
+    return TreeExtraService.abbreviateAttrLabel(attrLabel, separator);
+  }
+
   private initSvg() {
     this.svg = d3.select('svg');
 

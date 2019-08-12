@@ -26,6 +26,8 @@ export class TreeLinksService {
 
   activeAttrs: string[] = [];
 
+  completeAttrName = false;
+
   constructor() { }
 
   static funcLinkHalfXCoord = function(): number {
@@ -146,8 +148,14 @@ export class TreeLinksService {
         .remove();
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
-      const curAttr = this.activeAttrs[i];
-      const attrLabelPrefix = (this.activeAttrs.length > 1) ? (curAttr + ': ') : '';
+      let curAttr = this.activeAttrs[i];
+
+      const formatedAttrLabel = (
+          this.completeAttrName ?
+          curAttr :
+          TreeExtraService.abbreviateAttrLabel(curAttr));
+
+      const attrLabelPrefix = (this.activeAttrs.length > 1) ? (formatedAttrLabel + ': ') : '';
       const translationValue = (TreeLinksService.styleTextFontSize +
                                 (TreeLinksService.styleTextFontSize +
                                  TreeLinksService.styleTextSpacing) *

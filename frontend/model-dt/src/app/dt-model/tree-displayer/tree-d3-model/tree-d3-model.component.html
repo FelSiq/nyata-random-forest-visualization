@@ -21,7 +21,7 @@
                            color="primary"
                            [selected]="nodeService.activeAttrs.indexOf(nodeAttr) > -1"
                            [value]="nodeAttr">
-            Show {{ (nodeAttr | titlecase).split('-').join(' ') }}
+            Show {{ (nodeAttr | titlecase).split('-').join(' ') }} ({{ abbreviateAttrLabel(nodeAttr) }})
           </mat-list-option>
         </mat-selection-list>
       </mat-card-content>
@@ -38,7 +38,7 @@
                            color="primary"
                            [selected]="linkService.activeAttrs.indexOf(linkAttr) > -1"
                            [value]="linkAttr">
-            Show {{ (linkAttr | titlecase).split('-').join(' ') }}
+            Show {{ (linkAttr | titlecase).split('-').join(' ') }} ({{ abbreviateAttrLabel(linkAttr) }})
           </mat-list-option>
         </mat-selection-list>
       </mat-card-content>
