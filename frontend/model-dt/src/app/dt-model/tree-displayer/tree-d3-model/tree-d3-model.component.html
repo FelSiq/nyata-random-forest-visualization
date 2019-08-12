@@ -6,95 +6,104 @@
         Visual settings
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <mat-toolbar color="primary">
-      Toggle visible attributes
-    </mat-toolbar>
-    <mat-card>
-      <mat-card-title>
-        Node attributes
-      </mat-card-title>
-      <mat-card-content>
-        <mat-selection-list #nodeAttrList
-                            dense
-                            (selectionChange)="nodeService.toggleAttr($event.option.value); nodeService.updateNodeLabel(nodes)">
-          <mat-list-option *ngFor="let nodeAttr of nodeService.visibleAttrs"
-                           color="primary"
-                           [selected]="nodeService.activeAttrs.indexOf(nodeAttr) > -1"
-                           [value]="nodeAttr">
-            Show {{ (nodeAttr | titlecase).split('-').join(' ') }} ({{ abbreviateAttrLabel(nodeAttr) }})
-          </mat-list-option>
-        </mat-selection-list>
-      </mat-card-content>
-    </mat-card>
-    <mat-card>
-      <mat-card-title>
-        Link attributes
-      </mat-card-title>
-      <mat-card-content>
-        <mat-selection-list #linkAttrList
-                            dense
-                            (selectionChange)="linkService.toggleAttr($event.option.value); linkService.updateLinkLabel(links)">
-          <mat-list-option *ngFor="let linkAttr of linkService.visibleAttrs"
-                           color="primary"
-                           [selected]="linkService.activeAttrs.indexOf(linkAttr) > -1"
-                           [value]="linkAttr">
-            Show {{ (linkAttr | titlecase).split('-').join(' ') }} ({{ abbreviateAttrLabel(linkAttr) }})
-          </mat-list-option>
-        </mat-selection-list>
-      </mat-card-content>
-    </mat-card>
-    <mat-toolbar color="primary">
-      Miscellaneous visualization attributes
-    </mat-toolbar>
-    <mat-card>
-      <mat-card-title>
-        Visualization depth (current tree depth: {{ maxDepth }})
-      </mat-card-title>
-      <mat-card-content>
-        <div>
-          From root ({{ visualDepthFromRoot }}):
-          <mat-icon (click)="visualDepthFromRoot = visualDepthFromRoot - (visualDepthFromRoot > 0)"
-                    [style.cursor]="visualDepthFromRoot <= 0 ? 'not-allowed' : 'pointer'"
-                    class="depth-visualization-control-icon">
-            {{ visualDepthFromRoot > 0 ? 'remove_circle' : 'remove_circle_outlined' }}
-          </mat-icon>
-          <mat-slider [min]="0"
-                      [max]="maxDepth - visualDepthFromLeaves"
-                      [disabled]="maxDepth ? visualDepthFromLeaves === maxDepth : false"
-                      [(value)]="visualDepthFromRoot"
-                      step="1"
-                      color="primary"
-                      class="depth-visualization-slider">
-          </mat-slider>
-          <mat-icon (click)="visualDepthFromRoot = visualDepthFromRoot + (visualDepthFromRoot < maxDepth - visualDepthFromLeaves)"
-                    [style.cursor]="visualDepthFromRoot >= (maxDepth - visualDepthFromLeaves) ? 'not-allowed' : 'pointer'"
-                    class="depth-visualization-control-icon">
-            {{ visualDepthFromRoot < maxDepth - visualDepthFromLeaves ? 'add_circle' : 'add_circle_outlined' }}
-          </mat-icon>
-        </div>
-        <div>
-          From leaf ({{ visualDepthFromLeaves }}):
-          <mat-icon (click)="visualDepthFromLeaves = visualDepthFromLeaves - (visualDepthFromLeaves > 0)"
-                    [style.cursor]="visualDepthFromLeaves <= 0 ? 'not-allowed' : 'pointer'"
-                    class="depth-visualization-control-icon">
-            {{ visualDepthFromLeaves > 0 ? 'remove_circle' : 'remove_circle_outlined' }}
-          </mat-icon>
-          <mat-slider [min]="0"
-                      [max]="maxDepth - visualDepthFromRoot"
-                      [disabled]="maxDepth ? visualDepthFromRoot === maxDepth : false"
-                      [(value)]="visualDepthFromLeaves"
-                      step="1"
-                      color="primary"
-                      class="depth-visualization-slider">
-          </mat-slider>
-          <mat-icon (click)="visualDepthFromLeaves = visualDepthFromLeaves + (visualDepthFromLeaves < maxDepth - visualDepthFromRoot)"
-                    [style.cursor]="visualDepthFromLeaves >= (maxDepth - visualDepthFromRoot) ? 'not-allowed' : 'pointer'"
-                    class="depth-visualization-control-icon">
-            {{ visualDepthFromLeaves < maxDepth - visualDepthFromRoot ? 'add_circle' : 'add_circle_outlined' }}
-          </mat-icon>
-        </div>
-      </mat-card-content>
-    </mat-card>
+
+    <ng-template matExpansionPanelContent>
+      <mat-toolbar color="primary">
+        Toggle visible attributes
+      </mat-toolbar>
+      <mat-card>
+        <mat-card-title>
+          Node attributes
+        </mat-card-title>
+        <mat-card-content>
+          <mat-selection-list #nodeAttrList
+                              dense
+                              (selectionChange)="nodeService.toggleAttr($event.option.value); nodeService.updateNodeLabel(nodes)">
+            <mat-list-option *ngFor="let nodeAttr of nodeService.visibleAttrs"
+                             color="primary"
+                             [selected]="nodeService.activeAttrs.indexOf(nodeAttr) > -1"
+                             [value]="nodeAttr">
+              Show {{ (nodeAttr | titlecase).split('-').join(' ') }} ({{ abbreviateAttrLabel(nodeAttr) }})
+            </mat-list-option>
+          </mat-selection-list>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-title>
+          Link attributes
+        </mat-card-title>
+        <mat-card-content>
+          <mat-selection-list #linkAttrList
+                              dense
+                              (selectionChange)="linkService.toggleAttr($event.option.value); linkService.updateLinkLabel(links)">
+            <mat-list-option *ngFor="let linkAttr of linkService.visibleAttrs"
+                             color="primary"
+                             [selected]="linkService.activeAttrs.indexOf(linkAttr) > -1"
+                             [value]="linkAttr">
+              Show {{ (linkAttr | titlecase).split('-').join(' ') }} ({{ abbreviateAttrLabel(linkAttr) }})
+            </mat-list-option>
+          </mat-selection-list>
+        </mat-card-content>
+      </mat-card>
+      <mat-toolbar color="primary">
+        Miscellaneous visualization attributes
+      </mat-toolbar>
+      <mat-card>
+        <mat-card-title>
+          Visualization depth
+        </mat-card-title>
+        <mat-card-content>
+          <div>
+            From root ({{ visualDepthFromRoot }}):
+            <mat-icon (click)="visualDepthFromRoot = visualDepthFromRoot - (visualDepthFromRoot > 0)"
+                      [style.cursor]="visualDepthFromRoot <= 0 ? 'not-allowed' : 'pointer'"
+                      class="depth-visualization-control-icon">
+              {{ visualDepthFromRoot > 0 ? 'remove_circle' : 'remove_circle_outlined' }}
+            </mat-icon>
+            <mat-slider [min]="0"
+                        [max]="maxDepth - visualDepthFromLeaves"
+                        [disabled]="maxDepth ? visualDepthFromLeaves === maxDepth : false"
+                        [(value)]="visualDepthFromRoot"
+                        step="1"
+                        color="primary"
+                        class="depth-visualization-slider">
+            </mat-slider>
+            <mat-icon (click)="visualDepthFromRoot = visualDepthFromRoot + (visualDepthFromRoot < maxDepth - visualDepthFromLeaves)"
+                      [style.cursor]="visualDepthFromRoot >= (maxDepth - visualDepthFromLeaves) ? 'not-allowed' : 'pointer'"
+                      class="depth-visualization-control-icon">
+              {{ visualDepthFromRoot < maxDepth - visualDepthFromLeaves ? 'add_circle' : 'add_circle_outlined' }}
+            </mat-icon>
+          </div>
+          <div>
+            From leaf ({{ visualDepthFromLeaves }}):
+            <mat-icon (click)="visualDepthFromLeaves = visualDepthFromLeaves - (visualDepthFromLeaves > 0)"
+                      [style.cursor]="visualDepthFromLeaves <= 0 ? 'not-allowed' : 'pointer'"
+                      class="depth-visualization-control-icon">
+              {{ visualDepthFromLeaves > 0 ? 'remove_circle' : 'remove_circle_outlined' }}
+            </mat-icon>
+            <mat-slider [min]="0"
+                        [max]="maxDepth - visualDepthFromRoot"
+                        [disabled]="maxDepth ? visualDepthFromRoot === maxDepth : false"
+                        [(value)]="visualDepthFromLeaves"
+                        step="1"
+                        color="primary"
+                        class="depth-visualization-slider">
+            </mat-slider>
+            <mat-icon (click)="visualDepthFromLeaves = visualDepthFromLeaves + (visualDepthFromLeaves < maxDepth - visualDepthFromRoot)"
+                      [style.cursor]="visualDepthFromLeaves >= (maxDepth - visualDepthFromRoot) ? 'not-allowed' : 'pointer'"
+                      class="depth-visualization-control-icon">
+              {{ visualDepthFromLeaves < maxDepth - visualDepthFromRoot ? 'add_circle' : 'add_circle_outlined' }}
+            </mat-icon>
+          </div>
+          <div>
+            Current tree depth: {{ maxDepth }}
+          </div>
+          <div>
+            Visiblity of current tree: {{ (visualDepthFromLeaves + visualDepthFromRoot) / maxDepth | percent }}
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </ng-template>
   </mat-expansion-panel>
 </mat-accordion>
 
