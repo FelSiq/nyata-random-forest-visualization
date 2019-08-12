@@ -102,7 +102,7 @@ export class TreeNodeService {
         .classed('link-active', false)
         .select('line')
           .style('stroke', function() {
-            const predictPathLink = d3.select(this)
+            const predictPathLink = d3.select(this.parentNode)
               .classed('in-predict-path');
 
             return (
