@@ -6,11 +6,12 @@
   height: 100%;
 }
 
-.zoom-slider {
-  width: calc(100% - 2 * 24px - 2px);
+.control-section-rotate {
+  margin-right: 16px;
 }
 
-.zoom-icon {
+.zoom-slider {
+  width: calc(100% - 4 * 24px - 2px - 16px);
 }
 
 .visual-settings-panel {

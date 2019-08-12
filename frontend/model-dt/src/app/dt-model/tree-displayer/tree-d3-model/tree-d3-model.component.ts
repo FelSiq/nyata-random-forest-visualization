@@ -48,6 +48,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private width: number;
   private height: number;
   private maxImpurity: number;
+  private treeAngle: number = 180;
   private classes: Array<string | number>;
 
   constructor(private eleRef: ElementRef,
@@ -116,6 +117,50 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       .selectAll('*').remove();
   }
 
+  private calcRootCoordAndDeltas(curTree: TreeInterface) {
+    let cxDelta, cyDelta, rootYCoord, rootXCoord;
+
+    if (this.treeAngle === 90 || this.treeAngle === 270) {
+      cxDelta = this.width / 4.05;
+      cyDelta = 0.98 * this.height / (1 + curTree.maximum_depth);
+
+      rootXCoord = (
+          0.5 * this.width +
+          TreeNodeService.radiusMinimum +
+          TreeNodeService.radiusScaleFactor);
+
+      rootYCoord = (
+          TreeNodeService.radiusMinimum +
+          TreeNodeService.radiusScaleFactor +
+          0.01 * this.height);
+
+      if (this.treeAngle === 270) {
+        rootYCoord = this.height - rootYCoord;
+        cyDelta *= -1.0;
+      }
+    } else {
+      cyDelta = this.height / 4.05;
+      cxDelta = 0.98 * this.width / (1 + curTree.maximum_depth);
+
+      rootYCoord = (
+          0.5 * this.height +
+          TreeNodeService.radiusMinimum +
+          TreeNodeService.radiusScaleFactor);
+
+      rootXCoord = (
+          TreeNodeService.radiusMinimum +
+          TreeNodeService.radiusScaleFactor +
+          0.01 * this.width);
+
+      if (this.treeAngle === 0) {
+        rootXCoord = this.width - rootXCoord;
+        cxDelta *= -1.0;
+      }
+    }
+
+    return { rootXCoord, rootYCoord, cxDelta, cyDelta };
+  }
+
   private createTree(): void {
     if (!this.svg || !this.treeNodes) {
       return;
@@ -145,12 +190,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         .domain([0.0, this.maxImpurity])
         .range(['white', 'black']);
 
-    const cxDelta = this.width / 4.05;
-    const cyDelta = 0.98 * this.height / (1 + curTree.maximum_depth);
-    const rootYCoord = (
-        TreeNodeService.radiusMinimum +
-        TreeNodeService.radiusScaleFactor +
-        0.01 * this.height);
+    const { rootXCoord,
+            rootYCoord,
+            cxDelta,
+            cyDelta } = this.calcRootCoordAndDeltas(curTree);
 
     this.extraService.buildDepthMarkers(
         this.depthMarkers,
@@ -164,8 +207,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         curTree,
         0,
         -1,
-        0.5 * this.width + (TreeNodeService.radiusMinimum +
-                            TreeNodeService.radiusScaleFactor),
+        rootXCoord,
         cxDelta,
         rootYCoord,
         cyDelta);
@@ -206,6 +248,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       const nodeClassId = curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
       const circleColor = this.impurityColors(impurity);
 
+      const cxScaleFactor = (this.treeAngle === 90 || this.treeAngle === 270) ? 0.5 : 1.0;
+      const cyScaleFactor = (this.treeAngle === 0  || this.treeAngle === 180) ? 0.5 : 1.0;
+
       const radius = (
         TreeNodeService.radiusMinimum +
         TreeNodeService.radiusScaleFactor *
@@ -231,7 +276,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           });
 
       if (sonLeftId >= 0 && sonLeftId < curTree.capacity) {
-        const cxSonLeft = cx - cxDelta;
+        const cxSonLeft = cx + (this.treeAngle === 90 || this.treeAngle === 270 ? -1 : 1) * cxDelta;
         const cySonLeft = cy + cyDelta;
 
         this.buildNode(
@@ -239,28 +284,32 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
             sonLeftId,
             nodeId,
             cxSonLeft,
-            0.5 * cxDelta,
+            cxScaleFactor * cxDelta,
             cySonLeft,
-            cyDelta);
+            cyScaleFactor * cyDelta);
 
         this.linkService.connectNodes(this.links, this.nodes, nodeId, sonLeftId, '<=');
       }
 
       if (sonRightId >= 0 && sonRightId < curTree.capacity) {
         const cxSonRight = cx + cxDelta;
-        const cySonRight = cy + cyDelta;
+        const cySonRight = cy + (this.treeAngle === 0 || this.treeAngle === 180 ? -1 : 1) * cyDelta;
 
         this.buildNode(
             curTree,
             sonRightId,
             nodeId,
             cxSonRight,
-            0.5 * cxDelta,
+            cxScaleFactor * cxDelta,
             cySonRight,
-            cyDelta);
+            cyScaleFactor * cyDelta);
 
         this.linkService.connectNodes(this.links, this.nodes, nodeId, sonRightId, '>');
       }
   }
 
+  private rotateTree(angleUpdate: number | string): void {
+    this.treeAngle = (this.treeAngle + +angleUpdate) % 360;
+    this.changesHandler();
+  }
 }

@@ -69,24 +69,38 @@
   
   <mat-card-footer>
     <div>
-      <mat-icon (click)="updateZoomValue(-0.25)"
-                (dblclick)="updateZoomValue(-0.75)"
-                [style.cursor]="zoomValue <= zoomMin ? 'not-allowed' : 'pointer'"
-                class="zoom-icon">
-        zoom_out
-      </mat-icon>
-      <mat-slider [min]="zoomMin"
-                  [max]="zoomMax"
-                  [(value)]="zoomValue"
-                  step="0.01"
-                  class="zoom-slider">
-      </mat-slider>
-      <mat-icon (click)="updateZoomValue(+0.25)"
-                (dblclick)="updateZoomValue(+0.75)"
-                [style.cursor]="zoomValue >= zoomMax ? 'not-allowed' : 'pointer'"
-                class="zoom-icon">
-        zoom_in
-      </mat-icon>
+      <span class="control-section-rotate">
+        <mat-icon (click)="rotateTree(90)"
+                  [style.cursor]="'pointer'"
+                  class="rotate-icon">
+          rotate_left
+        </mat-icon>
+        <mat-icon (click)="rotateTree(270)"
+                  [style.cursor]="'pointer'"
+                  class="rotate-icon">
+          rotate_right
+        </mat-icon>
+      </span>
+      <span class="control-section-zoom">
+        <mat-icon (click)="updateZoomValue(-0.25)"
+                  (dblclick)="updateZoomValue(-0.75)"
+                  [style.cursor]="zoomValue <= zoomMin ? 'not-allowed' : 'pointer'"
+                  class="zoom-icon">
+          zoom_out
+        </mat-icon>
+        <mat-slider [min]="zoomMin"
+                    [max]="zoomMax"
+                    [(value)]="zoomValue"
+                    step="0.01"
+                    class="zoom-slider">
+        </mat-slider>
+        <mat-icon (click)="updateZoomValue(+0.25)"
+                  (dblclick)="updateZoomValue(+0.75)"
+                  [style.cursor]="zoomValue >= zoomMax ? 'not-allowed' : 'pointer'"
+                  class="zoom-icon">
+          zoom_in
+        </mat-icon>
+      </span>
     </div>
     
     <div *ngIf="treeNodes && (chosenTree || chosenTree === 0)">
