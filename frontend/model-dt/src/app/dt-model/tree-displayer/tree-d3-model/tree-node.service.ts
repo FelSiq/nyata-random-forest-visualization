@@ -12,10 +12,11 @@ import { TreeLinksService } from './tree-links.service';
 export class TreeNodeService {
   static readonly radiusMinimum = 8;
   static readonly radiusScaleFactor = 24;
-  static readonly radiusSelectScaleFactor = 1.1;
+  static readonly radiusSelectScaleFactor = 1.2;
   static readonly styleColorTextOutline = 'black';
   static readonly styleTextFontSize = 16;
   static readonly styleTextSpacing = 4;
+  static readonly transitionDragEffect = 300;
 
   readonly visibleAttrs = [
     'impurity',
@@ -42,7 +43,7 @@ export class TreeNodeService {
     const parentId = +node.attr('parent-id');
     const sonLeftId = +node.attr('son-left-id');
     const sonRightId = +node.attr('son-right-id');
-    const radius = !circle.empty() ? +circle.attr('r') : 0.0;
+    const radius = !circle.empty() ? +circle.attr('original-radius') : 0.0;
 
     d3.select('.group-nodes')
       .append('circle')
@@ -72,7 +73,9 @@ export class TreeNodeService {
       ].join(','))
         .classed('link-active', true)
         .select('line')
-          .style('stroke', TreeLinksService.styleColorLinkSelected);
+          .transition()
+            .duration(TreeNodeService.transitionDragEffect)
+            .style('stroke', TreeLinksService.styleColorLinkSelected);
   };
 
   private funcDragOnEnd = function() {
@@ -88,13 +91,18 @@ export class TreeNodeService {
     const parentId = +node.attr('parent-id');
     const sonLeftId = +node.attr('son-left-id');
     const sonRightId = +node.attr('son-right-id');
-    const radius = +circle.attr('r');
+    const radius = +circle.attr('original-radius');
 
     node
       .classed('node-active', false);
 
     circle
-      .attr('r', radius / TreeNodeService.radiusSelectScaleFactor);
+      .transition()
+        .duration(0.5 * TreeNodeService.transitionDragEffect)
+        .attr('r', radius / (0.9 * TreeNodeService.radiusSelectScaleFactor))
+      .transition()
+        .duration(0.5 * TreeNodeService.transitionDragEffect)
+        .attr('r', radius);
 
     d3.select('#placeholder-node-' + nodeId)
       .remove();
@@ -106,7 +114,9 @@ export class TreeNodeService {
       ].join(','))
         .classed('link-active', false)
         .select('line')
-          .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
+          .transition()
+            .duration(TreeNodeService.transitionDragEffect)
+            .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
   };
 
   private funcDragOnDrag = function() {
@@ -136,9 +146,6 @@ export class TreeNodeService {
       .attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; })
       .attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; })
       .attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
-
-    if (!nodeDraggables.empty()) {
-    }
 
     d3.selectAll([linkA, linkB].join(','))
       .select('line')
@@ -179,20 +186,25 @@ export class TreeNodeService {
       return;
     }
 
-    node.attr('stroke-width', 2)
-        .attr('stroke', 'rgb(96,96,96)');
-
-    d3.select('#node-info-pannel')
-      .attr('selected-node', node.attr('index'));
+    node.attr('stroke', 'rgb(96,96,96)')
+        .transition()
+          .duration(350)
+          .attr('stroke-width', 3);
   };
 
   private funcMouseleave = function() {
-    d3.select(this)
-      .attr('stroke-width', 1)
-      .attr('stroke', 'gray');
+    const node = d3.select(this);
 
-    d3.select('#node-info-pannel')
-      .attr('selected-node', -1);
+    if (node.empty()) {
+      return;
+    }
+
+    node
+      .attr('stroke', 'gray')
+      .transition()
+        .duration(350)
+        .attr('stroke-width', 1)
+        .attr('r', node.attr('original-radius'));
   };
 
   constructor() { }
@@ -250,6 +262,7 @@ export class TreeNodeService {
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('r', radius)
+        .attr('original-radius', radius)
         .on('mouseenter', this.funcMouseenter)
         .on('mouseleave', this.funcMouseleave);
   }
