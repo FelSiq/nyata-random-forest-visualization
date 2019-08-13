@@ -133,11 +133,15 @@
       <span class="control-section-rotate">
         <mat-icon (click)="rotateTree(90)"
                   [style.cursor]="'pointer'"
+                  matTooltip="Rotate tree 90 degrees counter-clockwise"
+                  matTooltipShowDelay="400"
                   class="rotate-icon">
           rotate_left
         </mat-icon>
         <mat-icon (click)="rotateTree(270)"
                   [style.cursor]="'pointer'"
+                  matTooltip="Rotate tree 90 degrees clockwise"
+                  matTooltipShowDelay="400"
                   class="rotate-icon">
           rotate_right
         </mat-icon>
@@ -146,6 +150,8 @@
         <mat-icon (click)="updateZoomValue(-0.25)"
                   (dblclick)="updateZoomValue(-0.75)"
                   [style.cursor]="zoomValue <= zoomMin ? 'not-allowed' : 'pointer'"
+                  matTooltip="Zoom out"
+                  matTooltipShowDelay="400"
                   class="zoom-icon">
           zoom_out
         </mat-icon>
@@ -158,6 +164,8 @@
         <mat-icon (click)="updateZoomValue(+0.25)"
                   (dblclick)="updateZoomValue(+0.75)"
                   [style.cursor]="zoomValue >= zoomMax ? 'not-allowed' : 'pointer'"
+                  matTooltip="Zoom in"
+                  matTooltipShowDelay="400"
                   class="zoom-icon">
           zoom_in
         </mat-icon>
