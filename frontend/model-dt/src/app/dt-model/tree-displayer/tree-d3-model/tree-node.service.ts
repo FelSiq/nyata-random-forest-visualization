@@ -5,6 +5,7 @@ import * as d3Drag from 'd3-drag';
 
 import { TreeExtraService } from './tree-extra.service';
 import { TreeLinksService } from './tree-links.service';
+import { ObjectLabelInfoService } from './object-label-info.service';
 
 @Injectable({
   providedIn: 'root',
@@ -119,33 +120,22 @@ export class TreeNodeService {
             .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
   };
 
-  private funcDragOnDrag = function() {
-    const node = d3.select(this);
-
-    if (node.empty()) {
-      return;
-    }
-
-    const circle = node.select('circle');
-
-    const nodeId = +node.attr('index');
+  static getNodeLinks(node): string[] {
+    const nodeIndex = +node.attr('index');
     const parentId = +node.attr('parent-id');
     const sonLeftId = +node.attr('son-left-id');
     const sonRightId = +node.attr('son-right-id');
 
-    const linkA = TreeExtraService.formatLinkId(nodeId, sonLeftId, true);
-    const linkB = TreeExtraService.formatLinkId(nodeId, sonRightId, true);
-    const linkC = TreeExtraService.formatLinkId(parentId, nodeId, true);
+    const linkA = TreeExtraService.formatLinkId(nodeIndex, sonLeftId, true);
+    const linkB = TreeExtraService.formatLinkId(nodeIndex, sonRightId, true);
+    const linkC = TreeExtraService.formatLinkId(parentId, nodeIndex, true);
 
-    node
-      .attr('cx', d3.event.x)
-      .attr('cy', d3.event.y);
+    return [linkA, linkB, linkC];
+  }
 
-    const nodeDraggables = node.selectAll('.draggable')
-      .attr('cx', function() { return +d3.select(this).attr('cx') + d3.event.dx; })
-      .attr('cy', function() { return +d3.select(this).attr('cy') + d3.event.dy; })
-      .attr('x', function() { return +d3.select(this).attr('x') + d3.event.dx; })
-      .attr('y', function() { return +d3.select(this).attr('y') + d3.event.dy; });
+  static moveNodeLinks(node): void {
+    const [linkA, linkB, linkC] = TreeNodeService.getNodeLinks(node);
+    const circle = node.select('circle');
 
     d3.selectAll([linkA, linkB].join(','))
       .select('line')
@@ -177,37 +167,53 @@ export class TreeNodeService {
         linkDraggables.attr('y', TreeLinksService.funcLinkHalfYCoord);
       }
     }
+  }
+
+  static moveNode(node, x: number, y: number): void {
+    const dx = x - +node.attr('cx');
+    const dy = y - +node.attr('cy');
+
+    node
+      .attr('cx', x)
+      .attr('cy', y);
+
+    const nodeDraggables = node.selectAll('.draggable')
+      .attr('cx', function() { return +d3.select(this).attr('cx') + dx; })
+      .attr('cy', function() { return +d3.select(this).attr('cy') + dy; })
+      .attr('x', function() { return +d3.select(this).attr('x') + dx; })
+      .attr('y', function() { return +d3.select(this).attr('y') + dy; });
+
+    TreeNodeService.moveNodeLinks(node);
+  }
+
+  private funcDragOnDrag = function() {
+    const node = d3.select(this);
+    TreeNodeService.moveNode(
+        node,
+        d3.event.x,
+        d3.event.y);
   };
 
   private funcMouseenter = function() {
     const node = d3.select(this);
 
-    if (node.empty()) {
-      return;
-    }
-
-    node.attr('stroke', 'rgb(96,96,96)')
-        .transition()
-          .duration(350)
-          .attr('stroke-width', 3);
+    node
+      .transition()
+        .duration(350)
+        .attr('stroke-width', 3);
   };
 
   private funcMouseleave = function() {
     const node = d3.select(this);
 
-    if (node.empty()) {
-      return;
-    }
-
     node
-      .attr('stroke', 'gray')
       .transition()
         .duration(350)
         .attr('stroke-width', 1)
         .attr('r', node.attr('original-radius'));
   };
 
-  constructor() { }
+  constructor(objectLabelService: ObjectLabelInfoService) { }
 
   static funcNodeXCoord = function(): number {
     const circle = d3.select(this.parentNode).select('circle');
@@ -258,6 +264,7 @@ export class TreeNodeService {
       .append('circle')
         .classed('draggable', true)
         .attr('stroke', 'gray')
+        .attr('stroke-width', 1)
         .attr('fill', circleColor)
         .attr('cx', cx)
         .attr('cy', cy)

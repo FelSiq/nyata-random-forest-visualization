@@ -53,6 +53,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private maxDepth: number;
   private visualDepthFromRoot: number;
   private visualDepthFromLeaves: number;
+  private nodeIDByDepth: { [depth: number] : string[]; };
 
   constructor(private eleRef: ElementRef,
               private nodeService: TreeNodeService,
@@ -83,6 +84,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
   private initSvg() {
     this.svg = d3.select('svg');
+
+    this.nodeIDByDepth = {};
 
     this.cleanSvg();
 
@@ -183,8 +186,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const curTree = curTreeNodes.tree_.value as TreeInterface;
 
     this.maxDepth = +curTree.maximum_depth;
-    this.visualDepthFromRoot = Math.ceil(0.5 * this.maxDepth);
-    this.visualDepthFromLeaves = Math.floor(0.5 * this.maxDepth);
+    this.visualDepthFromRoot = Math.min(4, Math.ceil(0.5 * this.maxDepth));
+    this.visualDepthFromLeaves = Math.min(4, Math.floor(0.5 * this.maxDepth));
 
     const criterion = curTreeNodes.criterion.value;
 
@@ -220,7 +223,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         rootXCoord,
         cxDelta,
         rootYCoord,
-        cyDelta);
+        cyDelta,
+        0);
+
+    this.adjustNodePositions();
 
     if (this._decisionPath && this.chosenTree) {
       this.linkService.cleanPredictionPaths(
@@ -247,7 +253,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         cx: number,
         cxDelta: number,
         cy: number,
-        cyDelta: number): void {
+        cyDelta: number,
+        depth: number): void {
 
       const sonLeftId = +curTree.children_left[nodeId];
       const sonRightId = +curTree.children_right[nodeId];
@@ -258,14 +265,21 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       const nodeClassId = curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
       const circleColor = this.impurityColors(impurity);
 
-      const cxScaleFactor = (this.treeAngle === 90 || this.treeAngle === 270) ? 0.5 : 1.0;
-      const cyScaleFactor = (this.treeAngle === 0  || this.treeAngle === 180) ? 0.5 : 1.0;
+      const verticalAngle = (this.treeAngle === 90 || this.treeAngle === 270);
+
+      const cxScaleFactor = verticalAngle ? 0.5 : 1.0;
+      const cyScaleFactor = !verticalAngle ? 0.5 : 1.0;
 
       const radius = (
         TreeNodeService.radiusMinimum +
         TreeNodeService.radiusScaleFactor *
         (numInstInNode /
         +curTree.weighted_number_of_node_samples[0]));
+
+      if (!(depth in this.nodeIDByDepth)) {
+        this.nodeIDByDepth[depth] = [];
+      }
+      this.nodeIDByDepth[depth].push(TreeExtraService.formatNodeId(nodeId, true));
 
       this.nodeService.generateNode(
           this.nodes,
@@ -286,7 +300,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           });
 
       if (sonLeftId >= 0 && sonLeftId < curTree.capacity) {
-        const cxSonLeft = cx + (this.treeAngle === 90 || this.treeAngle === 270 ? -1 : 1) * cxDelta;
+        const cxSonLeft = cx + (verticalAngle ? -1 : 1) * cxDelta;
         const cySonLeft = cy + cyDelta;
 
         this.buildNode(
@@ -296,14 +310,15 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
             cxSonLeft,
             cxScaleFactor * cxDelta,
             cySonLeft,
-            cyScaleFactor * cyDelta);
+            cyScaleFactor * cyDelta,
+            depth + 1);
 
         this.linkService.connectNodes(this.links, this.nodes, nodeId, sonLeftId, '<=');
       }
 
       if (sonRightId >= 0 && sonRightId < curTree.capacity) {
         const cxSonRight = cx + cxDelta;
-        const cySonRight = cy + (this.treeAngle === 0 || this.treeAngle === 180 ? -1 : 1) * cyDelta;
+        const cySonRight = cy + (!verticalAngle ? -1 : 1) * cyDelta;
 
         this.buildNode(
             curTree,
@@ -312,7 +327,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
             cxSonRight,
             cxScaleFactor * cxDelta,
             cySonRight,
-            cyScaleFactor * cyDelta);
+            cyScaleFactor * cyDelta,
+            depth + 1);
 
         this.linkService.connectNodes(this.links, this.nodes, nodeId, sonRightId, '>');
       }
@@ -321,5 +337,25 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private rotateTree(angleUpdate: number | string): void {
     this.treeAngle = (this.treeAngle + +angleUpdate) % 360;
     this.changesHandler();
+  }
+
+  private adjustNodePositions(): void {
+    const verticalAngle = (this.treeAngle == 90 || this.treeAngle == 270);
+    const totalLength: number = verticalAngle ? this.width : this.height;
+
+    for (const depth in this.nodeIDByDepth) {
+      const nodeList: string[] = this.nodeIDByDepth[depth];
+      const divLength: number = totalLength / (1 + nodeList.length);
+
+      d3.selectAll(nodeList.join(','))
+        .each(function(d, i) {
+          const node = d3.select(this);
+          if (verticalAngle) {
+            TreeNodeService.moveNode(node, divLength * (i + 1), +node.attr('cy'));
+          } else {
+            TreeNodeService.moveNode(node, +node.attr('cx'), divLength * (i + 1));
+          }
+        });
+    }
   }
 }

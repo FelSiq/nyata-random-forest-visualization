@@ -10,9 +10,10 @@ import { TreeExtraService } from './tree-extra.service';
 export class TreeLinksService {
   static readonly styleColorLinkDefault = 'rgb(128, 128, 128)';
   static readonly styleColorLinkSelected = 'rgb(0, 0, 0)';
-  static readonly styleColorLinkPredict = 'rgb(255, 0, 0)';
+  static readonly styleColorLinkPredict = 'rgb(192, 0, 0)';
   static readonly styleWidthLinkDefault = 2;
   static readonly styleWidthLinkSelected = 6;
+  static readonly styleWidthLinkDragFactor = 2.0;
   static readonly styleColorTextOutline = 'black';
   static readonly styleTextFontSize = 16;
   static readonly styleTextSpacing = 4;
