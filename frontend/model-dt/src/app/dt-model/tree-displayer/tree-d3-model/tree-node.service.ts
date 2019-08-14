@@ -31,6 +31,8 @@ export class TreeNodeService {
 
   completeAttrName = false;
 
+  showNodeLabelsRect = true;
+
   private funcDragOnStart = function() {
     const node = d3.select(this);
 
@@ -296,7 +298,8 @@ export class TreeNodeService {
                            this.activeAttrs.length)
           .attr('rx', 5)
           .attr('opacity', 0.5)
-          .attr('fill', 'black');
+          .attr('fill', 'black')
+          .attr('visibility', this.showNodeLabelsRect ? 'visible' : 'hidden');
 
     } else {
       rects = nodes.selectAll('.node')
@@ -371,4 +374,11 @@ export class TreeNodeService {
     }
   }
 
+  toggleRectVisibility(nodes): void {
+    this.showNodeLabelsRect = !this.showNodeLabelsRect;
+
+    nodes.selectAll('.node')
+      .select('rect')
+        .attr('visibility', this.showNodeLabelsRect ? 'visible' : 'hidden');
+  }
 }

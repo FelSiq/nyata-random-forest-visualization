@@ -55,6 +55,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private visualDepthFromLeaves: number;
   private nodeIDByDepth: { [depth: number] : string[]; };
 
+  private showNodeLabelsRect = true;
+  private showLinkLabelsRect = true;
+  private rearrangeNodes = true;
+
   constructor(private eleRef: ElementRef,
               private nodeService: TreeNodeService,
               private linkService: TreeLinksService,
@@ -226,7 +230,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         cyDelta,
         0);
 
-    this.adjustNodePositions();
+    if (this.rearrangeNodes) {
+      this.adjustNodePositions();
+    }
 
     if (this._decisionPath && this.chosenTree) {
       this.linkService.cleanPredictionPaths(
@@ -358,4 +364,5 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         });
     }
   }
+
 }

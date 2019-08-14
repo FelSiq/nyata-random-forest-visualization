@@ -29,6 +29,8 @@ export class TreeLinksService {
 
   completeAttrName = false;
 
+  showLinkLabelsRect = true;
+
   constructor() { }
 
   static funcLinkHalfXCoord = function(): number {
@@ -134,7 +136,8 @@ export class TreeLinksService {
                            this.activeAttrs.length)
           .attr('rx', 5)
           .attr('opacity', 0.5)
-          .attr('fill', 'red');
+          .attr('fill', 'red')
+          .attr('visibility', this.showLinkLabelsRect ? 'visible' : 'hidden');
 
     } else {
       rects = links.selectAll('.link')
@@ -209,4 +212,11 @@ export class TreeLinksService {
     }
   }
 
+  toggleRectVisibility(links): void {
+    this.showLinkLabelsRect = !this.showLinkLabelsRect;
+
+    links.selectAll('.link')
+      .select('rect')
+        .attr('visibility', this.showLinkLabelsRect ? 'visible' : 'hidden');
+  }
 }
