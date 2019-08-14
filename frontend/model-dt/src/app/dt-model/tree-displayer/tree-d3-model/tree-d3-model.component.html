@@ -6,16 +6,19 @@
         Visual settings
       </mat-panel-title>
     </mat-expansion-panel-header>
-
     <ng-template matExpansionPanelContent>
       <mat-toolbar color="primary">
-        Toggle visible attributes
+        <mat-icon class="visual-settings-panel-icon">more</mat-icon>
+        Toggle attributes
       </mat-toolbar>
-      <mat-card>
-        <mat-card-title>
-          Node attributes
-        </mat-card-title>
-        <mat-card-content>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon class="visual-settings-panel-icon">bubble_chart</mat-icon>
+            Node attributes
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
           <mat-selection-list #nodeAttrList
                               dense
                               (selectionChange)="nodeService.toggleAttr($event.option.value); nodeService.updateNodeLabel(nodes)">
@@ -26,13 +29,16 @@
               Show {{ (nodeAttr | titlecase).split('-').join(' ') }} ({{ abbreviateAttrLabel(nodeAttr) }})
             </mat-list-option>
           </mat-selection-list>
-        </mat-card-content>
-      </mat-card>
-      <mat-card>
-        <mat-card-title>
-          Link attributes
-        </mat-card-title>
-        <mat-card-content>
+        </ng-template>
+      </mat-expansion-panel>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon class="visual-settings-panel-icon">share</mat-icon>
+            Link attributes
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
           <mat-selection-list #linkAttrList
                               dense
                               (selectionChange)="linkService.toggleAttr($event.option.value); linkService.updateLinkLabel(links)">
@@ -43,16 +49,20 @@
               Show {{ (linkAttr | titlecase).split('-').join(' ') }} ({{ abbreviateAttrLabel(linkAttr) }})
             </mat-list-option>
           </mat-selection-list>
-        </mat-card-content>
-      </mat-card>
+        </ng-template>
+      </mat-expansion-panel>
       <mat-toolbar color="primary">
-        Miscellaneous visualization attributes
+        <mat-icon class="visual-settings-panel-icon">texture</mat-icon>
+        Miscellaneous
       </mat-toolbar>
-      <mat-card>
-        <mat-card-title>
-          Visualization depth
-        </mat-card-title>
-        <mat-card-content>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon class="visual-settings-panel-icon">vertical_align_center</mat-icon>
+            Visualization depth
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
           <mat-list dense>
             <mat-list-item>
               From root ({{ visualDepthFromRoot }}):
@@ -103,13 +113,16 @@
               Visiblity of current tree: {{ (visualDepthFromLeaves + visualDepthFromRoot) / maxDepth | percent }}
             </mat-list-item>
           </mat-list>
-        </mat-card-content>
-      </mat-card>
-      <mat-card>
-        <mat-card-title>
-          Aesthetics
-        </mat-card-title>
-        <mat-card-content>
+        </ng-template>
+      </mat-expansion-panel>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon class="visual-settings-panel-icon">details</mat-icon>
+            Aesthetics
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
           <mat-list dense>
             <mat-list-item>
               <mat-slide-toggle color="primary"
@@ -133,8 +146,8 @@
               </mat-slide-toggle>
             </mat-list-item>
           </mat-list>
-        </mat-card-content>
-      </mat-card>
+        </ng-template>
+      </mat-expansion-panel>
     </ng-template>
   </mat-expansion-panel>
 </mat-accordion>
