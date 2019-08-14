@@ -109,11 +109,11 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     );
 
     /*
-    this.svg.call(d3Zoom.zoom()
+    this.svg
+      .call(d3Zoom.zoom()
       .scaleExtent([0.5, 3])
-      .translateExtent([[0, 0], [this.width, this.height]])
-      .on('zoom', () => {
-        this.svg
+      .on('zoom', function() {
+        d3.select(this)
           .attr('transform', d3.event.transform);
       }));
     */
@@ -131,10 +131,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       cxDelta = this.width / 4.05;
       cyDelta = 0.98 * this.height / (1 + curTree.maximum_depth);
 
-      rootXCoord = (
-          0.5 * this.width +
-          TreeNodeService.radiusMinimum +
-          TreeNodeService.radiusScaleFactor);
+      rootXCoord = 0.5 * this.width;
 
       rootYCoord = (
           TreeNodeService.radiusMinimum +
@@ -151,10 +148,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
                  TreeNodeService.radiusMinimum -
                  TreeNodeService.radiusScaleFactor) / +curTree.maximum_depth);
 
-      rootYCoord = (
-          0.5 * this.height +
-          TreeNodeService.radiusMinimum +
-          TreeNodeService.radiusScaleFactor);
+      rootYCoord = 0.5 * this.height;
 
       rootXCoord = (
           TreeNodeService.radiusMinimum +
@@ -284,7 +278,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
             'impurity': impurity,
             'decision-feature': feature >= 0 ? feature : null,
             'node-class': this.classes ? this.classes[+nodeClassId] : null,
-            'threshold': threshold,
+            'threshold': feature >= 0 ? threshold : null,
             'number-of-instances': numInstInNode,
             'parent-id': parentId,
             'son-left-id': sonLeftId,
