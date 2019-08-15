@@ -236,7 +236,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       .formatNodeId(TreeNodeService.aggregationDepthNodeId, true);
 
     this.nodeService.buildAggregationDepthNodeText(
-      this.nodes.select(aggregationNodeId));
+      this.nodes.select(aggregationNodeId),
+      this.maxDepth - (this.visualDepthFromRoot + this.visualDepthFromLeaves));
 
     if (this.rearrangeNodes) {
       this.adjustNodePositions();

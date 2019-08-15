@@ -17,6 +17,7 @@ export class TreeNodeService {
   static readonly styleColorTextOutline = 'black';
   static readonly styleTextFontSize = 16;
   static readonly styleTextSpacing = 4;
+  static readonly styleDepthNodeTextFontSize = 14;
   static readonly transitionDragEffect = 300;
   static readonly aggregationNodeDepthRadius = 48;
 
@@ -307,18 +308,31 @@ export class TreeNodeService {
         .on('mouseleave', this.funcMouseleave);
   }
 
-  buildAggregationDepthNodeText(agDepthNode): void {
-    agDepthNode.append('text')
-      .classed('draggable node-special-label', true)
-      .attr('font-size', 16)
+  private setAggregationDepthNodeTextStyle(text): void {
+    text
+      .attr('font-size', TreeNodeService.styleDepthNodeTextFontSize)
       .attr('font-family', "'Roboto', sans-serif")
       .attr('font-weight', 400)
-      .attr('fill', 'black')
+      .attr('fill', 'rgb(96,96,96)')
       .attr('text-anchor', 'middle')
       .attr('alignment-baseline', 'central')
+  }
+
+  buildAggregationDepthNodeText(agDepthNode, totalDepth: number): void {
+    const textDepth = agDepthNode.append('text')
+      .classed('draggable node-special-label', true)
       .attr('x', agDepthNode.attr('cx'))
       .attr('y', agDepthNode.attr('cy'))
+      .text('Total depth: ' + totalDepth);
+
+    const textNode = agDepthNode.append('text')
+      .classed('draggable node-special-label', true)
+      .attr('x', agDepthNode.attr('cx'))
+      .attr('y', +agDepthNode.attr('cy') + TreeNodeService.styleDepthNodeTextFontSize + 4)
       .text('Nodes in: ' + agDepthNode.attr('number-of-nodes'));
+
+    this.setAggregationDepthNodeTextStyle(textNode);
+    this.setAggregationDepthNodeTextStyle(textDepth);
   }
 
   private buildNodesLabelRect(nodes) {
