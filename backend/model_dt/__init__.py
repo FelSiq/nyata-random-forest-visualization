@@ -119,7 +119,8 @@ class PredictSingleInstance(flask_restful.Resource):
         self.y = y
         self.attr_labels = attr_labels
 
-    def _preprocess_instance(self, instance: str,
+    @staticmethod
+    def _preprocess_instance(instance: str,
                              sep: str = ",") -> t.Optional[np.ndarray]:
         """Preprocess the user-given single instance."""
         preproc_inst = np.array(RE_EMPTY_SPACE.sub("", instance).split(sep))
@@ -129,7 +130,8 @@ class PredictSingleInstance(flask_restful.Resource):
 
         return preproc_inst.astype(np.float32).reshape(1, -1)
 
-    def _handle_errors(self, err_code: t.Sequence[str]) -> t.Dict[str, str]:
+    @staticmethod
+    def _handle_errors(err_code: t.Sequence[str]) -> t.Dict[str, str]:
         """Handle probable errors found while predicting the instance."""
         err_msg = {}
 
@@ -164,14 +166,14 @@ class PredictSingleInstance(flask_restful.Resource):
 
     def get(self, instance: str):
         """Predict single instance and provide information."""
-        inst_proc = self._preprocess_instance(instance)
+        inst_proc = PredictSingleInstance._preprocess_instance(instance)
         err_code = []
 
         if inst_proc is None:
             err_code.append("ERROR_MISSING_VAL")
 
         if err_code:
-            return flask.jsonify(self._handle_errors(err_code))
+            return flask.jsonify(PredictSingleInstance._handle_errors(err_code))
 
         pred_vals = model_dt.json_encoder_type_manager(
             collections.OrderedDict((

@@ -92,7 +92,7 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
 
 
 def get_class_freqs(dt_model: sklearn.ensemble.forest.RandomForestClassifier,
-                    instance: np.ndarray) -> t.Optional[t.Dict[str, str]]:
+                    instance: np.ndarray) -> t.Optional[t.Dict[str, t.Dict[str, str]]]:
     """Get the frequency of every class from a RF Classifier prediction."""
     if not isinstance(dt_model,
                       sklearn.ensemble.forest.RandomForestClassifier):
@@ -167,10 +167,15 @@ def get_metrics(
         true_labels: np.array,
 ) -> t.Dict[str, t.Any]:
     """Evaluate given DT/RF models using some chosen metrics."""
-    def safe_call_func(func, true_labels, preds):
+    def safe_call_func(func, true_labels, preds) -> t.Optional[str]:
         """Call an evaluation metric, catching ValueError exceptions."""
         try:
-            return func(true_labels, preds)
+            res = func(true_labels, preds)
+
+            if res is not None:
+                res = "{:.2f}".format(res)
+
+            return res
 
         except ValueError as val_err:
             return None
@@ -188,9 +193,7 @@ def get_metrics(
     if chosen_metrics:
         return {
             metric_name: {
-                "value":
-                "{:.2f}".format(
-                    safe_call_func(metric_func, true_labels, preds)),
+                "value": safe_call_func(metric_func, true_labels, preds),
                 "description":
                 "Todo.",
             }
@@ -221,7 +224,9 @@ def get_toy_model(forest: bool = False, regressor: bool = False):
     else:
         args = {}
 
-    model = ALGORITHMS.get((forest, regressor))(**args)
+    model = ALGORITHMS.get(
+        (forest, regressor),
+        sklearn.tree.DecisionTreeClassifier)(**args)
     model.fit(iris.data, iris.target)
 
     return model, X, y, attr_labels
