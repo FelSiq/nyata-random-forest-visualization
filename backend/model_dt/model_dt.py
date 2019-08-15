@@ -10,9 +10,13 @@ import numpy as np
 import scipy.sparse
 
 RE_KEY_NUMBEROF = re.compile(r"\bn \b")
+"""Regular expression for getting 'n ' string, to format JSON keys."""
 RE_KEY_MIN = re.compile(r"\bmin\b")
+"""Regular expression for getting 'min' string, to format JSON keys."""
 RE_KEY_MAX = re.compile(r"\bmax\b")
+"""Regular expression for getting 'max' string, to format JSON keys."""
 RE_KEY_PARAMS = re.compile(r"\bparams\b")
+"""Regular expression for getting 'params' string, to format JSON keys."""
 
 METRICS_CLASSIFICATION = {
     "accuracy": sklearn.metrics.accuracy_score,
@@ -21,6 +25,7 @@ METRICS_CLASSIFICATION = {
     "precision": sklearn.metrics.precision_score,
     "recall": sklearn.metrics.recall_score,
 }
+"""Chosen metrics to evaluate classifier models."""
 
 METRICS_REGRESSION = {
     "mean_absolute_error": sklearn.metrics.mean_absolute_error,
@@ -30,6 +35,7 @@ METRICS_REGRESSION = {
     "median_absolute_error": sklearn.metrics.median_absolute_error,
     "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
 }
+"""Chosen metrics to evaluate regressor models."""
 
 
 def preprocess_key(key: str) -> str:
@@ -87,7 +93,7 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
 
 def get_class_freqs(dt_model: sklearn.ensemble.forest.RandomForestClassifier,
                     instance: np.ndarray) -> t.Optional[t.Dict[str, str]]:
-    """."""
+    """Get the frequency of every class from a RF Classifier prediction."""
     if not isinstance(dt_model,
                       sklearn.ensemble.forest.RandomForestClassifier):
         return None
@@ -160,7 +166,9 @@ def get_metrics(
         preds: np.array,
         true_labels: np.array,
 ) -> t.Dict[str, t.Any]:
+    """Evaluate given DT/RF models using some chosen metrics."""
     def safe_call_func(func, true_labels, preds):
+        """Call an evaluation metric, catching ValueError exceptions."""
         try:
             return func(true_labels, preds)
 
@@ -193,7 +201,7 @@ def get_metrics(
 
 
 def get_toy_model(forest: bool = False, regressor: bool = False):
-    """Create a DT toy model for testing purposes."""
+    """Create a DT/RF toy model for testing purposes."""
     from sklearn.datasets import load_iris
     iris = load_iris()  # type: sklearn.utils.Bunch
 

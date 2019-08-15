@@ -1,4 +1,4 @@
-"""."""
+"""App module of the DT/TF visualization backend."""
 
 import typing as t
 import re
@@ -24,14 +24,14 @@ NULL_VALUES = {
     "",
     "nil",
 }
-"""."""
+"""Values in the instances to be interpreted as missing values."""
 
 RE_EMPTY_SPACE = re.compile(r"\s+|%20")
-"""."""
+"""Regular expression for empty spaces to preprocess given instances."""
 
 
 class DecisionTree(flask_restful.Resource):
-    """."""
+    """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
 
     def __init__(self,
                  model,
@@ -45,14 +45,14 @@ class DecisionTree(flask_restful.Resource):
         self.attr_labels = attr_labels
 
     def get(self):
-        """."""
+        """Serialize and jsonify a sklearn RF/DT model."""
         return flask.jsonify(
             model_dt.serialize_decision_tree(
                 dt_model=self.model, attr_labels=self.attr_labels))
 
 
 class PredictDataset(flask_restful.Resource):
-    """."""
+    """Class dedicated to give methods for predicting a whole dataset."""
 
     def __init__(self,
                  model,
@@ -77,7 +77,7 @@ class PredictDataset(flask_restful.Resource):
         self.reqparse.add_argument("hasClasses", type=bool, location="form")
 
     def post(self):
-        """."""
+        """Make predictions and give metrics for the user-given dataset."""
         args = self.reqparse.parse_args()
 
         dataset_file = args["file"]
@@ -106,7 +106,7 @@ class PredictDataset(flask_restful.Resource):
 
 
 class PredictSingleInstance(flask_restful.Resource):
-    """."""
+    """Class dedicated to provide methods for predicting a single instance."""
 
     def __init__(self,
                  model,
@@ -121,7 +121,7 @@ class PredictSingleInstance(flask_restful.Resource):
 
     def _preprocess_instance(self, instance: str,
                              sep: str = ",") -> t.Optional[np.ndarray]:
-        """."""
+        """Preprocess the user-given single instance."""
         preproc_inst = np.array(RE_EMPTY_SPACE.sub("", instance).split(sep))
 
         if not set(map(str.lower, preproc_inst)).isdisjoint(NULL_VALUES):
@@ -130,7 +130,7 @@ class PredictSingleInstance(flask_restful.Resource):
         return preproc_inst.astype(np.float32).reshape(1, -1)
 
     def _handle_errors(self, err_code: t.Sequence[str]) -> t.Dict[str, str]:
-        """."""
+        """Handle probable errors found while predicting the instance."""
         err_msg = {}
 
         if "ERROR_MISSING_VAL" in err_code:
@@ -140,7 +140,7 @@ class PredictSingleInstance(flask_restful.Resource):
 
     def _decision_path(self,
                        inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
-        """."""
+        """Get the decision path of the instace for every tree in the model."""
         if isinstance(self.model, (sklearn.tree.tree.DecisionTreeClassifier,
                                    sklearn.tree.tree.DecisionTreeRegressor)):
             nodes = [self.model.decision_path(inst_proc).indices]
@@ -163,7 +163,7 @@ class PredictSingleInstance(flask_restful.Resource):
         return nodes
 
     def get(self, instance: str):
-        """."""
+        """Predict single instance and provide information."""
         inst_proc = self._preprocess_instance(instance)
         err_code = []
 
@@ -176,16 +176,19 @@ class PredictSingleInstance(flask_restful.Resource):
         pred_vals = model_dt.json_encoder_type_manager(
             collections.OrderedDict((
                 ("prediction_result", {
-                    "value": self.model.predict(inst_proc)[0]
+                    "value": self.model.predict(inst_proc)[0],
+                    "description": "Final value predicted by the model.",
                 }),
                 ("classes_by_tree", {
-                    "value": model_dt.get_class_freqs(self.model, inst_proc)
+                    "value": model_dt.get_class_freqs(self.model, inst_proc),
+                    "description": "Frequency of every class "
+                                   "for every tree in the model.",
                 }),
                 ("decision_path", {
-                    "value": self._decision_path(inst_proc)
+                    "value": self._decision_path(inst_proc),
                 }),
                 ("leaf_id", {
-                    "value": self.model.apply(inst_proc)[0]
+                    "value": self.model.apply(inst_proc)[0],
                 }),
             )))
 
