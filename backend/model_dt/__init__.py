@@ -1,3 +1,5 @@
+"""."""
+
 import typing as t
 import re
 import collections
@@ -9,6 +11,7 @@ import flask_restful.reqparse
 import werkzeug
 import numpy as np
 import pandas as pd
+import sklearn.tree
 
 from . import model_dt
 
@@ -21,33 +24,42 @@ NULL_VALUES = {
     "",
     "nil",
 }
+"""."""
 
 RE_EMPTY_SPACE = re.compile(r"\s+|%20")
+"""."""
 
 
 class DecisionTree(flask_restful.Resource):
+    """."""
+
     def __init__(self,
                  model,
                  X: np.ndarray,
                  y: np.ndarray,
                  attr_labels: t.Optional[t.Sequence[str]] = None):
+        """."""
         self.model = model
         self.X = X
         self.y = y
         self.attr_labels = attr_labels
 
     def get(self):
-        return flask.jsonify(model_dt.serialize_decision_tree(
-            dt_model=self.model,
-            attr_labels=self.attr_labels))
+        """."""
+        return flask.jsonify(
+            model_dt.serialize_decision_tree(
+                dt_model=self.model, attr_labels=self.attr_labels))
 
 
 class PredictDataset(flask_restful.Resource):
+    """."""
+
     def __init__(self,
                  model,
                  X: np.ndarray,
                  y: np.ndarray,
                  attr_labels: t.Optional[t.Sequence[str]] = None):
+        """."""
         self.model = model
         self.X = X
         self.y = y
@@ -56,20 +68,16 @@ class PredictDataset(flask_restful.Resource):
         self.reqparse = flask_restful.reqparse.RequestParser()
 
         self.reqparse.add_argument(
-            "file",
-            type=werkzeug.datastructures.FileStorage,
-            location="files")
+            "file", type=werkzeug.datastructures.FileStorage, location="files")
 
-        self.reqparse.add_argument(
-            "sep", type=str, location="form")
+        self.reqparse.add_argument("sep", type=str, location="form")
 
-        self.reqparse.add_argument(
-            "hasHeader", type=bool, location="form")
+        self.reqparse.add_argument("hasHeader", type=bool, location="form")
 
-        self.reqparse.add_argument(
-            "hasClasses", type=bool, location="form")
+        self.reqparse.add_argument("hasClasses", type=bool, location="form")
 
     def post(self):
+        """."""
         args = self.reqparse.parse_args()
 
         dataset_file = args["file"]
@@ -84,7 +92,7 @@ class PredictDataset(flask_restful.Resource):
 
         if has_classes:
             X = data.iloc[:, :-1].values
-            y = data.iloc[:,  -1].values
+            y = data.iloc[:, -1].values
 
         else:
             X = data.values
@@ -92,18 +100,20 @@ class PredictDataset(flask_restful.Resource):
 
         preds = self.model.predict(X)
 
-        return flask.jsonify(model_dt.get_metrics(
-            dt_model=self.model,
-            preds=preds,
-            true_labels=y))
-        
+        return flask.jsonify(
+            model_dt.get_metrics(
+                dt_model=self.model, preds=preds, true_labels=y))
+
 
 class PredictSingleInstance(flask_restful.Resource):
+    """."""
+
     def __init__(self,
                  model,
                  X: np.ndarray,
                  y: np.ndarray,
                  attr_labels: t.Optional[t.Sequence[str]] = None):
+        """."""
         self.model = model
         self.X = X
         self.y = y
@@ -111,6 +121,7 @@ class PredictSingleInstance(flask_restful.Resource):
 
     def _preprocess_instance(self, instance: str,
                              sep: str = ",") -> t.Optional[np.ndarray]:
+        """."""
         preproc_inst = np.array(RE_EMPTY_SPACE.sub("", instance).split(sep))
 
         if not set(map(str.lower, preproc_inst)).isdisjoint(NULL_VALUES):
@@ -119,6 +130,7 @@ class PredictSingleInstance(flask_restful.Resource):
         return preproc_inst.astype(np.float32).reshape(1, -1)
 
     def _handle_errors(self, err_code: t.Sequence[str]) -> t.Dict[str, str]:
+        """."""
         err_msg = {}
 
         if "ERROR_MISSING_VAL" in err_code:
@@ -126,24 +138,32 @@ class PredictSingleInstance(flask_restful.Resource):
 
         return err_msg
 
-    def _decision_path(self, inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
-        dec_path, indices = self.model.decision_path(inst_proc)
-        
-        nodes = []
-        base_index = 0
-        next_tree_id = 0
-        
-        for value in dec_path.indices:
-            if value == indices[next_tree_id]:
-                base_index = value
-                next_tree_id += 1
-                nodes.append([])
+    def _decision_path(self,
+                       inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
+        """."""
+        if isinstance(self.model, (sklearn.tree.tree.DecisionTreeClassifier,
+                                   sklearn.tree.tree.DecisionTreeRegressor)):
+            nodes = [self.model.decision_path(inst_proc).indices]
 
-            nodes[-1].append(value - base_index)
+        else:
+            dec_path, indices = self.model.decision_path(inst_proc)
+
+            nodes = []
+            base_index = 0
+            next_tree_id = 0
+
+            for value in dec_path.indices:
+                if value == indices[next_tree_id]:
+                    base_index = value
+                    next_tree_id += 1
+                    nodes.append([])
+
+                nodes[-1].append(value - base_index)
 
         return nodes
 
     def get(self, instance: str):
+        """."""
         inst_proc = self._preprocess_instance(instance)
         err_code = []
 

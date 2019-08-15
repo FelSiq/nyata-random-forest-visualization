@@ -15,21 +15,20 @@ RE_KEY_MAX = re.compile(r"\bmax\b")
 RE_KEY_PARAMS = re.compile(r"\bparams\b")
 
 METRICS_CLASSIFICATION = {
-  "accuracy": sklearn.metrics.accuracy_score,
-  "log_loss": sklearn.metrics.log_loss,
-  "balanced_accuracy": sklearn.metrics.balanced_accuracy_score,
-  "average_precision": sklearn.metrics.average_precision_score,
-  "precision": sklearn.metrics.precision_score,
-  "recall": sklearn.metrics.recall_score,
+    "accuracy": sklearn.metrics.accuracy_score,
+    "balanced_accuracy": sklearn.metrics.balanced_accuracy_score,
+    "average_precision": sklearn.metrics.average_precision_score,
+    "precision": sklearn.metrics.precision_score,
+    "recall": sklearn.metrics.recall_score,
 }
 
 METRICS_REGRESSION = {
-  "mean_absolute_error": sklearn.metrics.mean_absolute_error,
-  "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
-  "explained_variance_score": sklearn.metrics.explained_variance_score,
-  "mean_squared_error": sklearn.metrics.mean_squared_error,
-  "median_absolute_error": sklearn.metrics.median_absolute_error,
-  "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
+    "mean_absolute_error": sklearn.metrics.mean_absolute_error,
+    "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
+    "explained_variance_score": sklearn.metrics.explained_variance_score,
+    "mean_squared_error": sklearn.metrics.mean_squared_error,
+    "median_absolute_error": sklearn.metrics.median_absolute_error,
+    "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
 }
 
 
@@ -89,7 +88,8 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
 def get_class_freqs(dt_model: sklearn.ensemble.forest.RandomForestClassifier,
                     instance: np.ndarray) -> t.Optional[t.Dict[str, str]]:
     """."""
-    if not isinstance(dt_model, sklearn.ensemble.forest.RandomForestClassifier):
+    if not isinstance(dt_model,
+                      sklearn.ensemble.forest.RandomForestClassifier):
         return None
 
     class_by_tree = {str(class_label): 0
@@ -135,19 +135,19 @@ def serialize_decision_tree(
     }
 
     try:
-      if attr_labels is None:
-          attr_num = len(dt_model.feature_importances_)
-          attr_labels = ["Attribute {}".format(i) for i in range(attr_num)]
+        if attr_labels is None:
+            attr_num = len(dt_model.feature_importances_)
+            attr_labels = ["Attribute {}".format(i) for i in range(attr_num)]
 
-      new_model["feature_importances_"] = {
-          "value": json_encoder_type_manager(
-              list(map(lambda item: "{}: {:.2f} %".format(item[1], 100 * item[0]),
-              zip(dt_model.feature_importances_, attr_labels)))),
-          "description": "TODO: this documentation properly."
-      }
+        new_model["feature_importances_"] = {
+            "value": json_encoder_type_manager(
+                list(map(lambda item: "{}: {:.2f} %".format(item[1], 100 * item[0]),
+                zip(dt_model.feature_importances_, attr_labels)))),
+            "description": "TODO: this documentation properly."
+        }
 
     except AttributeError:
-      pass
+        pass
 
     return new_model
 
@@ -162,10 +162,10 @@ def get_metrics(
 ) -> t.Dict[str, t.Any]:
     def safe_call_func(func, true_labels, preds):
         try:
-          return func(true_labels, preds)
+            return func(true_labels, preds)
 
         except ValueError as val_err:
-          return None
+            return None
 
     chosen_metrics = None
 
@@ -180,15 +180,19 @@ def get_metrics(
     if chosen_metrics:
         return {
             metric_name: {
-                "value": safe_call_func(metric_func, true_labels, preds),
-                "description": "Todo.",
+                "value":
+                "{:.2f}".format(
+                    safe_call_func(metric_func, true_labels, preds)),
+                "description":
+                "Todo.",
             }
             for metric_name, metric_func in chosen_metrics.items()
         }
 
     return {}
 
-def get_toy_model(forest: bool = True, regressor: bool = False):
+
+def get_toy_model(forest: bool = False, regressor: bool = False):
     """Create a DT toy model for testing purposes."""
     from sklearn.datasets import load_iris
     iris = load_iris()  # type: sklearn.utils.Bunch
@@ -204,7 +208,12 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
         (True, True): sklearn.ensemble.RandomForestRegressor,
     }
 
-    model = ALGORITHMS.get((forest, regressor))(n_estimators=10)
+    if forest:
+        args = {"n_estimators": 10}
+    else:
+        args = {}
+
+    model = ALGORITHMS.get((forest, regressor))(**args)
     model.fit(iris.data, iris.target)
 
     return model, X, y, attr_labels
