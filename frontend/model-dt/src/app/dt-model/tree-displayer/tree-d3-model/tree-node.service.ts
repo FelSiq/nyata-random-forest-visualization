@@ -136,6 +136,10 @@ export class TreeNodeService {
   }
 
   static moveNodeLinks(node): void {
+    if (+node.attr('index') < 0) {
+      console.log('specialNodeMoving');
+    }
+
     const [linkA, linkB, linkC] = TreeNodeService.getNodeLinks(node);
     const circle = node.select('circle');
 
@@ -314,7 +318,7 @@ export class TreeNodeService {
         .remove();
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
-      let curAttr = this.activeAttrs[i];
+      const curAttr = this.activeAttrs[i];
 
       const formatedAttrLabel = (
           this.completeAttrName ?
@@ -381,4 +385,5 @@ export class TreeNodeService {
       .select('rect')
         .attr('visibility', this.showNodeLabelsRect ? 'visible' : 'hidden');
   }
+
 }

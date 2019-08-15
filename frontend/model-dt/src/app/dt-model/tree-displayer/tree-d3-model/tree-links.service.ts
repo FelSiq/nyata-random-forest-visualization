@@ -59,29 +59,31 @@ export class TreeLinksService {
       predictPathLink ? 
       TreeLinksService.styleColorLinkPredict :
       TreeLinksService.styleColorLinkDefault);
-  }
+  };
 
   connectNodes(links,
                nodes,
                nodeAId: number,
                nodeBId: number,
                decision: string): void {
+    if (nodeAId === nodeBId) {
+      return;
+    }
+
     const nodeA = nodes.select(TreeExtraService.formatNodeId(nodeAId, true));
     const nodeB = nodes.select(TreeExtraService.formatNodeId(nodeBId, true));
 
-    const weight: string = (
-      100 * +nodeB.attr('number-of-instances') / +nodeA.attr('number-of-instances')
-    ).toFixed(1) + '%';
+    if (nodeA.empty() || nodeB.empty()) {
+      return;
+    }
 
-    links.append('g')
+    const newLink = links.append('g')
       .classed('link', true)
       .attr('id', TreeExtraService.formatLinkId(nodeAId, nodeBId))
       .attr('node-a-id', nodeAId)
-      .attr('node-b-id', nodeBId)
-      .attr('decision', decision)
-      .attr('threshold', nodeA.attr('threshold'))
-      .attr('decision-feature', nodeA.attr('decision-feature'))
-      .attr('weight', weight)
+      .attr('node-b-id', nodeBId);
+
+    newLink
       .append('line')
         .attr('x1', nodeA.attr('cx'))
         .attr('x2', nodeB.attr('cx'))
@@ -89,6 +91,18 @@ export class TreeLinksService {
         .attr('y2', nodeB.attr('cy'))
         .style('stroke-width', TreeLinksService.styleWidthLinkDefault)
         .style('stroke', TreeLinksService.styleColorLinkDefault);
+
+    if (+nodeA.attr('index') >= 0 && +nodeB.attr('index') >= 0) {
+      const weight: string = (
+        100 * +nodeB.attr('number-of-instances') / +nodeA.attr('number-of-instances')
+      ).toFixed(1) + '%';
+
+      newLink
+        .attr('decision', decision)
+        .attr('threshold', nodeA.attr('threshold'))
+        .attr('decision-feature', nodeA.attr('decision-feature'))
+        .attr('weight', weight);
+    }
   }
 
   cleanPredictionPaths(links, dashed = false): void {
@@ -113,20 +127,16 @@ export class TreeLinksService {
     }
   }
 
-  updateLinkLabel(links): void {
-    if (this.activeAttrs.length === 0) {
-      links.selectAll('.link')
-        .selectAll('.link-label')
-          .remove();
+  private checkAggregationLink = function() {
+    const link = d3.select(this);
+    const aggregationLink = (+link.attr('node-a-id') < 0 ||
+                             +link.attr('node-b-id') < 0);
+    return aggregationLink ? null : this;
+  };
 
-      return;
-
-    }
-
-    let rects = null;
-
-    if (links.select('.link').select('rect').empty()) {
-      rects = links.selectAll('.link')
+  private buildLinksLabelRect(links) {
+    const rects = links.selectAll('.link')
+      .select(this.checkAggregationLink)
         .append('rect')
           .raise()
           .classed('draggable link-label', true)
@@ -139,20 +149,16 @@ export class TreeLinksService {
           .attr('fill', 'red')
           .attr('visibility', this.showLinkLabelsRect ? 'visible' : 'hidden');
 
-    } else {
-      rects = links.selectAll('.link')
-        .select('rect')
-          .attr('height', (TreeLinksService.styleTextFontSize +
-                           TreeLinksService.styleTextSpacing) *
-                           this.activeAttrs.length);
-    }
+    return rects;
+  }
 
+  private buildLinksLabelText(links): void {
     links.selectAll('.link')
       .selectAll('text')
         .remove();
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
-      let curAttr = this.activeAttrs[i];
+      const curAttr = this.activeAttrs[i];
 
       const formatedAttrLabel = (
           this.completeAttrName ?
@@ -165,27 +171,53 @@ export class TreeLinksService {
                                  TreeLinksService.styleTextSpacing) *
                                 (i - 0.5 * this.activeAttrs.length));
       links.selectAll('.link')
-        .append('text')
-          .classed('draggable link-label', true)
-          .attr('font-size', TreeLinksService.styleTextFontSize)
-          .attr('font-family', "'Roboto', sans-serif")
-          .attr('font-weight', 900)
-          .attr('fill', 'white')
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'central')
-          .attr('x', TreeLinksService.funcLinkHalfXCoord)
-          .attr('y', TreeLinksService.funcLinkHalfYCoord)
-          .attr('transform', 'translate(0, ' + translationValue + ')')
-          .text(function(): string {
-            let value: string | number = d3.select(this.parentNode).attr(curAttr);
-            if (+value && value.indexOf('.') > -1 && value.length > 4) {
-              value = (+value).toFixed(2);
-            }
-            return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
-          })
-          .style('stroke', TreeLinksService.styleColorTextOutline)
-          .style('stroke-width', '1px');
+        .select(this.checkAggregationLink)
+          .append('text')
+            .classed('draggable link-label', true)
+            .attr('font-size', TreeLinksService.styleTextFontSize)
+            .attr('font-family', "'Roboto', sans-serif")
+            .attr('font-weight', 900)
+            .attr('fill', 'white')
+            .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'central')
+            .attr('x', TreeLinksService.funcLinkHalfXCoord)
+            .attr('y', TreeLinksService.funcLinkHalfYCoord)
+            .attr('transform', 'translate(0, ' + translationValue + ')')
+            .text(function(): string {
+              let value: string | number = d3.select(this.parentNode).attr(curAttr);
+              if (+value && value.indexOf('.') > -1 && value.length > 4) {
+                value = (+value).toFixed(2);
+              }
+              return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
+            })
+            .style('stroke', TreeLinksService.styleColorTextOutline)
+            .style('stroke-width', '1px');
     }
+  }
+
+  updateLinkLabel(links): void {
+    if (this.activeAttrs.length === 0) {
+      links.selectAll('.link')
+        .selectAll('.link-label')
+          .remove();
+
+      return;
+    }
+
+    let rects = null;
+
+    if (links.select('.link').select('rect').empty()) {
+      rects = this.buildLinksLabelRect(links);
+
+    } else {
+      rects = links.selectAll('.link')
+        .select('rect')
+          .attr('height', (TreeLinksService.styleTextFontSize +
+                           TreeLinksService.styleTextSpacing) *
+                           this.activeAttrs.length);
+    }
+
+    this.buildLinksLabelText(links);
 
     if (rects) {
       let labelWidth = 0;

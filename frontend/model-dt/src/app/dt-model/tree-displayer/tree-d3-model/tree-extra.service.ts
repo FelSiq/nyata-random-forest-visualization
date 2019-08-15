@@ -19,8 +19,8 @@ export class TreeExtraService {
   }
 
   static abbreviateAttrLabel(attrLabel: string, separator = '-'): string {
-    let letters: string[] = [];
-    for (let token of attrLabel.split(separator)) {
+    const letters: string[] = [];
+    for (const token of attrLabel.split(separator)) {
       letters.push(token[0].toUpperCase());
     }
     return letters.join('');
