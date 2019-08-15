@@ -225,12 +225,18 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this.buildNode(
         curTree,
         0,
-        -1,
+        null,
         rootXCoord,
         cxDelta,
         rootYCoord,
         cyDelta,
         0);
+
+    const aggregationNodeId = TreeExtraService
+      .formatNodeId(TreeNodeService.aggregationDepthNodeId, true);
+
+    this.nodeService.buildAggregationDepthNodeText(
+      this.nodes.select(aggregationNodeId));
 
     if (this.rearrangeNodes) {
       this.adjustNodePositions();
@@ -273,9 +279,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           depth <= this.maxDepth - this.visualDepthFromLeaves) {
           cxScaleFactor = 1.0;
           cyScaleFactor = 1.0;
-          nodeId = -1;
+          nodeId = TreeNodeService.aggregationDepthNodeId;
 
-          const aggregationNode = this.nodes.select(TreeExtraService.formatNodeId(nodeId, true));
+          const aggregationNodeId = TreeExtraService.formatNodeId(nodeId, true);
+          const aggregationNode = this.nodes.select(aggregationNodeId);
 
           if (aggregationNode.empty()) {
             this.nodeService.generateNode(
@@ -283,12 +290,12 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
                 nodeId,
                 this.verticalAngle ? 0.5 * this.width : cx,
                 !this.verticalAngle ? 0.5 * this.height : cy,
-                (TreeNodeService.radiusScaleFactor +
-                 TreeNodeService.radiusMinimum),
+                TreeNodeService.aggregationNodeDepthRadius,
                 'white',
                 {
                   'number-of-nodes': 1,
                 });
+
           } else {
             aggregationNode.attr(
               'number-of-nodes', 1 + +aggregationNode.attr('number-of-nodes'));
@@ -329,8 +336,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
               'threshold': feature >= 0 ? threshold : null,
               'number-of-instances': numInstInNode,
               'parent-id': parentId,
-              'son-left-id': aggregationIsChildren ? -1 : sonLeftId,
-              'son-right-id': aggregationIsChildren ? -1 : sonRightId,
+              'son-left-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
+              'son-right-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
             });
       }
 
@@ -352,7 +359,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           this.links,
           this.nodes,
           nodeId,
-          aggregationIsChildren ? -1 : sonLeftId,
+          aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
           '<=');
       }
 
@@ -374,7 +381,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           this.links,
           this.nodes,
           nodeId,
-          aggregationIsChildren ? -1 : sonRightId,
+          aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
           '>');
       }
   }

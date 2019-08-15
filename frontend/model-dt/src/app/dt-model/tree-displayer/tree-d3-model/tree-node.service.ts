@@ -18,6 +18,9 @@ export class TreeNodeService {
   static readonly styleTextFontSize = 16;
   static readonly styleTextSpacing = 4;
   static readonly transitionDragEffect = 300;
+  static readonly aggregationNodeDepthRadius = 48;
+
+  static readonly aggregationDepthNodeId = -1;
 
   readonly visibleAttrs = [
     'impurity',
@@ -122,7 +125,7 @@ export class TreeNodeService {
             .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
   };
 
-  static getNodeLinks(node): string[] {
+  static getConventionalNodeLinks(node): string[] {
     const nodeIndex = +node.attr('index');
     const parentId = +node.attr('parent-id');
     const sonLeftId = +node.attr('son-left-id');
@@ -136,11 +139,29 @@ export class TreeNodeService {
   }
 
   static moveNodeLinks(node): void {
-    if (+node.attr('index') < 0) {
-      console.log('specialNodeMoving');
+    const nodeIndex = +node.attr('index');
+
+    if (nodeIndex < 0) {
+      d3.selectAll('.link')
+        .select(function() {
+          return +d3.select(this).attr('node-a-id') === nodeIndex ? this : null;
+        })
+          .select('line')
+            .attr('x1', node.attr('cx'))
+            .attr('y1', node.attr('cy'));
+
+      d3.selectAll('.link')
+        .select(function() {
+          return +d3.select(this).attr('node-b-id') === nodeIndex ? this : null;
+        })
+          .select('line')
+            .attr('x2', node.attr('cx'))
+            .attr('y2', node.attr('cy'));
+
+      return;
     }
 
-    const [linkA, linkB, linkC] = TreeNodeService.getNodeLinks(node);
+    const [linkA, linkB, linkC] = TreeNodeService.getConventionalNodeLinks(node);
     const circle = node.select('circle');
 
     d3.selectAll([linkA, linkB].join(','))
@@ -219,6 +240,12 @@ export class TreeNodeService {
         .attr('r', node.attr('original-radius'));
   };
 
+  private filterAggregationNode = function() {
+    const node = d3.select(this);
+    const aggregationNode = +node.attr('index') < 0;
+    return aggregationNode ? null : this;
+  };
+
   constructor(objectLabelService: ObjectLabelInfoService) { }
 
   static funcNodeXCoord = function(): number {
@@ -280,11 +307,19 @@ export class TreeNodeService {
         .on('mouseleave', this.funcMouseleave);
   }
 
-  private filterAggregationNode = function() {
-    const node = d3.select(this);
-    const aggregationNode = +node.attr('index') < 0;
-    return aggregationNode ? null : this;
-  };
+  buildAggregationDepthNodeText(agDepthNode): void {
+    agDepthNode.append('text')
+      .classed('draggable node-special-label', true)
+      .attr('font-size', 16)
+      .attr('font-family', "'Roboto', sans-serif")
+      .attr('font-weight', 400)
+      .attr('fill', 'black')
+      .attr('text-anchor', 'middle')
+      .attr('alignment-baseline', 'central')
+      .attr('x', agDepthNode.attr('cx'))
+      .attr('y', agDepthNode.attr('cy'))
+      .text('Nodes in: ' + agDepthNode.attr('number-of-nodes'));
+  }
 
   private buildNodesLabelRect(nodes) {
     const rects = nodes.selectAll('.node')
