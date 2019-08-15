@@ -102,42 +102,49 @@
   
     <ng-template matExpansionPanelContent>
       <form (ngSubmit)="uploadDatasetToPredict()">
-        <p>
-          Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}.
-        </p>
-        <div>
-          <mat-checkbox [checked]="datasetHasHeader"
-                        color="primary"
-                        (change)="datasetHasHeader = !datasetHasHeader"
-                        matTooltip="Select this option if the first row of your dataset is the attribute labels.">
-            First row is the attribute labels
-          </mat-checkbox>
-        <div>
-        </div>
-          <mat-checkbox [checked]="datasetHasClasses"
-                        color="primary"
-                        (change)="datasetHasClasses = !datasetHasClasses"
-                        matTooltip="Select this option if the last column of your dataset is the dependent attribute and, thus, should be used just for computing performance metrics.">
-            Last column is the dependent attribute
-          </mat-checkbox>
-        </div>
-        <div>
-          <label for="file-upload-input"> Choose your file: </label>
-          <input type="file"
-                 id="file-upload-input"
-                 (change)="handleFileInput($event.target.files)"/>
-        </div>
-        <div>
-          <mat-list class="file-error-messages">
-            <mat-list-item class="file-error-messages-item"
-                           *ngFor="let errorMsg of datasetErrorLogs">
-              <mat-icon matListIcon>error</mat-icon>
-              Error: {{ errorMsg }}.
-            </mat-list-item>
-          </mat-list>
-        </div>
+        <mat-list dense>
+          <mat-list-item>
+            Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}.
+          </mat-list-item>
+          <mat-list-item>
+            <mat-checkbox [checked]="datasetHasHeader"
+                          color="primary"
+                          (change)="datasetHasHeader = !datasetHasHeader"
+                          matTooltip="Select this option if the first row of your dataset is the attribute labels.">
+              First row is the attribute labels
+            </mat-checkbox>
+          </mat-list-item>
+          <mat-list-item>
+            <mat-checkbox [checked]="datasetHasClasses"
+                          color="primary"
+                          (change)="datasetHasClasses = !datasetHasClasses"
+                          matTooltip="Select this option if the last column of your dataset is the dependent attribute and, thus, should be used just for computing performance metrics.">
+              Last column is the dependent attribute
+            </mat-checkbox>
+          </mat-list-item>
+          <mat-list-item>
+            <label for="file-upload-input"> Choose your file: </label>
+            <input type="file"
+                   id="file-upload-input"
+                   (change)="handleFileInput($event.target.files)"/>
+          </mat-list-item>
+          <mat-list-item>
+            <mat-list class="file-error-messages">
+              <mat-list-item class="file-error-messages-item"
+                             *ngFor="let errorMsg of datasetErrorLogs">
+                <mat-icon matListIcon>error</mat-icon>
+                Error: {{ errorMsg }}.
+              </mat-list-item>
+            </mat-list>
+          </mat-list-item>
+        </mat-list>
         <mat-action-row>
-          <button mat-raised-button [disabled]="datasetErrorLogs.length || !fileToUpload"> Submit </button>
+          <button mat-raised-button [disabled]="datasetErrorLogs.length || !fileToUpload"
+                  [style.cursor]="!(datasetErrorLogs.length || !fileToUpload) ? 'default' : 'not-allowed'"
+                  matTooltip="Use the loaded model to make predictions about the loaded dataset."
+                  matTooltipShowDelay="300">
+            Submit
+          </button>
         </mat-action-row>
       </form>
     </ng-template>
