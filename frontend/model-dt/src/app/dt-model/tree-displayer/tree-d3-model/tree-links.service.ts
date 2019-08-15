@@ -127,7 +127,7 @@ export class TreeLinksService {
     }
   }
 
-  private checkAggregationLink = function() {
+  private filterAggregationLink = function() {
     const link = d3.select(this);
     const aggregationLink = (+link.attr('node-a-id') < 0 ||
                              +link.attr('node-b-id') < 0);
@@ -136,7 +136,7 @@ export class TreeLinksService {
 
   private buildLinksLabelRect(links) {
     const rects = links.selectAll('.link')
-      .select(this.checkAggregationLink)
+      .select(this.filterAggregationLink)
         .append('rect')
           .raise()
           .classed('draggable link-label', true)
@@ -171,7 +171,7 @@ export class TreeLinksService {
                                  TreeLinksService.styleTextSpacing) *
                                 (i - 0.5 * this.activeAttrs.length));
       links.selectAll('.link')
-        .select(this.checkAggregationLink)
+        .select(this.filterAggregationLink)
           .append('text')
             .classed('draggable link-label', true)
             .attr('font-size', TreeLinksService.styleTextFontSize)

@@ -280,19 +280,15 @@ export class TreeNodeService {
         .on('mouseleave', this.funcMouseleave);
   }
 
-  updateNodeLabel(nodes): void {
-    if (this.activeAttrs.length === 0) {
-      nodes.selectAll('.node')
-        .selectAll('.node-label')
-          .remove();
+  private filterAggregationNode = function() {
+    const node = d3.select(this);
+    const aggregationNode = +node.attr('index') < 0;
+    return aggregationNode ? null : this;
+  };
 
-      return;
-    }
-
-    let rects = null;
-
-    if (nodes.select('.node').select('rect').empty()) {
-      rects = nodes.selectAll('.node')
+  private buildNodesLabelRect(nodes) {
+    const rects = nodes.selectAll('.node')
+      .select(this.filterAggregationNode)
         .append('rect')
           .raise()
           .classed('draggable node-label', true)
@@ -305,14 +301,10 @@ export class TreeNodeService {
           .attr('fill', 'black')
           .attr('visibility', this.showNodeLabelsRect ? 'visible' : 'hidden');
 
-    } else {
-      rects = nodes.selectAll('.node')
-        .select('rect')
-          .attr('height', (TreeNodeService.styleTextFontSize +
-                           TreeNodeService.styleTextSpacing) *
-                           this.activeAttrs.length);
-    }
+    return rects;
+  }
 
+  private buildNodesLabelText(nodes): void {
     nodes.selectAll('.node')
       .selectAll('text')
         .remove();
@@ -331,27 +323,53 @@ export class TreeNodeService {
                                  TreeNodeService.styleTextSpacing) *
                                 (i - 0.5 * this.activeAttrs.length));
       nodes.selectAll('.node')
-        .append('text')
-          .classed('draggable node-label', true)
-          .attr('font-size', TreeNodeService.styleTextFontSize)
-          .attr('font-family', "'Roboto', sans-serif")
-          .attr('font-weight', 900)
-          .attr('fill', 'white')
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'central')
-          .attr('x', TreeNodeService.funcNodeXCoord)
-          .attr('y', TreeNodeService.funcNodeYCoord)
-          .attr('transform', 'translate(0, ' + translationValue + ')')
-          .text(function(): string {
-            let value: string | number = d3.select(this.parentNode).attr(curAttr);
-            if (+value && value.indexOf('.') > -1 && value.length > 4) {
-              value = (+value).toFixed(2);
-            }
-            return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
-          })
-          .style('stroke', TreeLinksService.styleColorTextOutline)
-          .style('stroke-width', '1px');
+        .select(this.filterAggregationNode)
+          .append('text')
+            .classed('draggable node-label', true)
+            .attr('font-size', TreeNodeService.styleTextFontSize)
+            .attr('font-family', "'Roboto', sans-serif")
+            .attr('font-weight', 900)
+            .attr('fill', 'white')
+            .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'central')
+            .attr('x', TreeNodeService.funcNodeXCoord)
+            .attr('y', TreeNodeService.funcNodeYCoord)
+            .attr('transform', 'translate(0, ' + translationValue + ')')
+            .text(function(): string {
+              let value: string | number = d3.select(this.parentNode).attr(curAttr);
+              if (+value && value.indexOf('.') > -1 && value.length > 4) {
+                value = (+value).toFixed(2);
+              }
+              return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
+            })
+            .style('stroke', TreeLinksService.styleColorTextOutline)
+            .style('stroke-width', '1px');
     }
+  }
+
+  updateNodeLabel(nodes): void {
+    if (this.activeAttrs.length === 0) {
+      nodes.selectAll('.node')
+        .selectAll('.node-label')
+          .remove();
+
+      return;
+    }
+
+    let rects = null;
+
+    if (nodes.select('.node').select('rect').empty()) {
+      rects = this.buildNodesLabelRect(nodes);
+
+    } else {
+      rects = nodes.selectAll('.node')
+        .select('rect')
+          .attr('height', (TreeNodeService.styleTextFontSize +
+                           TreeNodeService.styleTextSpacing) *
+                           this.activeAttrs.length);
+    }
+
+    this.buildNodesLabelText(nodes);
 
     if (rects) {
       let labelWidth = 0;
