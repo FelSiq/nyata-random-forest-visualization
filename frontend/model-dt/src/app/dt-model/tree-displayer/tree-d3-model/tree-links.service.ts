@@ -153,7 +153,11 @@ export class TreeLinksService {
   }
 
   private buildLinksLabelText(links): void {
-    links.selectAll('.link')
+    const filteredLinks = links
+      .selectAll('.link')
+        .select(this.filterAggregationLink);
+
+    filteredLinks
       .selectAll('text')
         .remove();
 
@@ -170,28 +174,27 @@ export class TreeLinksService {
                                 (TreeLinksService.styleTextFontSize +
                                  TreeLinksService.styleTextSpacing) *
                                 (i - 0.5 * this.activeAttrs.length));
-      links.selectAll('.link')
-        .select(this.filterAggregationLink)
-          .append('text')
-            .classed('draggable link-label', true)
-            .attr('font-size', TreeLinksService.styleTextFontSize)
-            .attr('font-family', "'Roboto', sans-serif")
-            .attr('font-weight', 900)
-            .attr('fill', 'white')
-            .attr('text-anchor', 'middle')
-            .attr('alignment-baseline', 'central')
-            .attr('x', TreeLinksService.funcLinkHalfXCoord)
-            .attr('y', TreeLinksService.funcLinkHalfYCoord)
-            .attr('transform', 'translate(0, ' + translationValue + ')')
-            .text(function(): string {
-              let value: string | number = d3.select(this.parentNode).attr(curAttr);
-              if (+value && value.indexOf('.') > -1 && value.length > 4) {
-                value = (+value).toFixed(2);
-              }
-              return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
-            })
-            .style('stroke', TreeLinksService.styleColorTextOutline)
-            .style('stroke-width', '1px');
+      filteredLinks
+        .append('text')
+          .classed('draggable link-label', true)
+          .attr('font-size', TreeLinksService.styleTextFontSize)
+          .attr('font-family', "'Roboto', sans-serif")
+          .attr('font-weight', 900)
+          .attr('fill', 'white')
+          .attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'central')
+          .attr('x', TreeLinksService.funcLinkHalfXCoord)
+          .attr('y', TreeLinksService.funcLinkHalfYCoord)
+          .attr('transform', 'translate(0, ' + translationValue + ')')
+          .text(function(): string {
+            let value: string | number = d3.select(this.parentNode).attr(curAttr);
+            if (+value && value.indexOf('.') > -1 && value.length > 4) {
+              value = (+value).toFixed(2);
+            }
+            return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
+          })
+          .style('stroke', TreeLinksService.styleColorTextOutline)
+          .style('stroke-width', '1px');
     }
   }
 

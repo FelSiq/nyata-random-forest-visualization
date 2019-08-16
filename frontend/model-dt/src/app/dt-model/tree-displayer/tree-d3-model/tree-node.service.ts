@@ -39,11 +39,6 @@ export class TreeNodeService {
 
   private funcDragOnStart = function() {
     const node = d3.select(this);
-
-    if (node.empty()) {
-      return;
-    }
-
     const circle = node.select('circle');
 
     const nodeId = +node.attr('index');
@@ -87,11 +82,6 @@ export class TreeNodeService {
 
   private funcDragOnEnd = function() {
     const node = d3.select(this);
-
-    if (node.empty()) {
-      return;
-    }
-
     const circle = node.select('circle');
 
     const nodeId = +node.attr('index');
@@ -126,75 +116,42 @@ export class TreeNodeService {
             .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
   };
 
-  static getConventionalNodeLinks(node): string[] {
-    const nodeIndex = +node.attr('index');
-    const parentId = +node.attr('parent-id');
-    const sonLeftId = +node.attr('son-left-id');
-    const sonRightId = +node.attr('son-right-id');
-
-    const linkA = TreeExtraService.formatLinkId(nodeIndex, sonLeftId, true);
-    const linkB = TreeExtraService.formatLinkId(nodeIndex, sonRightId, true);
-    const linkC = TreeExtraService.formatLinkId(parentId, nodeIndex, true);
-
-    return [linkA, linkB, linkC];
+  private static moveDraggables(links): void {
+    links
+      .selectAll('.draggable')
+        .attr('cx', TreeLinksService.funcLinkHalfXCoord)
+        .attr('cy', TreeLinksService.funcLinkHalfYCoord)
+        .attr('x', TreeLinksService.funcLinkHalfXCoord)
+        .attr('y', TreeLinksService.funcLinkHalfYCoord);
   }
 
   static moveNodeLinks(node): void {
     const nodeIndex = +node.attr('index');
-
-    if (nodeIndex < 0) {
-      d3.selectAll('.link')
-        .select(function() {
-          return +d3.select(this).attr('node-a-id') === nodeIndex ? this : null;
-        })
-          .select('line')
-            .attr('x1', node.attr('cx'))
-            .attr('y1', node.attr('cy'));
-
-      d3.selectAll('.link')
-        .select(function() {
-          return +d3.select(this).attr('node-b-id') === nodeIndex ? this : null;
-        })
-          .select('line')
-            .attr('x2', node.attr('cx'))
-            .attr('y2', node.attr('cy'));
-
-      return;
-    }
-
-    const [linkA, linkB, linkC] = TreeNodeService.getConventionalNodeLinks(node);
     const circle = node.select('circle');
+    const links = d3.selectAll('.link');
 
-    d3.selectAll([linkA, linkB].join(','))
+    const linksFromNode = links
+      .select(function() {
+        return +d3.select(this).attr('node-a-id') === nodeIndex ? this : null;
+      })
+
+    linksFromNode
       .select('line')
-        .attr('x1', circle.attr('cx'))
-        .attr('y1', circle.attr('cy'));
+        .attr('x1', node.attr('cx'))
+        .attr('y1', node.attr('cy'));
 
-    d3.select(linkC)
+    const linksToNode = links
+      .select(function() {
+        return +d3.select(this).attr('node-b-id') === nodeIndex ? this : null;
+      })
+
+    linksToNode
       .select('line')
-        .attr('x2', circle.attr('cx'))
-        .attr('y2', circle.attr('cy'));
+        .attr('x2', node.attr('cx'))
+        .attr('y2', node.attr('cy'));
 
-    const linkDraggables = d3.selectAll([linkA, linkB, linkC].join(','))
-      .selectAll('.draggable');
-
-    if (!linkDraggables.empty()) {
-      if (linkDraggables.attr('cx')) {
-        linkDraggables.attr('cx', TreeLinksService.funcLinkHalfXCoord);
-      }
-
-      if (linkDraggables.attr('cy')) {
-        linkDraggables.attr('cy', TreeLinksService.funcLinkHalfYCoord);
-      }
-
-      if (linkDraggables.attr('x')) {
-        linkDraggables.attr('x', TreeLinksService.funcLinkHalfXCoord);
-      }
-
-      if (linkDraggables.attr('y')) {
-        linkDraggables.attr('y', TreeLinksService.funcLinkHalfYCoord);
-      }
-    }
+    TreeNodeService.moveDraggables(linksFromNode);
+    TreeNodeService.moveDraggables(linksToNode);
   }
 
   static moveNode(node, x: number, y: number): void {
@@ -354,9 +311,13 @@ export class TreeNodeService {
   }
 
   private buildNodesLabelText(nodes): void {
-    nodes.selectAll('.node')
-      .selectAll('text')
-        .remove();
+    const filteredNodes = nodes
+        .selectAll('.node')
+          .select(this.filterAggregationNode);
+
+    filteredNodes
+        .selectAll('text')
+          .remove();
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
       const curAttr = this.activeAttrs[i];
@@ -371,28 +332,27 @@ export class TreeNodeService {
                                 (TreeNodeService.styleTextFontSize +
                                  TreeNodeService.styleTextSpacing) *
                                 (i - 0.5 * this.activeAttrs.length));
-      nodes.selectAll('.node')
-        .select(this.filterAggregationNode)
-          .append('text')
-            .classed('draggable node-label', true)
-            .attr('font-size', TreeNodeService.styleTextFontSize)
-            .attr('font-family', "'Roboto', sans-serif")
-            .attr('font-weight', 900)
-            .attr('fill', 'white')
-            .attr('text-anchor', 'middle')
-            .attr('alignment-baseline', 'central')
-            .attr('x', TreeNodeService.funcNodeXCoord)
-            .attr('y', TreeNodeService.funcNodeYCoord)
-            .attr('transform', 'translate(0, ' + translationValue + ')')
-            .text(function(): string {
-              let value: string | number = d3.select(this.parentNode).attr(curAttr);
-              if (+value && value.indexOf('.') > -1 && value.length > 4) {
-                value = (+value).toFixed(2);
-              }
-              return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
-            })
-            .style('stroke', TreeLinksService.styleColorTextOutline)
-            .style('stroke-width', '1px');
+      filteredNodes
+        .append('text')
+          .classed('draggable node-label', true)
+          .attr('font-size', TreeNodeService.styleTextFontSize)
+          .attr('font-family', "'Roboto', sans-serif")
+          .attr('font-weight', 900)
+          .attr('fill', 'white')
+          .attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'central')
+          .attr('x', TreeNodeService.funcNodeXCoord)
+          .attr('y', TreeNodeService.funcNodeYCoord)
+          .attr('transform', 'translate(0, ' + translationValue + ')')
+          .text(function(): string {
+            let value: string | number = d3.select(this.parentNode).attr(curAttr);
+            if (+value && value.indexOf('.') > -1 && value.length > 4) {
+              value = (+value).toFixed(2);
+            }
+            return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
+          })
+          .style('stroke', TreeLinksService.styleColorTextOutline)
+          .style('stroke-width', '1px');
     }
   }
 
