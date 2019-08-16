@@ -141,10 +141,11 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
   private calcRootCoordAndDeltas(curTree: TreeInterface) {
     let cxDelta, cyDelta, rootYCoord, rootXCoord;
+    const visibleDepth = this.visualDepthFromRoot + this.visualDepthFromLeaves;
 
     if (this.verticalAngle) {
       cxDelta = this.width / 4.05;
-      cyDelta = 0.98 * this.height / (1 + curTree.maximum_depth);
+      cyDelta = 0.98 * this.height / (1 + visibleDepth);
 
       rootXCoord = 0.5 * this.width;
 
@@ -161,7 +162,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       cyDelta = this.height / 4.05;
       cxDelta = ((0.99 * this.width -
                  TreeNodeService.radiusMinimum -
-                 TreeNodeService.radiusScaleFactor) / +curTree.maximum_depth);
+                 TreeNodeService.radiusScaleFactor) / visibleDepth);
 
       rootYCoord = 0.5 * this.height;
 
@@ -223,7 +224,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         0.99 * (this.verticalAngle ? this.width : this.height),
         this.verticalAngle ? rootYCoord : rootXCoord,
         this.verticalAngle ? cyDelta : cxDelta,
-        curTree.maximum_depth,
+        this.visualDepthFromRoot + this.visualDepthFromLeaves,
         this.verticalAngle);
 
     this.buildNode(
@@ -241,7 +242,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
     this.nodeService.buildAggregationDepthNodeText(
       this.nodes.select(aggregationNodeId),
-      this.maxDepth - (this.visualDepthFromRoot + this.visualDepthFromLeaves));
+      this.maxDepth - (this.visualDepthFromRoot + this.visualDepthFromLeaves - 1));
 
     if (this.rearrangeNodes) {
       this.adjustNodePositions();
@@ -265,6 +266,83 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private updateAggregationDepthNode(cx: number, cy: number): void {
+    const aggregationNodeId = TreeExtraService
+      .formatNodeId(TreeNodeService.aggregationDepthNodeId, true);
+
+    const aggregationNode = this.nodes.select(aggregationNodeId);
+
+    if (aggregationNode.empty()) {
+      const nodeAttrs = {
+        'number-of-nodes': 1,
+      };
+
+      this.nodeService.generateNode(
+          this.nodes,
+          TreeNodeService.aggregationDepthNodeId,
+          this.verticalAngle ? 0.5 * this.width : cx,
+          !this.verticalAngle ? 0.5 * this.height : cy,
+          TreeNodeService.aggregationNodeDepthRadius,
+          'white',
+          nodeAttrs);
+
+    } else {
+      aggregationNode.attr(
+        'number-of-nodes', 1 + +aggregationNode.attr('number-of-nodes'));
+    }
+  }
+
+  private generateConventionalNode(
+        curTree: TreeInterface,
+        nodeId: number,
+        parentId: number,
+        cx: number,
+        cy: number,
+        depth: number,
+        aggregationIsChildren = false): void {
+    const numInstInNode = +curTree.weighted_number_of_node_samples[nodeId];
+    const impurity = +curTree.impurity[nodeId];
+    const threshold = +curTree.threshold[nodeId];
+    const feature = +curTree.feature[nodeId];
+    const nodeClassId = curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
+    const circleColor = this.impurityColors(impurity);
+    const sonLeftId = +curTree.children_left[nodeId];
+    const sonRightId = +curTree.children_right[nodeId];
+
+    const radius = (
+      TreeNodeService.radiusMinimum +
+      TreeNodeService.radiusScaleFactor *
+      (numInstInNode /
+      +curTree.weighted_number_of_node_samples[0]));
+
+    if (!(depth in this.nodeIDByDepth)) {
+      this.nodeIDByDepth[depth] = [];
+    }
+
+    this.nodeIDByDepth[depth]
+      .push(TreeExtraService.formatNodeId(nodeId, true));
+
+    const nodeAttrs = {
+      'impurity': impurity,
+      'decision-feature': feature >= 0 ? feature : null,
+      'node-class': this.classes ? this.classes[+nodeClassId] : null,
+      'threshold': feature >= 0 ? threshold : null,
+      'number-of-instances': numInstInNode,
+      'parent-id': parentId,
+      'son-left-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
+      'son-right-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
+    };
+
+    this.nodeService.generateNode(
+        this.nodes,
+        nodeId,
+        cx,
+        cy,
+        radius,
+        circleColor,
+        nodeAttrs);
+  }
+
   private buildNode(
         curTree: TreeInterface,
         nodeId: number,
@@ -282,68 +360,22 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
       if (depth >= this.visualDepthFromRoot &&
           depth <= this.maxDepth - this.visualDepthFromLeaves) {
-          cxScaleFactor = 1.0;
-          cyScaleFactor = 1.0;
-          nodeId = TreeNodeService.aggregationDepthNodeId;
+        cxScaleFactor = 1.0;
+        cyScaleFactor = 1.0;
+        nodeId = TreeNodeService.aggregationDepthNodeId;
+        this.updateAggregationDepthNode(cx, cy);
 
-          const aggregationNodeId = TreeExtraService.formatNodeId(nodeId, true);
-          const aggregationNode = this.nodes.select(aggregationNodeId);
-
-          if (aggregationNode.empty()) {
-            this.nodeService.generateNode(
-                this.nodes,
-                nodeId,
-                this.verticalAngle ? 0.5 * this.width : cx,
-                !this.verticalAngle ? 0.5 * this.height : cy,
-                TreeNodeService.aggregationNodeDepthRadius,
-                'white',
-                {
-                  'number-of-nodes': 1,
-                });
-
-          } else {
-            aggregationNode.attr(
-              'number-of-nodes', 1 + +aggregationNode.attr('number-of-nodes'));
-          }
       } else {
-        const numInstInNode = +curTree.weighted_number_of_node_samples[nodeId];
-        const impurity = +curTree.impurity[nodeId];
-        const threshold = +curTree.threshold[nodeId];
-        const feature = +curTree.feature[nodeId];
-        const nodeClassId = curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
-        const circleColor = this.impurityColors(impurity);
-
         cxScaleFactor = this.verticalAngle ? 0.5 : 1.0;
         cyScaleFactor = !this.verticalAngle ? 0.5 : 1.0;
-
-        const radius = (
-          TreeNodeService.radiusMinimum +
-          TreeNodeService.radiusScaleFactor *
-          (numInstInNode /
-          +curTree.weighted_number_of_node_samples[0]));
-
-        if (!(depth in this.nodeIDByDepth)) {
-          this.nodeIDByDepth[depth] = [];
-        }
-        this.nodeIDByDepth[depth].push(TreeExtraService.formatNodeId(nodeId, true));
-
-        this.nodeService.generateNode(
-            this.nodes,
-            nodeId,
-            cx,
-            cy,
-            radius,
-            circleColor,
-            {
-              'impurity': impurity,
-              'decision-feature': feature >= 0 ? feature : null,
-              'node-class': this.classes ? this.classes[+nodeClassId] : null,
-              'threshold': feature >= 0 ? threshold : null,
-              'number-of-instances': numInstInNode,
-              'parent-id': parentId,
-              'son-left-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
-              'son-right-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
-            });
+        this.generateConventionalNode(
+          curTree,
+          nodeId,
+          parentId,
+          cx,
+          cy,
+          depth,
+          aggregationIsChildren);
       }
 
       if (sonLeftId >= 0 && sonLeftId < curTree.capacity) {
