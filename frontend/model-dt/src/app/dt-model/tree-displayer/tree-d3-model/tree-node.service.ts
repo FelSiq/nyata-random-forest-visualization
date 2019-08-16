@@ -41,9 +41,6 @@ export class TreeNodeService {
     const circle = node.select('circle');
 
     const nodeId = +node.attr('index');
-    const parentId = +node.attr('parent-id');
-    const sonLeftId = +node.attr('son-left-id');
-    const sonRightId = +node.attr('son-right-id');
     const radius = !circle.empty() ? +circle.attr('original-radius') : 0.0;
 
     d3.select('.group-nodes')
@@ -67,16 +64,12 @@ export class TreeNodeService {
         .attr('r', TreeNodeService.radiusSelectScaleFactor * radius);
     }
 
-    d3.selectAll([
-          TreeExtraService.formatLinkId(nodeId, sonLeftId, true),
-          TreeExtraService.formatLinkId(nodeId, sonRightId, true),
-          TreeExtraService.formatLinkId(parentId, nodeId, true),
-      ].join(','))
-        .classed('link-active', true)
-        .select('line')
-          .transition()
-            .duration(TreeNodeService.transitionDragEffect)
-            .style('stroke', TreeLinksService.styleColorLinkSelected);
+    TreeLinksService.getNodeIncidentEdges(node)
+      .classed('link-active', true)
+      .select('line')
+        .transition()
+          .duration(TreeNodeService.transitionDragEffect)
+          .style('stroke', TreeLinksService.styleColorLinkSelected);
   };
 
   private funcDragOnEnd = function(): void {
@@ -84,9 +77,6 @@ export class TreeNodeService {
     const circle = node.select('circle');
 
     const nodeId = +node.attr('index');
-    const parentId = +node.attr('parent-id');
-    const sonLeftId = +node.attr('son-left-id');
-    const sonRightId = +node.attr('son-right-id');
     const radius = +circle.attr('original-radius');
 
     node
@@ -103,16 +93,12 @@ export class TreeNodeService {
     d3.select('#placeholder-node-' + nodeId)
       .remove();
 
-    d3.selectAll([
-          TreeExtraService.formatLinkId(nodeId, sonLeftId, true),
-          TreeExtraService.formatLinkId(nodeId, sonRightId, true),
-          TreeExtraService.formatLinkId(parentId, nodeId, true),
-      ].join(','))
-        .classed('link-active', false)
-        .select('line')
-          .transition()
-            .duration(TreeNodeService.transitionDragEffect)
-            .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
+    TreeLinksService.getNodeIncidentEdges(node)
+      .classed('link-active', false)
+      .select('line')
+        .transition()
+          .duration(TreeNodeService.transitionDragEffect)
+          .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
   };
 
   private funcDragOnDrag = function(): void {
@@ -175,7 +161,7 @@ export class TreeNodeService {
   }
 
   static moveNodeLinks(node: D3Selection): void {
-    const [linksFromNode, linksToNode] = TreeLinksService.getNodeLinks(node);
+    const [linksFromNode, linksToNode] = TreeLinksService.getToAndFromNodeLinks(node);
 
     linksFromNode
       .select('line')

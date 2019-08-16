@@ -68,7 +68,20 @@ export class TreeLinksService {
 
   constructor() { }
 
-  static getNodeLinks(node: D3Selection): [D3Selection, D3Selection] {
+  static getNodeIncidentEdges(node: D3Selection): D3Selection {
+    const links = d3.selectAll('.link');
+    const nodeIndex = +node.attr('index');
+
+    return links
+      .select(function() {
+        return (
+          +d3.select(this).attr('node-a-id') === nodeIndex ||
+          +d3.select(this).attr('node-b-id') === nodeIndex
+        ) ? this : null;
+      });
+  }
+
+  static getToAndFromNodeLinks(node: D3Selection): [D3Selection, D3Selection] {
     const links = d3.selectAll('.link');
     const nodeIndex = +node.attr('index');
 
