@@ -110,14 +110,16 @@ export class TreeNodeService {
   };
 
   private funcMouseenter = function(): void {
-    d3.select(this)
-      .transition()
-        .duration(350)
-        .attr('stroke-width', 3);
+    d3.select(this.parentNode)
+      .select('circle')
+        .transition()
+          .duration(350)
+          .attr('stroke-width', 3);
   };
 
   private funcMouseleave = function(): void {
-    const node = d3.select(this);
+    const node = d3.select(this.parentNode)
+      .select('circle');
 
     node
       .transition()
@@ -231,7 +233,12 @@ export class TreeNodeService {
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('r', radius)
-        .attr('original-radius', radius)
+        .attr('original-radius', radius);
+  }
+
+  setMouseEvents(nodes: D3Selection): void {
+    nodes
+      .selectAll('.draggable')
         .on('mouseenter', this.funcMouseenter)
         .on('mouseleave', this.funcMouseleave);
   }
@@ -334,6 +341,8 @@ export class TreeNodeService {
         .selectAll('.node-label')
           .remove();
 
+      this.setMouseEvents(nodes);
+
       return;
     }
 
@@ -366,6 +375,8 @@ export class TreeNodeService {
         .attr('x', TreeNodeService.funcNodeXCoord)
         .attr('y', TreeNodeService.funcNodeYCoord);
     }
+
+    this.setMouseEvents(nodes);
   }
 
   toggleAttr(newValue: string): void {
