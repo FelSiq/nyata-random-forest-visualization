@@ -41,8 +41,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
   readonly zoomMin: number = 0;
   readonly zoomMax: number = 3;
-  readonly minDepthFromRoot = 2;
-  readonly minDepthFromLeaf = 2;
+  readonly minDepthFromRoot = 4;
+  readonly minDepthFromLeaf = 4;
 
   private svg: D3Selection;
   private links: D3Selection;
@@ -144,33 +144,28 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     let cxDelta, cyDelta, rootYCoord, rootXCoord;
     const visibleDepth = this.visualDepthFromRoot + this.visualDepthFromLeaves;
 
+    const translationFactor = (
+      TreeNodeService.radiusMinimum +
+      TreeNodeService.radiusScaleFactor);
+
+    const totalWidth = this.width - 2 * translationFactor;
+    const totalHeight = this.height - 2 * translationFactor;
+
     if (this.verticalAngle) {
-      cxDelta = this.width / 4.05;
-      cyDelta = 0.98 * this.height / (1 + visibleDepth);
-
-      rootXCoord = 0.5 * this.width;
-
-      rootYCoord = (
-          TreeNodeService.radiusMinimum +
-          TreeNodeService.radiusScaleFactor +
-          0.01 * this.height);
+      cxDelta = 0.25 * totalWidth;
+      cyDelta = totalHeight / visibleDepth;
+      rootXCoord = translationFactor + 0.5 * totalWidth;
+      rootYCoord = translationFactor;
 
       if (this.treeAngle === 270) {
         rootYCoord = this.height - rootYCoord;
         cyDelta *= -1.0;
       }
     } else {
-      cyDelta = this.height / 4.05;
-      cxDelta = ((0.99 * this.width -
-                 TreeNodeService.radiusMinimum -
-                 TreeNodeService.radiusScaleFactor) / visibleDepth);
-
-      rootYCoord = 0.5 * this.height;
-
-      rootXCoord = (
-          TreeNodeService.radiusMinimum +
-          TreeNodeService.radiusScaleFactor +
-          0.01 * this.width);
+      cyDelta = 0.25 * totalHeight;
+      cxDelta = totalWidth / visibleDepth;
+      rootXCoord = translationFactor;
+      rootYCoord = translationFactor + 0.5 * totalHeight;
 
       if (this.treeAngle === 0) {
         rootXCoord = this.width - rootXCoord;
