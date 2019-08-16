@@ -11,6 +11,8 @@ import { TreeLinksService } from './tree-links.service';
 import { TreeExtraService } from './tree-extra.service';
 import { DTInterface, TreeInterface } from '../../../dt-interface';
 
+type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
+
 @Component({
   selector: 'app-tree-d3-model',
   templateUrl: './tree-d3-model.component.html',
@@ -42,11 +44,11 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   readonly minDepthFromRoot = 2;
   readonly minDepthFromLeaf = 2;
 
-  private svg: any;
-  private links: any;
-  private nodes: any;
-  private depthMarkers: any;
-  private impurityColors: any;
+  private svg: D3Selection;
+  private links: D3Selection;
+  private nodes: D3Selection;
+  private depthMarkers: D3Selection;
+  private impurityColors: d3Scale.ScaleLinear<string, number>;
   private width: number;
   private height: number;
   private maxImpurity: number;
@@ -131,8 +133,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   private cleanSvg(): void {
-    this.svg.selectAll('.cleanable')
-      .selectAll('*').remove();
+    this.svg
+      .selectAll('.cleanable')
+        .selectAll('*')
+          .remove();
   }
 
   private calcRootCoordAndDeltas(curTree: TreeInterface) {
@@ -204,7 +208,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       (criterion === 'entropy' ? Math.log2(curTree.maximum_number_of_classes) :
       (Math.max(...curTree.impurity))));
 
-    this.impurityColors = d3Scale.scaleLinear<string>()
+    this.impurityColors = d3Scale.scaleLinear<string, number>()
         .domain([0.0, this.maxImpurity])
         .range(['white', 'black']);
 

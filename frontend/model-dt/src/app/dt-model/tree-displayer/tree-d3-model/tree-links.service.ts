@@ -4,6 +4,8 @@ import * as d3 from 'd3-selection';
 
 import { TreeExtraService } from './tree-extra.service';
 
+type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -26,12 +28,8 @@ export class TreeLinksService {
   ];
 
   activeAttrs: string[] = [];
-
   completeAttrName = false;
-
   showLinkLabelsRect = true;
-
-  constructor() { }
 
   static funcLinkHalfXCoord = function(): number {
     const link = d3.select(this.parentNode).select('line');
@@ -61,8 +59,34 @@ export class TreeLinksService {
       TreeLinksService.styleColorLinkDefault);
   };
 
-  connectNodes(links,
-               nodes,
+  private filterAggregationLink = function() {
+    const link = d3.select(this);
+    const aggregationLink = (+link.attr('node-a-id') < 0 ||
+                             +link.attr('node-b-id') < 0);
+    return aggregationLink ? null : this;
+  };
+
+  constructor() { }
+
+  static getNodeLinks(node: D3Selection): [D3Selection, D3Selection] {
+    const links = d3.selectAll('.link');
+    const nodeIndex = +node.attr('index');
+
+    const linksFromNode = links
+      .select(function() {
+        return +d3.select(this).attr('node-a-id') === nodeIndex ? this : null;
+      })
+
+    const linksToNode = links
+      .select(function() {
+        return +d3.select(this).attr('node-b-id') === nodeIndex ? this : null;
+      })
+
+    return [ linksFromNode, linksToNode ];
+  }
+
+  connectNodes(links: D3Selection,
+               nodes: D3Selection,
                nodeAId: number,
                nodeBId: number,
                decision: string): void {
@@ -105,7 +129,7 @@ export class TreeLinksService {
     }
   }
 
-  cleanPredictionPaths(links, dashed = false): void {
+  cleanPredictionPaths(links: D3Selection, dashed = false): void {
     if (links) {
       links.selectAll('.link')
         .classed('in-predict-path', false)
@@ -116,7 +140,7 @@ export class TreeLinksService {
     }
   }
 
-  drawPredictionPaths(links, curPath): void {
+  drawPredictionPaths(links: D3Selection, curPath): void {
     for (let i = 0; i < curPath.length - 1; i++) {
       links.select(TreeExtraService.formatLinkId(curPath[i], curPath[i+1], true))
         .classed('in-predict-path', true)
@@ -127,14 +151,7 @@ export class TreeLinksService {
     }
   }
 
-  private filterAggregationLink = function() {
-    const link = d3.select(this);
-    const aggregationLink = (+link.attr('node-a-id') < 0 ||
-                             +link.attr('node-b-id') < 0);
-    return aggregationLink ? null : this;
-  };
-
-  private buildLinksLabelRect(links) {
+  private buildLinksLabelRect(links: D3Selection): D3Selection {
     const rects = links.selectAll('.link')
       .select(this.filterAggregationLink)
         .append('rect')
@@ -152,7 +169,7 @@ export class TreeLinksService {
     return rects;
   }
 
-  private buildLinksLabelText(links): void {
+  private buildLinksLabelText(links: D3Selection): void {
     const filteredLinks = links
       .selectAll('.link')
         .select(this.filterAggregationLink);
@@ -247,11 +264,12 @@ export class TreeLinksService {
     }
   }
 
-  toggleRectVisibility(links): void {
+  toggleRectVisibility(links: D3Selection): void {
     this.showLinkLabelsRect = !this.showLinkLabelsRect;
 
-    links.selectAll('.link')
-      .select('rect')
-        .attr('visibility', this.showLinkLabelsRect ? 'visible' : 'hidden');
+    links
+      .selectAll('.link')
+        .select('rect')
+          .attr('visibility', this.showLinkLabelsRect ? 'visible' : 'hidden');
   }
 }
