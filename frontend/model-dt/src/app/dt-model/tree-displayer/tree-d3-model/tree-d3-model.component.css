@@ -1,5 +1,7 @@
 .current-tree-selector {
-  width: 100%;
+  width: calc(100% - 100px - 24px);
+  float: right;
+  overflow: auto;
 }
 
 .d3-tree-model {
@@ -27,4 +29,8 @@
 
 .depth-visualization-slider {
   width: 50%;
+}
+
+.reload-button {
+  margin-right: 8px;
 }

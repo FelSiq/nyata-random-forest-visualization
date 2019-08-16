@@ -154,19 +154,26 @@
 
 <mat-card>
   <mat-card-actions>
-    <div>
-      <mat-form-field class="current-tree-selector" *ngIf="treeNodes && treeNodes.length > 1">
-        <mat-label class="forest-label">
-          Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
-        </mat-label>
-        <mat-select [(ngModel)]="chosenTree" (ngModelChange)="changesHandler()">
-          <mat-option *ngFor="let tree of treeNodes; index as i;"
-                  value="{{ i }}">
-                  {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }}, depth: {{ tree.tree_.value.maximum_depth }})
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+    <button class="reload-button"
+            color="warn"
+            mat-stroked-button
+            (click)="changesHandler()">
+      <mat-icon>
+        refresh
+      </mat-icon>
+      Reload
+    </button>
+    <mat-form-field class="current-tree-selector" *ngIf="treeNodes && treeNodes.length > 1">
+      <mat-label class="forest-label">
+        Current selected model from the forest (of size {{ treeNodes.length }}) to visualize:
+      </mat-label>
+      <mat-select [(ngModel)]="chosenTree" (ngModelChange)="changesHandler()">
+        <mat-option *ngFor="let tree of treeNodes; index as i;"
+                value="{{ i }}">
+                {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }}, depth: {{ tree.tree_.value.maximum_depth }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
   </mat-card-actions>
   
   <mat-card-content>
