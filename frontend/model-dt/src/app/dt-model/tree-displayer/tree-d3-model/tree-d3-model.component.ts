@@ -59,6 +59,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private visualDepthFromLeaves: number;
   private nodeIDByDepth: { [depth: number] : string[]; };
   private verticalAngle: boolean;
+  private aggregationDepthNodeDepth: number;
 
   private showNodeLabelsRect = true;
   private showLinkLabelsRect = true;
@@ -266,7 +267,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private updateAggregationDepthNode(cx: number, cy: number): void {
+  private updateAggregationDepthNode(cx: number, cy: number, depth: number): void {
     const aggregationNodeId = TreeExtraService
       .formatNodeId(TreeNodeService.aggregationDepthNodeId, true);
 
@@ -286,10 +287,13 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           'white',
           nodeAttrs);
 
-    } else {
-      aggregationNode.attr(
-        'number-of-nodes', 1 + +aggregationNode.attr('number-of-nodes'));
+      this.aggregationDepthNodeDepth = depth;
+
+      return;
     }
+
+    aggregationNode.attr(
+      'number-of-nodes', 1 + +aggregationNode.attr('number-of-nodes'));
   }
 
   private generateConventionalNode(
@@ -315,13 +319,6 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       (numInstInNode /
       +curTree.weighted_number_of_node_samples[0]));
 
-    if (!(depth in this.nodeIDByDepth)) {
-      this.nodeIDByDepth[depth] = [];
-    }
-
-    this.nodeIDByDepth[depth]
-      .push(TreeExtraService.formatNodeId(nodeId, true));
-
     const nodeAttrs = {
       'impurity': impurity,
       'decision-feature': feature >= 0 ? feature : null,
@@ -343,6 +340,18 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         nodeAttrs);
   }
 
+  private updateNodeByDepthLists(nodeId: number, depth: number): void {
+    if (!(depth in this.nodeIDByDepth)) {
+      this.nodeIDByDepth[depth] = [];
+    }
+
+    const formattedNodeId = TreeExtraService.formatNodeId(nodeId, true);
+
+    if (this.nodeIDByDepth[depth].indexOf(formattedNodeId) < 0) {
+      this.nodeIDByDepth[depth].push(formattedNodeId);
+    }
+  }
+
   private buildNode(
         curTree: TreeInterface,
         nodeId: number,
@@ -352,75 +361,85 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         cy: number,
         cyDelta: number,
         depth: number): void {
-      const aggregationIsChildren = (depth === this.visualDepthFromRoot - 1);
-      const sonLeftId = +curTree.children_left[nodeId];
-      const sonRightId = +curTree.children_right[nodeId];
+    const aggregationIsChildren = (depth === this.visualDepthFromRoot - 1);
+    const sonLeftId = +curTree.children_left[nodeId];
+    const sonRightId = +curTree.children_right[nodeId];
+    const omittedNode = (
+        depth >= this.visualDepthFromRoot &&
+        depth <= this.maxDepth - this.visualDepthFromLeaves);
 
-      let cxScaleFactor, cyScaleFactor;
+    let cxScaleFactor, cyScaleFactor;
 
-      if (depth >= this.visualDepthFromRoot &&
-          depth <= this.maxDepth - this.visualDepthFromLeaves) {
-        cxScaleFactor = 1.0;
-        cyScaleFactor = 1.0;
-        nodeId = TreeNodeService.aggregationDepthNodeId;
-        this.updateAggregationDepthNode(cx, cy);
+    if (omittedNode) {
+      cxScaleFactor = 1.0;
+      cyScaleFactor = 1.0;
+      nodeId = TreeNodeService.aggregationDepthNodeId;
 
-      } else {
-        cxScaleFactor = this.verticalAngle ? 0.5 : 1.0;
-        cyScaleFactor = !this.verticalAngle ? 0.5 : 1.0;
-        this.generateConventionalNode(
+      this.updateAggregationDepthNode(cx, cy, depth);
+
+      if (depth !== this.aggregationDepthNodeDepth) {
+        cx -= cxDelta;
+        cy -= cyDelta;
+      }
+
+    } else {
+      cxScaleFactor = this.verticalAngle ? 0.5 : 1.0;
+      cyScaleFactor = !this.verticalAngle ? 0.5 : 1.0;
+      this.generateConventionalNode(
+        curTree,
+        nodeId,
+        parentId,
+        cx,
+        cy,
+        depth,
+        aggregationIsChildren);
+    }
+
+    this.updateNodeByDepthLists(nodeId, depth);
+
+    if (sonLeftId >= 0 && sonLeftId < curTree.capacity) {
+      const cxSonLeft = cx + (this.verticalAngle ? -1 : 1) * cxDelta;
+      const cySonLeft = cy + cyDelta;
+
+      this.buildNode(
           curTree,
+          sonLeftId,
           nodeId,
-          parentId,
-          cx,
-          cy,
-          depth,
-          aggregationIsChildren);
-      }
+          cxSonLeft,
+          cxScaleFactor * cxDelta,
+          cySonLeft,
+          cyScaleFactor * cyDelta,
+          depth + 1);
 
-      if (sonLeftId >= 0 && sonLeftId < curTree.capacity) {
-        const cxSonLeft = cx + (this.verticalAngle ? -1 : 1) * cxDelta;
-        const cySonLeft = cy + cyDelta;
+      this.linkService.connectNodes(
+        this.links,
+        this.nodes,
+        nodeId,
+        aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
+        '<=');
+    }
 
-        this.buildNode(
-            curTree,
-            sonLeftId,
-            nodeId,
-            cxSonLeft,
-            cxScaleFactor * cxDelta,
-            cySonLeft,
-            cyScaleFactor * cyDelta,
-            depth + 1);
+    if (sonRightId >= 0 && sonRightId < curTree.capacity) {
+      const cxSonRight = cx + cxDelta;
+      const cySonRight = cy + (!this.verticalAngle ? -1 : 1) * cyDelta;
 
-        this.linkService.connectNodes(
-          this.links,
-          this.nodes,
+      this.buildNode(
+          curTree,
+          sonRightId,
           nodeId,
-          aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
-          '<=');
-      }
+          cxSonRight,
+          cxScaleFactor * cxDelta,
+          cySonRight,
+          cyScaleFactor * cyDelta,
+          depth + 1);
 
-      if (sonRightId >= 0 && sonRightId < curTree.capacity) {
-        const cxSonRight = cx + cxDelta;
-        const cySonRight = cy + (!this.verticalAngle ? -1 : 1) * cyDelta;
-
-        this.buildNode(
-            curTree,
-            sonRightId,
-            nodeId,
-            cxSonRight,
-            cxScaleFactor * cxDelta,
-            cySonRight,
-            cyScaleFactor * cyDelta,
-            depth + 1);
-
-        this.linkService.connectNodes(
-          this.links,
-          this.nodes,
-          nodeId,
-          aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
-          '>');
-      }
+      this.linkService.connectNodes(
+        this.links,
+        this.nodes,
+        nodeId,
+        aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
+        '>');
+    }
   }
 
   private rotateTree(angleUpdate: number | string): void {
@@ -433,18 +452,20 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const verticalAngle = this.verticalAngle;
 
     for (const depth in this.nodeIDByDepth) {
-      const nodeList: string[] = this.nodeIDByDepth[depth];
-      const divLength: number = totalLength / (1 + nodeList.length);
+      if (this.nodeIDByDepth.hasOwnProperty(depth)) {
+        const nodeList: string[] = this.nodeIDByDepth[depth];
+        const divLength: number = totalLength / (1 + nodeList.length);
 
-      d3.selectAll(nodeList.join(','))
-        .each(function(d, i) {
-          const node = d3.select(this);
-          if (verticalAngle) {
-            TreeNodeService.moveNode(node, divLength * (i + 1), +node.attr('cy'));
-          } else {
-            TreeNodeService.moveNode(node, +node.attr('cx'), divLength * (i + 1));
-          }
-        });
+        d3.selectAll(nodeList.join(','))
+          .each(function(d, i) {
+            const node = d3.select(this);
+            if (verticalAngle) {
+              TreeNodeService.moveNode(node, divLength * (i + 1), +node.attr('cy'));
+            } else {
+              TreeNodeService.moveNode(node, +node.attr('cx'), divLength * (i + 1));
+            }
+          });
+      }
     }
   }
 
