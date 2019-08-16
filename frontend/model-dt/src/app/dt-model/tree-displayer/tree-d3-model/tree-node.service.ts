@@ -30,6 +30,7 @@ export class TreeNodeService {
     'number-of-instances',
     'threshold',
     'node-class',
+    'depth',
   ];
 
   activeAttrs: string[] = [];
@@ -247,13 +248,13 @@ export class TreeNodeService {
 
   buildAggregationDepthNodeText(agDepthNode: D3Selection, totalDepth: number): void {
     const textDepth = agDepthNode.append('text')
-      .classed('draggable node-special-label', true)
+      .classed('draggable node-label', true)
       .attr('x', agDepthNode.attr('cx'))
       .attr('y', agDepthNode.attr('cy'))
       .text('Total depth: ' + totalDepth);
 
     const textNode = agDepthNode.append('text')
-      .classed('draggable node-special-label', true)
+      .classed('draggable node-label', true)
       .attr('x', agDepthNode.attr('cx'))
       .attr('y', +agDepthNode.attr('cy') + TreeNodeService.styleDepthNodeTextFontSize + 4)
       .text('Nodes in: ' + agDepthNode.attr('number-of-nodes'));
@@ -282,13 +283,9 @@ export class TreeNodeService {
   }
 
   private buildNodesLabelText(nodes: D3Selection): void {
-    const filteredNodes = nodes
-        .selectAll('.node')
-          .select(this.filterAggregationNode);
-
-    filteredNodes
-        .selectAll('text')
-          .remove();
+    nodes
+      .selectAll('text')
+        .remove();
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
       const curAttr = this.activeAttrs[i];
@@ -303,7 +300,7 @@ export class TreeNodeService {
                                 (TreeNodeService.styleTextFontSize +
                                  TreeNodeService.styleTextSpacing) *
                                 (i - 0.5 * this.activeAttrs.length));
-      filteredNodes
+      nodes
         .append('text')
           .classed('draggable node-label', true)
           .attr('font-size', TreeNodeService.styleTextFontSize)
@@ -328,11 +325,14 @@ export class TreeNodeService {
   }
 
   updateNodeLabel(nodes): void {
+    const filteredNodes = nodes
+      .selectAll('.node')
+        .select(this.filterAggregationNode);
+
     if (this.activeAttrs.length === 0) {
-      nodes
-        .selectAll('.node')
-          .selectAll('.node-label')
-            .remove();
+      filteredNodes
+        .selectAll('.node-label')
+          .remove();
 
       return;
     }
@@ -343,24 +343,23 @@ export class TreeNodeService {
       rects = this.buildNodesLabelRect(nodes);
 
     } else {
-      rects = nodes.selectAll('.node')
+      rects = filteredNodes
         .select('rect')
           .attr('height', (TreeNodeService.styleTextFontSize +
                            TreeNodeService.styleTextSpacing) *
                            this.activeAttrs.length);
     }
 
-    this.buildNodesLabelText(nodes);
+    this.buildNodesLabelText(filteredNodes);
 
     if (rects) {
       let labelWidth = 0;
 
-      nodes
-        .selectAll('.node')
-          .selectAll('text')
-            .each(function(i) {
-              labelWidth = Math.max(4 + this.getComputedTextLength(), labelWidth);
-            });
+      filteredNodes
+        .selectAll('text')
+          .each(function(i) {
+            labelWidth = Math.max(4 + this.getComputedTextLength(), labelWidth);
+          });
 
       rects
         .attr('width', labelWidth)
