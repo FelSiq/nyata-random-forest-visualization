@@ -75,12 +75,12 @@ export class TreeLinksService {
     const linksFromNode = links
       .select(function() {
         return +d3.select(this).attr('node-a-id') === nodeIndex ? this : null;
-      })
+      });
 
     const linksToNode = links
       .select(function() {
         return +d3.select(this).attr('node-b-id') === nodeIndex ? this : null;
-      })
+      });
 
     return [ linksFromNode, linksToNode ];
   }

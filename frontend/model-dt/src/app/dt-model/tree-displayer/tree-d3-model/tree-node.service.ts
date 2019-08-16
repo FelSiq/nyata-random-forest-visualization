@@ -256,7 +256,7 @@ export class TreeNodeService {
       .attr('font-weight', 400)
       .attr('fill', 'rgb(96,96,96)')
       .attr('text-anchor', 'middle')
-      .attr('alignment-baseline', 'central')
+      .attr('alignment-baseline', 'central');
   }
 
   buildAggregationDepthNodeText(agDepthNode: D3Selection, totalDepth: number): void {
