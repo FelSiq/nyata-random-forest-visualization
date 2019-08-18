@@ -448,23 +448,27 @@ export class TreeNodeService {
   }
 
   toggleNodeInPredictPath(nodes: D3Selection) {
-      const nodesNotInPath = nodes
-        .selectAll('.node')
-          .select(function() {
-            return !d3.select(this).classed('in-predict-path') ? this : null;
-          })
-            .select('circle')
-              .attr('stroke', 'gray')
-              .attr('stroke-width', TreeNodeService.styleWidthCircleDefault);
+    if (!nodes || nodes.empty()) {
+      return;
+    }
 
-      const nodesInPath = nodes
-        .selectAll('.node')
-          .select(function() {
-            return d3.select(this).classed('in-predict-path') ? this : null;
-          })
-            .select('circle')
-              .attr('stroke', TreeLinksService.styleColorLinkPredict)
-              .attr('stroke-width', TreeNodeService.styleWidthCirclePredict);
+    const nodesNotInPath = nodes
+      .selectAll('.node')
+        .select(function() {
+          return !d3.select(this).classed('in-predict-path') ? this : null;
+        })
+          .select('circle')
+            .attr('stroke', 'gray')
+            .attr('stroke-width', TreeNodeService.styleWidthCircleDefault);
+
+    const nodesInPath = nodes
+      .selectAll('.node')
+        .select(function() {
+          return d3.select(this).classed('in-predict-path') ? this : null;
+        })
+          .select('circle')
+            .attr('stroke', TreeLinksService.styleColorLinkPredict)
+            .attr('stroke-width', TreeNodeService.styleWidthCirclePredict);
   }
 
 }

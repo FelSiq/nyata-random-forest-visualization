@@ -38,10 +38,11 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         this._decisionPath[+this.chosenTree],
         this.omittedNodesId);
 
-      this.nodeService.toggleNodeInPredictPath(this.nodes);
     } else {
       this.linkService.cleanPredictionPaths(this.links, this.nodes, false);
     }
+
+    this.nodeService.toggleNodeInPredictPath(this.nodes);
   }
 
   chosenTree: string | number;
