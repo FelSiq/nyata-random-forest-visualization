@@ -109,14 +109,15 @@ export class TreeLinksService {
 
     const nodeA = nodes.select(TreeExtraService.formatNodeId(nodeAId, true));
     const nodeB = nodes.select(TreeExtraService.formatNodeId(nodeBId, true));
+    const newLinkId = TreeExtraService.formatLinkId(nodeAId, nodeBId);
 
-    if (nodeA.empty() || nodeB.empty()) {
+    if (nodeA.empty() || nodeB.empty() || !links.select('#' + newLinkId).empty()) {
       return;
     }
 
     const newLink = links.append('g')
       .classed('link', true)
-      .attr('id', TreeExtraService.formatLinkId(nodeAId, nodeBId))
+      .attr('id', newLinkId)
       .attr('node-a-id', nodeAId)
       .attr('node-b-id', nodeBId);
 
