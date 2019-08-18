@@ -24,6 +24,9 @@ export class TreeNodeService {
   static readonly transitionDragEffect = 300;
   static readonly aggregationNodeDepthRadius = 48;
   static readonly aggregationDepthNodeId = -1;
+  static readonly styleWidthCircleDefault = 1;
+  static readonly styleWidthCirclePredict = 2;
+  static readonly styleWidthCircleHover = 3;
 
   readonly visibleAttrs = [
     { name: 'impurity', abbv: null },
@@ -112,27 +115,33 @@ export class TreeNodeService {
   };
 
   private funcMouseenter = function(): void {
-    d3.select(this.parentNode)
-      .select('circle')
-        .transition()
-          .duration(350)
-          .attr('stroke-width', 3);
+    const circle = d3.select(this.parentNode)
+      .select('circle');
+
+    circle
+      .transition()
+        .duration(350)
+        .attr('stroke-width', TreeNodeService.styleWidthCircleHover);
   };
 
   private funcMouseleave = function(): void {
-    const node = d3.select(this.parentNode)
-      .select('circle');
+    const node = d3.select(this.parentNode);
+    const circle = node.select('circle');
 
-    node
+    circle
       .transition()
         .duration(350)
-        .attr('stroke-width', 1)
-        .attr('r', node.attr('original-radius'));
+        .attr('stroke-width',
+          node.classed('in-predict-path') ?
+          TreeNodeService.styleWidthCirclePredict :
+          TreeNodeService.styleWidthCircleDefault)
+        .attr('r', circle.attr('original-radius'));
   };
 
   private filterAggregationNode = function() {
     const node = d3.select(this);
     const aggregationNode = +node.attr('index') < 0;
+
     return aggregationNode ? null : this;
   };
 
@@ -436,6 +445,26 @@ export class TreeNodeService {
     }
 
     this.updateNodeLabel(nodes);
+  }
+
+  toggleNodeInPredictPath(nodes: D3Selection) {
+      const nodesNotInPath = nodes
+        .selectAll('.node')
+          .select(function() {
+            return !d3.select(this).classed('in-predict-path') ? this : null;
+          })
+            .select('circle')
+              .attr('stroke', 'gray')
+              .attr('stroke-width', TreeNodeService.styleWidthCircleDefault);
+
+      const nodesInPath = nodes
+        .selectAll('.node')
+          .select(function() {
+            return d3.select(this).classed('in-predict-path') ? this : null;
+          })
+            .select('circle')
+              .attr('stroke', TreeLinksService.styleColorLinkPredict)
+              .attr('stroke-width', TreeNodeService.styleWidthCirclePredict);
   }
 
 }

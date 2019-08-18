@@ -142,29 +142,73 @@ export class TreeLinksService {
     }
   }
 
-  cleanPredictionPaths(links: D3Selection, dashed = false): void {
+  cleanPredictionPaths(links: D3Selection, nodes: D3Selection, dashed = false): void {
     if (links && !links.empty()) {
-      links.selectAll('.link')
-        .classed('in-predict-path', false)
-        .select('line')
-          .style('stroke', TreeLinksService.styleColorLinkDefault)
-          .style('stroke-width', TreeLinksService.styleWidthLinkDefault)
-          .style('stroke-dasharray', dashed ? ('4, 4') : 'none');
+      links
+        .selectAll('.link')
+          .classed('in-predict-path', false)
+          .select('line')
+            .style('stroke', TreeLinksService.styleColorLinkDefault)
+            .style('stroke-width', TreeLinksService.styleWidthLinkDefault)
+            .style('stroke-dasharray', dashed ? ('4, 4') : 'none');
+    }
+
+    if (nodes && !nodes.empty()) {
+      nodes
+        .selectAll('.in-predict-path')
+          .classed('in-predict-path', false);
     }
   }
 
-  drawPredictionPaths(links: D3Selection, curPath): void {
+  drawPredictionPaths(links: D3Selection,
+                      nodes: D3Selection,
+                      curPath: Array<number | string>,
+                      omittedNodes: number[]): void {
     if (links.empty()) {
       return;
     }
 
-    for (let i = 0; i < curPath.length - 1; i++) {
-      links.select(TreeExtraService.formatLinkId(curPath[i], curPath[i+1], true))
-        .classed('in-predict-path', true)
-        .select('line')
-          .style('stroke', TreeLinksService.styleColorLinkPredict)
-          .style('stroke-width', TreeLinksService.styleWidthLinkSelected)
-          .style('stroke-dasharray', 'none');
+    let nodeAId,
+        nodeAIsDrawn,
+        nodeBIsDrawn,
+        nodeBId = curPath[0];
+
+    for (let i = 1; i < curPath.length; i++) {
+      nodeAId = +nodeBId;
+      nodeBId = +curPath[i];
+
+      nodeAIsDrawn = omittedNodes.indexOf(nodeAId) < 0,
+      nodeBIsDrawn = omittedNodes.indexOf(nodeBId) < 0;
+
+      if (!nodeAIsDrawn || !nodeBIsDrawn) {
+        d3.select(TreeExtraService.formatNodeId(-1, true))
+          .classed('in-predict-path', true);
+      }
+
+      if (nodeAIsDrawn || nodeBIsDrawn) {
+        if (nodeAIsDrawn) {
+          d3.select(TreeExtraService.formatNodeId(nodeAId, true))
+            .classed('in-predict-path', true);
+        }
+
+        if (nodeBIsDrawn) {
+          d3.select(TreeExtraService.formatNodeId(nodeBId, true))
+            .classed('in-predict-path', true);
+        }
+
+        const curLinkId = (
+          TreeExtraService.formatLinkId(
+            nodeAIsDrawn ? nodeAId : -1,
+            nodeBIsDrawn ? nodeBId : -1,
+            true));
+
+        links.select(curLinkId)
+          .classed('in-predict-path', true)
+          .select('line')
+            .style('stroke', TreeLinksService.styleColorLinkPredict)
+            .style('stroke-width', TreeLinksService.styleWidthLinkSelected)
+            .style('stroke-dasharray', 'none');
+      }
     }
   }
 

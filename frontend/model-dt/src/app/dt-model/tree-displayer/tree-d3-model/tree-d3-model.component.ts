@@ -27,12 +27,20 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this._decisionPath = decisionPath;
 
     if (this._decisionPath && this.chosenTree) {
-      this.linkService.cleanPredictionPaths(this.links, true);
+      this.linkService.cleanPredictionPaths(
+        this.links,
+        this.nodes,
+        true);
+
       this.linkService.drawPredictionPaths(
         this.links,
-        this._decisionPath[+this.chosenTree]);
+        this.nodes,
+        this._decisionPath[+this.chosenTree],
+        this.omittedNodesId);
+
+      this.nodeService.toggleNodeInPredictPath(this.nodes);
     } else {
-      this.linkService.cleanPredictionPaths(this.links, false);
+      this.linkService.cleanPredictionPaths(this.links, this.nodes, false);
     }
   }
 
@@ -61,6 +69,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private nodeIDByDepth: { [depth: number] : string[]; };
   private verticalAngle: boolean;
   private aggregationDepthNodeDepth: number;
+  private omittedNodesId: number[];
 
   private adjustVisualDepthAuto = true;
   private instNumBasedNodeRadius = true;
@@ -304,6 +313,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         2 + this.visualDepthFromRoot + this.visualDepthFromLeaves,
         this.verticalAngle);
 
+    this.omittedNodesId = [];
+
     this.buildNode(
         curTree,
         0,
@@ -328,11 +339,16 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     if (this._decisionPath && this.chosenTree) {
       this.linkService.cleanPredictionPaths(
         this.links,
+        this.nodes,
         true);
 
       this.linkService.drawPredictionPaths(
         this.links,
-        this._decisionPath[+this.chosenTree]);
+        this.nodes,
+        this._decisionPath[+this.chosenTree],
+        this.omittedNodesId);
+
+      this.nodeService.toggleNodeInPredictPath(this.nodes);
     }
 
     if (this.links) {
@@ -454,6 +470,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     if (omittedNode) {
       cxScaleFactor = 1.0;
       cyScaleFactor = 1.0;
+
+      this.omittedNodesId.push(nodeId);
+
       nodeId = TreeNodeService.aggregationDepthNodeId;
 
       this.updateAggregationDepthNode(cx, cy, depth);
