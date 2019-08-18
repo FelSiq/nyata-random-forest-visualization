@@ -527,4 +527,20 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private updateVisualDepthFromLeaves(newValue: number | string): void {
+    newValue = +newValue;
+    if (newValue >= 0 && newValue <= this.maxHiddenLevels - this.visualDepthFromRoot) {
+      this.visualDepthFromLeaves = newValue;
+      this.changesHandler();
+    }
+  }
+
+  private updateVisualDepthFromRoot(newValue: number | string): void {
+    newValue = +newValue;
+    if (newValue >= 0 && newValue <= this.maxHiddenLevels - this.visualDepthFromLeaves) {
+      this.visualDepthFromRoot = newValue;
+      this.changesHandler();
+    }
+  }
+
 }

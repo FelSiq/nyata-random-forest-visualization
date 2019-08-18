@@ -66,20 +66,22 @@
           <mat-list dense>
             <mat-list-item>
               From root ({{ visualDepthFromRoot }}):
-              <mat-icon (click)="visualDepthFromRoot = visualDepthFromRoot - (visualDepthFromRoot > 0)"
+              <mat-icon (click)="updateVisualDepthFromRoot(visualDepthFromRoot - 1)"
                         [style.cursor]="visualDepthFromRoot <= 0 ? 'not-allowed' : 'pointer'"
                         class="depth-visualization-control-icon">
                 {{ visualDepthFromRoot > 0 ? 'remove_circle' : 'remove_circle_outlined' }}
               </mat-icon>
-              <mat-slider [min]="0"
+              <mat-slider #visualDepthFromRootSlider
+                          [min]="0"
                           [max]="maxHiddenLevels - visualDepthFromLeaves"
                           [disabled]="maxHiddenLevels ? visualDepthFromLeaves === maxHiddenLevels : false"
                           [(value)]="visualDepthFromRoot"
+                          (change)="updateVisualDepthFromRoot(visualDepthFromRootSlider.value)"
                           step="1"
                           color="primary"
                           class="depth-visualization-slider">
               </mat-slider>
-              <mat-icon (click)="visualDepthFromRoot = visualDepthFromRoot + (visualDepthFromRoot < maxHiddenLevels - visualDepthFromLeaves)"
+              <mat-icon (click)="updateVisualDepthFromRoot(visualDepthFromRoot + 1)"
                         [style.cursor]="visualDepthFromRoot >= (maxHiddenLevels - visualDepthFromLeaves) ? 'not-allowed' : 'pointer'"
                         class="depth-visualization-control-icon">
                 {{ visualDepthFromRoot < maxHiddenLevels - visualDepthFromLeaves ? 'add_circle' : 'add_circle_outlined' }}
@@ -87,20 +89,22 @@
             </mat-list-item>
             <mat-list-item>
               From leaf ({{ visualDepthFromLeaves }}):
-              <mat-icon (click)="visualDepthFromLeaves = visualDepthFromLeaves - (visualDepthFromLeaves > 0)"
+              <mat-icon (click)="updateVisualDepthFromLeaves(visualDepthFromLeaves - 1)"
                         [style.cursor]="visualDepthFromLeaves <= 0 ? 'not-allowed' : 'pointer'"
                         class="depth-visualization-control-icon">
                 {{ visualDepthFromLeaves > 0 ? 'remove_circle' : 'remove_circle_outlined' }}
               </mat-icon>
-              <mat-slider [min]="0"
+              <mat-slider #visualDepthFromRootSlider
+                          [min]="0"
                           [max]="maxHiddenLevels - visualDepthFromRoot"
                           [disabled]="maxHiddenLevels ? visualDepthFromRoot === maxHiddenLevels : false"
                           [(value)]="visualDepthFromLeaves"
+                          (change)="updateVisualDepthFromLeaves(visualDepthFromRootSlider.value)"
                           step="1"
                           color="primary"
                           class="depth-visualization-slider">
               </mat-slider>
-              <mat-icon (click)="visualDepthFromLeaves = visualDepthFromLeaves + (visualDepthFromLeaves < maxHiddenLevels - visualDepthFromRoot)"
+              <mat-icon (click)="updateVisualDepthFromLeaves(visualDepthFromLeaves + 1)"
                         [style.cursor]="visualDepthFromLeaves >= (maxHiddenLevels - visualDepthFromRoot) ? 'not-allowed' : 'pointer'"
                         class="depth-visualization-control-icon">
                 {{ visualDepthFromLeaves < maxHiddenLevels - visualDepthFromRoot ? 'add_circle' : 'add_circle_outlined' }}
