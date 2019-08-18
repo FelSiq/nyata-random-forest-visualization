@@ -41,8 +41,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
   readonly zoomMin: number = 0;
   readonly zoomMax: number = 3;
-  readonly minDefaultDepthFromRoot = 4;
-  readonly minDefaultDepthFromLeaf = 4;
+  readonly minDefaultDepthFromRoot = 3;
+  readonly minDefaultDepthFromLeaf = 3;
 
   private svg: D3Selection;
   private links: D3Selection;
@@ -62,6 +62,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private verticalAngle: boolean;
   private aggregationDepthNodeDepth: number;
 
+  private adjustVisualDepthAuto = true;
   private instNumBasedNodeRadius = true;
   private impurityBasedNodeColor = true;
   private showNodeLabelsRect = true;
@@ -221,16 +222,26 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   private setVisualDepth(): void {
-    const curTreeDepthFromRoot = Math.ceil(0.5 * this.maxHiddenLevels);
-    const curTreeDepthFromLeaves = Math.floor(0.5 * this.maxHiddenLevels);
+    if (this.adjustVisualDepthAuto ||
+        this.visualDepthFromRoot === null ||
+        this.visualDepthFromRoot === undefined) {
+      this.visualDepthFromRoot = Math.min(
+        this.minDefaultDepthFromRoot,
+        Math.ceil(0.5 * this.maxHiddenLevels));
 
-    if (this.visualDepthFromRoot === null || this.visualDepthFromRoot === undefined) {
-      this.visualDepthFromRoot = this.minDefaultDepthFromRoot;
-      this.visualDepthFromLeaves = this.minDefaultDepthFromLeaf;
+      this.visualDepthFromLeaves = Math.min(
+        this.minDefaultDepthFromLeaf,
+        Math.floor(0.5 * this.maxHiddenLevels));
+
+    } else {
+      this.visualDepthFromRoot = Math.min(
+        this.visualDepthFromRoot,
+        this.maxHiddenLevels);
+
+      this.visualDepthFromLeaves = Math.min(
+        this.visualDepthFromLeaves,
+        this.maxHiddenLevels - this.visualDepthFromRoot);
     }
-
-    this.visualDepthFromRoot = Math.min(this.visualDepthFromRoot, curTreeDepthFromRoot);
-    this.visualDepthFromLeaves = Math.min(this.visualDepthFromLeaves, curTreeDepthFromLeaves);
   }
 
   private createTree(): void {
