@@ -14,6 +14,7 @@ type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
 })
 export class TreeNodeService {
   static readonly radiusMinimum = 8;
+  static readonly radiusDefault = 16;
   static readonly radiusScaleFactor = 24;
   static readonly radiusSelectScaleFactor = 1.2;
   static readonly styleColorTextOutline = 'black';

@@ -41,8 +41,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
   readonly zoomMin: number = 0;
   readonly zoomMax: number = 3;
-  readonly minDepthFromRoot = 4;
-  readonly minDepthFromLeaf = 4;
+  readonly minDefaultDepthFromRoot = 4;
+  readonly minDefaultDepthFromLeaf = 4;
 
   private svg: D3Selection;
   private links: D3Selection;
@@ -55,15 +55,46 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private treeAngle = 180;
   private classes: Array<string | number>;
   private maxDepth: number;
+  private maxHiddenLevels: number;
   private visualDepthFromRoot: number;
   private visualDepthFromLeaves: number;
   private nodeIDByDepth: { [depth: number] : string[]; };
   private verticalAngle: boolean;
   private aggregationDepthNodeDepth: number;
 
+  private instNumBasedNodeRadius = true;
+  private impurityBasedNodeColor = true;
   private showNodeLabelsRect = true;
   private showLinkLabelsRect = true;
   private rearrangeNodes = true;
+
+  private aestheticsOptions = [
+    {
+      text: 'Show node labels rectangle',
+      attr: this.nodeService.showNodeLabelsRect,
+      func: () => { this.nodeService.toggleRectVisibility(this.nodes); },
+    },
+    {
+      text: 'Show link labels rectangle',
+      attr: this.linkService.showLinkLabelsRect,
+      func: () => { this.linkService.toggleRectVisibility(this.links); },
+    },
+    {
+      text: 'Rearrange nodes to fit available space',
+      attr: this.rearrangeNodes,
+      func: () => { this.rearrangeNodes = !this.rearrangeNodes; },
+    },
+    {
+      text: 'Node color based on impurity value',
+      attr: this.impurityBasedNodeColor,
+      func: () => { this.impurityBasedNodeColor = !this.impurityBasedNodeColor; },
+    },
+    {
+      text: 'Node radius size based on number of instances within',
+      attr: this.instNumBasedNodeRadius,
+      func: () => { this.instNumBasedNodeRadius = !this.instNumBasedNodeRadius; },
+    },
+  ]
 
   constructor(private eleRef: ElementRef,
               private nodeService: TreeNodeService,
@@ -176,6 +207,19 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     return { rootXCoord, rootYCoord, cxDelta, cyDelta };
   }
 
+  private setVisualDepth(): void {
+    const curTreeDepthFromRoot = Math.ceil(0.5 * this.maxHiddenLevels);
+    const curTreeDepthFromLeaves = Math.floor(0.5 * this.maxHiddenLevels);
+
+    if (this.visualDepthFromRoot === null || this.visualDepthFromRoot === undefined) {
+      this.visualDepthFromRoot = this.minDefaultDepthFromRoot;
+      this.visualDepthFromLeaves = this.minDefaultDepthFromLeaf;
+    }
+
+    this.visualDepthFromRoot = Math.min(this.visualDepthFromRoot, curTreeDepthFromRoot);
+    this.visualDepthFromLeaves = Math.min(this.visualDepthFromLeaves, curTreeDepthFromLeaves);
+  }
+
   private createTree(): void {
     if (!this.svg || !this.treeNodes) {
       return;
@@ -195,8 +239,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const curTree = curTreeNodes.tree_.value as TreeInterface;
 
     this.maxDepth = +curTree.maximum_depth;
-    this.visualDepthFromRoot = Math.min(this.minDepthFromRoot, Math.ceil(0.5 * this.maxDepth));
-    this.visualDepthFromLeaves = Math.min(this.minDepthFromLeaf, Math.floor(0.5 * this.maxDepth));
+    this.maxHiddenLevels = +curTree.maximum_depth - 1;
+
+    this.setVisualDepth();
 
     const criterion = curTreeNodes.criterion.value;
 
@@ -304,15 +349,16 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const threshold = +curTree.threshold[nodeId];
     const feature = +curTree.feature[nodeId];
     const nodeClassId = curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
-    const circleColor = this.impurityColors(impurity);
+    const circleColor = this.impurityBasedNodeColor ? this.impurityColors(impurity) : 'white';
     const sonLeftId = +curTree.children_left[nodeId];
     const sonRightId = +curTree.children_right[nodeId];
 
-    const radius = (
-      TreeNodeService.radiusMinimum +
-      TreeNodeService.radiusScaleFactor *
-      (numInstInNode /
-      +curTree.weighted_number_of_node_samples[0]));
+    const radius = (this.instNumBasedNodeRadius ? (
+        TreeNodeService.radiusMinimum +
+        TreeNodeService.radiusScaleFactor *
+        (numInstInNode /
+        +curTree.weighted_number_of_node_samples[0])) :
+      TreeNodeService.radiusDefault);
 
     const nodeAttrs = {
       'impurity': impurity,

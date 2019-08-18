@@ -72,17 +72,17 @@
                 {{ visualDepthFromRoot > 0 ? 'remove_circle' : 'remove_circle_outlined' }}
               </mat-icon>
               <mat-slider [min]="0"
-                          [max]="maxDepth - visualDepthFromLeaves"
-                          [disabled]="maxDepth ? visualDepthFromLeaves === maxDepth : false"
+                          [max]="maxHiddenLevels - visualDepthFromLeaves"
+                          [disabled]="maxHiddenLevels ? visualDepthFromLeaves === maxHiddenLevels : false"
                           [(value)]="visualDepthFromRoot"
                           step="1"
                           color="primary"
                           class="depth-visualization-slider">
               </mat-slider>
-              <mat-icon (click)="visualDepthFromRoot = visualDepthFromRoot + (visualDepthFromRoot < maxDepth - visualDepthFromLeaves)"
-                        [style.cursor]="visualDepthFromRoot >= (maxDepth - visualDepthFromLeaves) ? 'not-allowed' : 'pointer'"
+              <mat-icon (click)="visualDepthFromRoot = visualDepthFromRoot + (visualDepthFromRoot < maxHiddenLevels - visualDepthFromLeaves)"
+                        [style.cursor]="visualDepthFromRoot >= (maxHiddenLevels - visualDepthFromLeaves) ? 'not-allowed' : 'pointer'"
                         class="depth-visualization-control-icon">
-                {{ visualDepthFromRoot < maxDepth - visualDepthFromLeaves ? 'add_circle' : 'add_circle_outlined' }}
+                {{ visualDepthFromRoot < maxHiddenLevels - visualDepthFromLeaves ? 'add_circle' : 'add_circle_outlined' }}
               </mat-icon>
             </mat-list-item>
             <mat-list-item>
@@ -93,24 +93,24 @@
                 {{ visualDepthFromLeaves > 0 ? 'remove_circle' : 'remove_circle_outlined' }}
               </mat-icon>
               <mat-slider [min]="0"
-                          [max]="maxDepth - visualDepthFromRoot"
-                          [disabled]="maxDepth ? visualDepthFromRoot === maxDepth : false"
+                          [max]="maxHiddenLevels - visualDepthFromRoot"
+                          [disabled]="maxHiddenLevels ? visualDepthFromRoot === maxHiddenLevels : false"
                           [(value)]="visualDepthFromLeaves"
                           step="1"
                           color="primary"
                           class="depth-visualization-slider">
               </mat-slider>
-              <mat-icon (click)="visualDepthFromLeaves = visualDepthFromLeaves + (visualDepthFromLeaves < maxDepth - visualDepthFromRoot)"
-                        [style.cursor]="visualDepthFromLeaves >= (maxDepth - visualDepthFromRoot) ? 'not-allowed' : 'pointer'"
+              <mat-icon (click)="visualDepthFromLeaves = visualDepthFromLeaves + (visualDepthFromLeaves < maxHiddenLevels - visualDepthFromRoot)"
+                        [style.cursor]="visualDepthFromLeaves >= (maxHiddenLevels - visualDepthFromRoot) ? 'not-allowed' : 'pointer'"
                         class="depth-visualization-control-icon">
-                {{ visualDepthFromLeaves < maxDepth - visualDepthFromRoot ? 'add_circle' : 'add_circle_outlined' }}
+                {{ visualDepthFromLeaves < maxHiddenLevels - visualDepthFromRoot ? 'add_circle' : 'add_circle_outlined' }}
               </mat-icon>
             </mat-list-item>
             <mat-list-item>
               Current tree depth: {{ maxDepth }}
             </mat-list-item>
             <mat-list-item>
-              Visiblity of current tree: {{ (visualDepthFromLeaves + visualDepthFromRoot) / maxDepth | percent }}
+              Visiblity of current tree: {{ (2 + visualDepthFromLeaves + visualDepthFromRoot) / maxDepth | percent }}
             </mat-list-item>
           </mat-list>
         </ng-template>
@@ -124,25 +124,11 @@
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
           <mat-list dense>
-            <mat-list-item>
+            <mat-list-item *ngFor="let item of aestheticsOptions">
               <mat-slide-toggle color="primary"
-                                [checked]="nodeService.showNodeLabelsRect"
-                                (change)="nodeService.toggleRectVisibility(nodes)">
-                Show node labels rectangle
-              </mat-slide-toggle>
-            </mat-list-item>
-            <mat-list-item>
-              <mat-slide-toggle color="primary"
-                                [checked]="linkService.showLinkLabelsRect"
-                                (change)="linkService.toggleRectVisibility(links)">
-                Show link labels rectangle
-              </mat-slide-toggle>
-            </mat-list-item>
-            <mat-list-item>
-              <mat-slide-toggle color="primary"
-                                [checked]="rearrangeNodes"
-                                (change)="rearrangeNodes = !rearrangeNodes">
-                Rearrange nodes to fit available space
+                                [checked]="item.attr"
+                                (change)="item.func()">
+                {{ item.text }}
               </mat-slide-toggle>
             </mat-list-item>
           </mat-list>
