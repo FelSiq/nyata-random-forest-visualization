@@ -26,12 +26,13 @@ export class TreeNodeService {
   static readonly aggregationDepthNodeId = -1;
 
   readonly visibleAttrs = [
-    'impurity',
-    'decision-feature',
-    'number-of-instances',
-    'threshold',
-    'node-class',
-    'depth',
+    { name: 'impurity', abbv: null },
+    { name: 'decision-feature', abbv: null },
+    { name: 'number-of-instances', abbv: null },
+    { name: 'threshold', abbv: null },
+    { name: 'node-class', abbv: null },
+    { name: 'depth', abbv: null },
+    { name: 'index', abbv: 'ID' },
   ];
 
   activeAttrs: string[] = [];
@@ -238,6 +239,10 @@ export class TreeNodeService {
   }
 
   setMouseEvents(nodes: D3Selection): void {
+    if (nodes.empty()) {
+      return;
+    }
+
     nodes
       .selectAll('.draggable')
         .on('mouseenter', this.funcMouseenter)
@@ -255,6 +260,10 @@ export class TreeNodeService {
   }
 
   buildAggregationDepthNodeText(agDepthNode: D3Selection, totalDepth: number): void {
+    if (agDepthNode.empty()) {
+      return;
+    }
+
     const textDepth = agDepthNode.append('text')
       .classed('draggable node-label', true)
       .attr('x', agDepthNode.attr('cx'))
@@ -272,6 +281,10 @@ export class TreeNodeService {
   }
 
   private buildNodesLabelRect(nodes: D3Selection): D3Selection {
+    if (nodes.empty()) {
+      return;
+    }
+
     const rects = nodes
       .selectAll('.node')
         .select(this.filterAggregationNode)
@@ -291,17 +304,24 @@ export class TreeNodeService {
   }
 
   private buildNodesLabelText(nodes: D3Selection): void {
+    if (nodes.empty()) {
+      return;
+    }
+
     nodes
       .selectAll('text')
         .remove();
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
       const curAttr = this.activeAttrs[i];
+      const curAbbv = null; // ?
 
       const formatedAttrLabel = (
           this.completeAttrName ?
-          curAttr :
-          TreeExtraService.abbreviateAttrLabel(curAttr));
+          curAttr : (
+            curAbbv ?
+            curAbbv : 
+            TreeExtraService.abbreviateAttrLabel(curAttr)));
 
       const attrLabelPrefix = (this.activeAttrs.length > 1) ? (formatedAttrLabel + ': ') : '';
       const translationValue = (TreeNodeService.styleTextFontSize +
@@ -333,6 +353,10 @@ export class TreeNodeService {
   }
 
   updateNodeLabel(nodes): void {
+    if (nodes.empty()) {
+      return;
+    }
+
     const filteredNodes = nodes
       .selectAll('.node')
         .select(this.filterAggregationNode);
@@ -391,6 +415,10 @@ export class TreeNodeService {
 
   toggleRectVisibility(nodes: D3Selection): void {
     this.showNodeLabelsRect = !this.showNodeLabelsRect;
+
+    if (nodes.empty()) {
+      return;
+    }
 
     nodes
       .selectAll('.node')

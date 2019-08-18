@@ -173,7 +173,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
   private calcRootCoordAndDeltas(curTree: TreeInterface) {
     let cxDelta, cyDelta, rootYCoord, rootXCoord;
-    const visibleDepth = this.visualDepthFromRoot + this.visualDepthFromLeaves;
+    let visibleLevelsNum = 2 + this.visualDepthFromRoot + this.visualDepthFromLeaves;
+   
+    // Adjust for the Aggregation Depth Node level
+    visibleLevelsNum -= +(visibleLevelsNum === this.maxDepth + 1);
 
     const translationFactor = (
       TreeNodeService.radiusMinimum +
@@ -184,7 +187,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
     if (this.verticalAngle) {
       cxDelta = 0.25 * totalWidth;
-      cyDelta = totalHeight / visibleDepth;
+      cyDelta = totalHeight / visibleLevelsNum;
       rootXCoord = translationFactor + 0.5 * totalWidth;
       rootYCoord = translationFactor;
 
@@ -194,7 +197,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       }
     } else {
       cyDelta = 0.25 * totalHeight;
-      cxDelta = totalWidth / visibleDepth;
+      cxDelta = totalWidth / visibleLevelsNum;
       rootXCoord = translationFactor;
       rootYCoord = translationFactor + 0.5 * totalHeight;
 
@@ -265,7 +268,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         0.99 * (this.verticalAngle ? this.width : this.height),
         this.verticalAngle ? rootYCoord : rootXCoord,
         this.verticalAngle ? cyDelta : cxDelta,
-        this.visualDepthFromRoot + this.visualDepthFromLeaves,
+        2 + this.visualDepthFromRoot + this.visualDepthFromLeaves,
         this.verticalAngle);
 
     this.buildNode(
@@ -283,7 +286,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
     this.nodeService.buildAggregationDepthNodeText(
       this.nodes.select(aggregationNodeId),
-      this.maxDepth - (this.visualDepthFromRoot + this.visualDepthFromLeaves - 1));
+      this.maxHiddenLevels - (this.visualDepthFromRoot + this.visualDepthFromLeaves));
 
     if (this.rearrangeNodes) {
       this.adjustNodePositions();
@@ -293,6 +296,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       this.linkService.cleanPredictionPaths(
         this.links,
         true);
+
       this.linkService.drawPredictionPaths(
         this.links,
         this._decisionPath[+this.chosenTree]);
@@ -402,12 +406,15 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         cy: number,
         cyDelta: number,
         depth: number): void {
-    const aggregationIsChildren = (depth === this.visualDepthFromRoot - 1);
     const sonLeftId = +curTree.children_left[nodeId];
     const sonRightId = +curTree.children_right[nodeId];
+    const aggregationIsChildren = (
+        depth === this.visualDepthFromRoot &&
+        depth !== this.maxDepth - this.visualDepthFromLeaves - 1);
+
     const omittedNode = (
-        depth >= this.visualDepthFromRoot &&
-        depth <= this.maxDepth - this.visualDepthFromLeaves);
+        depth > this.visualDepthFromRoot &&
+        depth < this.maxDepth - this.visualDepthFromLeaves);
 
     let cxScaleFactor, cyScaleFactor;
 
