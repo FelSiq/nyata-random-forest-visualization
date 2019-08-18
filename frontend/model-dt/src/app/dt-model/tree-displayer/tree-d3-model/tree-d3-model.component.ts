@@ -69,43 +69,55 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private showLinkLabelsRect = true;
   private rearrangeNodes = true;
 
-  private aestheticsOptions = [
+  private additionalMiscOptions = [
     {
-      text: 'Show node labels rectangle',
-      attr: this.nodeService.showNodeLabelsRect,
-      func: () => { this.nodeService.toggleRectVisibility(this.nodes); },
+      name: 'Visual information',
+      icon: 'tonality',
+      content: [
+        {
+          text: 'Node color based on impurity value',
+          attr: this.impurityBasedNodeColor,
+          func: () => { this.impurityBasedNodeColor = !this.impurityBasedNodeColor; },
+        },
+        {
+          text: 'Node radius size based on number of instances within',
+          attr: this.instNumBasedNodeRadius,
+          func: () => { this.instNumBasedNodeRadius = !this.instNumBasedNodeRadius; },
+        },
+      ],
     },
     {
-      text: 'Show link labels rectangle',
-      attr: this.linkService.showLinkLabelsRect,
-      func: () => { this.linkService.toggleRectVisibility(this.links); },
+      name: 'Aesthetics',
+      icon: 'details',
+      content: [
+        {
+          text: 'Show node labels rectangle',
+          attr: this.nodeService.showNodeLabelsRect,
+          func: () => { this.nodeService.toggleRectVisibility(this.nodes); },
+        },
+        {
+          text: 'Show link labels rectangle',
+          attr: this.linkService.showLinkLabelsRect,
+          func: () => { this.linkService.toggleRectVisibility(this.links); },
+        },
+        {
+          text: 'Show node attributes full name',
+          attr: this.nodeService.completeAttrName,
+          func: () => { this.nodeService.toggleCompleteAttrName(this.nodes); },
+        },
+        {
+          text: 'Show link attributes full name',
+          attr: this.linkService.completeAttrName,
+          func: () => { this.linkService.toggleCompleteAttrName(this.links); },
+        },
+        {
+          text: 'Rearrange nodes to fit available space',
+          attr: this.rearrangeNodes,
+          func: () => { this.rearrangeNodes = !this.rearrangeNodes; },
+        },
+      ],
     },
-    {
-      text: 'Show node attributes full name',
-      attr: this.nodeService.completeAttrName,
-      func: () => { this.nodeService.toggleCompleteAttrName(this.nodes); },
-    },
-    {
-      text: 'Show link attributes full name',
-      attr: this.linkService.completeAttrName,
-      func: () => { this.linkService.toggleCompleteAttrName(this.links); },
-    },
-    {
-      text: 'Rearrange nodes to fit available space',
-      attr: this.rearrangeNodes,
-      func: () => { this.rearrangeNodes = !this.rearrangeNodes; },
-    },
-    {
-      text: 'Node color based on impurity value',
-      attr: this.impurityBasedNodeColor,
-      func: () => { this.impurityBasedNodeColor = !this.impurityBasedNodeColor; },
-    },
-    {
-      text: 'Node radius size based on number of instances within',
-      attr: this.instNumBasedNodeRadius,
-      func: () => { this.instNumBasedNodeRadius = !this.instNumBasedNodeRadius; },
-    },
-  ]
+  ];
 
   constructor(private eleRef: ElementRef,
               private nodeService: TreeNodeService,
