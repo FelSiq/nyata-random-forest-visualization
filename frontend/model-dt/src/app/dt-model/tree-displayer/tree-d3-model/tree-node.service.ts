@@ -314,7 +314,9 @@ export class TreeNodeService {
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
       const curAttr = this.activeAttrs[i];
-      const curAbbv = null; // ?
+      const curAbbv = this.visibleAttrs[
+        this.visibleAttrs.map(item => item.name).indexOf(curAttr)
+      ].abbv;
 
       const formatedAttrLabel = (
           this.completeAttrName ?
@@ -424,6 +426,16 @@ export class TreeNodeService {
       .selectAll('.node')
         .select('rect')
           .attr('visibility', this.showNodeLabelsRect ? 'visible' : 'hidden');
+  }
+
+  toggleCompleteAttrName(nodes: D3Selection): void {
+    this.completeAttrName = !this.completeAttrName;
+
+    if (nodes.empty()) {
+      return;
+    }
+
+    this.updateNodeLabel(nodes);
   }
 
 }

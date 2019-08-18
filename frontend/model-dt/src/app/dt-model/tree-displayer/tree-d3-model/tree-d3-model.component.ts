@@ -80,6 +80,16 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       func: () => { this.linkService.toggleRectVisibility(this.links); },
     },
     {
+      text: 'Show node attributes full name',
+      attr: this.nodeService.completeAttrName,
+      func: () => { this.nodeService.toggleCompleteAttrName(this.nodes); },
+    },
+    {
+      text: 'Show link attributes full name',
+      attr: this.linkService.completeAttrName,
+      func: () => { this.linkService.toggleCompleteAttrName(this.links); },
+    },
+    {
       text: 'Rearrange nodes to fit available space',
       attr: this.rearrangeNodes,
       func: () => { this.rearrangeNodes = !this.rearrangeNodes; },

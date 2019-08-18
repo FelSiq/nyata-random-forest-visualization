@@ -21,10 +21,10 @@ export class TreeLinksService {
   static readonly styleTextSpacing = 4;
 
   readonly visibleAttrs = [
-    'weight',
-    'decision',
-    'decision-feature',
-    'threshold',
+    { name: 'weight', abbv: null },
+    { name: 'decision', abbv: null },
+    { name: 'decision-feature', abbv: null },
+    { name: 'threshold', abbv: null },
   ];
 
   activeAttrs: string[] = [];
@@ -103,7 +103,7 @@ export class TreeLinksService {
                nodeAId: number,
                nodeBId: number,
                decision: string): void {
-    if (nodeAId === nodeBId) {
+    if (nodeAId === nodeBId || links.empty()) {
       return;
     }
 
@@ -143,7 +143,7 @@ export class TreeLinksService {
   }
 
   cleanPredictionPaths(links: D3Selection, dashed = false): void {
-    if (links) {
+    if (links && !links.empty()) {
       links.selectAll('.link')
         .classed('in-predict-path', false)
         .select('line')
@@ -154,6 +154,10 @@ export class TreeLinksService {
   }
 
   drawPredictionPaths(links: D3Selection, curPath): void {
+    if (links.empty()) {
+      return;
+    }
+
     for (let i = 0; i < curPath.length - 1; i++) {
       links.select(TreeExtraService.formatLinkId(curPath[i], curPath[i+1], true))
         .classed('in-predict-path', true)
@@ -165,6 +169,10 @@ export class TreeLinksService {
   }
 
   private buildLinksLabelRect(links: D3Selection): D3Selection {
+    if (links.empty()) {
+      return;
+    }
+
     const rects = links.selectAll('.link')
       .select(this.filterAggregationLink)
         .append('rect')
@@ -183,6 +191,10 @@ export class TreeLinksService {
   }
 
   private buildLinksLabelText(links: D3Selection): void {
+    if (links.empty()) {
+      return;
+    }
+
     const filteredLinks = links
       .selectAll('.link')
         .select(this.filterAggregationLink);
@@ -193,11 +205,16 @@ export class TreeLinksService {
 
     for (let i = 0; i < this.activeAttrs.length; i++) {
       const curAttr = this.activeAttrs[i];
+      const curAbbv = this.visibleAttrs[
+        this.visibleAttrs.map(item => item.name).indexOf(curAttr)
+      ].abbv;
 
       const formatedAttrLabel = (
           this.completeAttrName ?
-          curAttr :
-          TreeExtraService.abbreviateAttrLabel(curAttr));
+          curAttr : (
+            curAbbv ?
+            curAbbv : 
+            TreeExtraService.abbreviateAttrLabel(curAttr)));
 
       const attrLabelPrefix = (this.activeAttrs.length > 1) ? (formatedAttrLabel + ': ') : '';
       const translationValue = (TreeLinksService.styleTextFontSize +
@@ -229,6 +246,10 @@ export class TreeLinksService {
   }
 
   updateLinkLabel(links): void {
+    if (links.empty()) {
+      return;
+    }
+
     if (this.activeAttrs.length === 0) {
       links.selectAll('.link')
         .selectAll('.link-label')
@@ -280,9 +301,24 @@ export class TreeLinksService {
   toggleRectVisibility(links: D3Selection): void {
     this.showLinkLabelsRect = !this.showLinkLabelsRect;
 
+    if (links.empty()) {
+      return;
+    }
+
     links
       .selectAll('.link')
         .select('rect')
           .attr('visibility', this.showLinkLabelsRect ? 'visible' : 'hidden');
   }
+
+  toggleCompleteAttrName(links: D3Selection): void {
+    this.completeAttrName = !this.completeAttrName;
+
+    if (links.empty()) {
+      return;
+    }
+
+    this.updateLinkLabel(links);
+  }
+
 }
