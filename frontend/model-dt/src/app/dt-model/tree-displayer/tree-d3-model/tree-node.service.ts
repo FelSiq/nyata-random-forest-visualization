@@ -262,6 +262,7 @@ export class TreeNodeService {
         .classed('draggable', true)
         .attr('stroke', 'gray')
         .attr('stroke-width', 1)
+        .attr('stroke-dasharray', nodeId < 0 ? ('4, 4') : null)
         .attr('fill', circleColor)
         .attr('cx', cx)
         .attr('cy', cy)
