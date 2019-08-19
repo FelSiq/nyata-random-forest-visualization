@@ -224,29 +224,7 @@ export class TreeLinksService {
     }
   }
 
-  private buildLinksLabelRect(links: D3Selection): D3Selection {
-    if (links.empty()) {
-      return;
-    }
-
-    const rects = links.selectAll('.link')
-      .select(this.filterAggregationLink)
-        .append('rect')
-          .raise()
-          .classed('draggable link-label', true)
-          .attr('width', 64)
-          .attr('height', (TreeLinksService.styleTextFontSize +
-                           TreeLinksService.styleTextSpacing) *
-                           this.activeAttrs.length)
-          .attr('rx', 5)
-          .attr('opacity', 0.5)
-          .attr('fill', 'red')
-          .attr('visibility', this.showLinkLabelsRect ? 'visible' : 'hidden');
-
-    return rects;
-  }
-
-  private buildLinksLabelText(links: D3Selection): void {
+  updateLinkLabel(links): void {
     if (links.empty()) {
       return;
     }
@@ -255,94 +233,31 @@ export class TreeLinksService {
       .selectAll('.link')
         .select(this.filterAggregationLink);
 
+    TreeExtraService.buildObjectsLabelText(
+      filteredLinks,
+      this.activeAttrs,
+      this.completeAttrName ? null : TreeExtraService.getAbbvs(this.activeAttrs, this.visibleAttrs),
+      TreeLinksService.styleTextFontSize,
+      TreeLinksService.styleTextSpacing,
+      TreeLinksService.styleColorTextOutline,
+      TreeLinksService.funcLinkHalfXCoord,
+      TreeLinksService.funcLinkHalfYCoord,
+    );
+
+    TreeExtraService.buildObjectsLabelRect(
+      filteredLinks,
+      'red',
+      this.showLinkLabelsRect,
+      (TreeLinksService.styleTextFontSize +
+       TreeLinksService.styleTextSpacing),
+      TreeLinksService.funcLinkHalfXCoord,
+      TreeLinksService.funcLinkHalfYCoord);
+
     filteredLinks
-      .selectAll('text')
-        .remove();
+      .selectAll('.label-text')
+        .raise();
 
-    for (let i = 0; i < this.activeAttrs.length; i++) {
-      const curAttr = this.activeAttrs[i];
-      const curAbbv = this.visibleAttrs[
-        this.visibleAttrs.map(item => item.name).indexOf(curAttr)
-      ].abbv;
-
-      const formatedAttrLabel = (
-          this.completeAttrName ?
-          curAttr : (
-            curAbbv ?
-            curAbbv : 
-            TreeExtraService.abbreviateAttrLabel(curAttr)));
-
-      const attrLabelPrefix = (this.activeAttrs.length > 1) ? (formatedAttrLabel + ': ') : '';
-      const translationValue = (TreeLinksService.styleTextFontSize +
-                                (TreeLinksService.styleTextFontSize +
-                                 TreeLinksService.styleTextSpacing) *
-                                (i - 0.5 * this.activeAttrs.length));
-      filteredLinks
-        .append('text')
-          .classed('draggable link-label', true)
-          .attr('font-size', TreeLinksService.styleTextFontSize)
-          .attr('font-family', "'Roboto', sans-serif")
-          .attr('font-weight', 900)
-          .attr('fill', 'white')
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'central')
-          .attr('x', TreeLinksService.funcLinkHalfXCoord)
-          .attr('y', TreeLinksService.funcLinkHalfYCoord)
-          .attr('transform', 'translate(0, ' + translationValue + ')')
-          .text(function(): string {
-            let value: string | number = d3.select(this.parentNode).attr(curAttr);
-            if (+value && value.indexOf('.') > -1 && value.length > 4) {
-              value = (+value).toFixed(2);
-            }
-            return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
-          })
-          .style('stroke', TreeLinksService.styleColorTextOutline)
-          .style('stroke-width', '1px');
-    }
-  }
-
-  updateLinkLabel(links): void {
-    if (links.empty()) {
-      return;
-    }
-
-    if (this.activeAttrs.length === 0) {
-      links.selectAll('.link')
-        .selectAll('.link-label')
-          .remove();
-
-      return;
-    }
-
-    let rects = null;
-
-    if (links.select('.link').select('rect').empty()) {
-      rects = this.buildLinksLabelRect(links);
-
-    } else {
-      rects = links.selectAll('.link')
-        .select('rect')
-          .attr('height', (TreeLinksService.styleTextFontSize +
-                           TreeLinksService.styleTextSpacing) *
-                           this.activeAttrs.length);
-    }
-
-    this.buildLinksLabelText(links);
-
-    if (rects) {
-      let labelWidth = 0;
-
-      links.selectAll('.link')
-        .selectAll('text')
-          .each(function(i) {
-            labelWidth = Math.max(4 + this.getComputedTextLength(), labelWidth);
-          });
-
-      rects
-        .attr('width', labelWidth)
-        .attr('x', TreeLinksService.funcLinkHalfXCoord)
-        .attr('y', TreeLinksService.funcLinkHalfYCoord);
-    }
+    TreeExtraService.setMouseEvents(links, null, null);
   }
 
   toggleAttr(newValue: string): void {

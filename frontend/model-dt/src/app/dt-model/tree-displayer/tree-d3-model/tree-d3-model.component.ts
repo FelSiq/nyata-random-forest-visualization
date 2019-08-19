@@ -421,6 +421,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       'parent-id': parentId,
       'son-left-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
       'son-right-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
+      'depth': depth,
     };
 
     this.nodeService.generateNode(

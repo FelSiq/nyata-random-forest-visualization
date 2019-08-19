@@ -72,13 +72,6 @@ export class TreeNodeService {
 
     circle
       .attr('r', TreeNodeService.radiusSelectScaleFactor * radius);
-
-    TreeLinksService.getNodeIncidentEdges(node)
-      .classed('link-active', true)
-      .select('line')
-        .transition()
-          .duration(TreeNodeService.transitionDragEffect)
-          .style('stroke', TreeLinksService.funcDragStartSelectStrokeStyle);
   };
 
   private funcDragOnEnd = function(): void {
@@ -101,13 +94,6 @@ export class TreeNodeService {
 
     d3.select('#placeholder-node-' + nodeId)
       .remove();
-
-    TreeLinksService.getNodeIncidentEdges(node)
-      .classed('link-active', false)
-      .select('line')
-        .transition()
-          .duration(TreeNodeService.transitionDragEffect)
-          .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
   };
 
   private funcDragOnDrag = function(): void {
@@ -271,17 +257,6 @@ export class TreeNodeService {
         .attr('radius-factor', radiusFactor);
   }
 
-  setMouseEvents(nodes: D3Selection): void {
-    if (nodes.empty()) {
-      return;
-    }
-
-    nodes
-      .selectAll('.draggable')
-        .on('mouseenter', this.funcMouseEnter)
-        .on('mouseleave', this.funcMouseLeave);
-  }
-
   private setAggregationDepthNodeTextStyle(text: D3Selection): void {
     text
       .attr('font-size', TreeNodeService.styleDepthNodeTextFontSize)
@@ -313,80 +288,6 @@ export class TreeNodeService {
     this.setAggregationDepthNodeTextStyle(textDepth);
   }
 
-  private buildNodesLabelRect(nodes: D3Selection): D3Selection {
-    if (nodes.empty()) {
-      return;
-    }
-
-    const rects = nodes
-      .selectAll('.node')
-        .select(this.filterAggregationNode)
-          .append('rect')
-            .raise()
-            .classed('draggable node-label', true)
-            .attr('width', 64)
-            .attr('height', (TreeNodeService.styleTextFontSize +
-                             TreeNodeService.styleTextSpacing) *
-                             this.activeAttrs.length)
-            .attr('rx', 5)
-            .attr('opacity', 0.5)
-            .attr('fill', 'black')
-            .attr('visibility', this.showNodeLabelsRect ? 'visible' : 'hidden');
-
-    return rects;
-  }
-
-  private buildNodesLabelText(nodes: D3Selection): void {
-    if (nodes.empty()) {
-      return;
-    }
-
-    nodes
-      .selectAll('text')
-        .remove();
-
-    for (let i = 0; i < this.activeAttrs.length; i++) {
-      const curAttr = this.activeAttrs[i];
-      const curAbbv = this.visibleAttrs[
-        this.visibleAttrs.map(item => item.name).indexOf(curAttr)
-      ].abbv;
-
-      const formatedAttrLabel = (
-          this.completeAttrName ?
-          curAttr : (
-            curAbbv ?
-            curAbbv : 
-            TreeExtraService.abbreviateAttrLabel(curAttr)));
-
-      const attrLabelPrefix = (this.activeAttrs.length > 1) ? (formatedAttrLabel + ': ') : '';
-      const translationValue = (TreeNodeService.styleTextFontSize +
-                                (TreeNodeService.styleTextFontSize +
-                                 TreeNodeService.styleTextSpacing) *
-                                (i - 0.5 * this.activeAttrs.length));
-      nodes
-        .append('text')
-          .classed('draggable node-label', true)
-          .attr('font-size', TreeNodeService.styleTextFontSize)
-          .attr('font-family', "'Roboto', sans-serif")
-          .attr('font-weight', 900)
-          .attr('fill', 'white')
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'central')
-          .attr('x', TreeNodeService.funcNodeXCoord)
-          .attr('y', TreeNodeService.funcNodeYCoord)
-          .attr('transform', 'translate(0, ' + translationValue + ')')
-          .text(function(): string {
-            let value: string | number = d3.select(this.parentNode).attr(curAttr);
-            if (+value && value.indexOf('.') > -1 && value.length > 4) {
-              value = (+value).toFixed(2);
-            }
-            return attrLabelPrefix + (value !== null && value !== undefined ? value : '-');
-          })
-          .style('stroke', TreeLinksService.styleColorTextOutline)
-          .style('stroke-width', '1px');
-    }
-  }
-
   updateNodeLabel(nodes): void {
     if (nodes.empty()) {
       return;
@@ -396,47 +297,34 @@ export class TreeNodeService {
       .selectAll('.node')
         .select(this.filterAggregationNode);
 
-    if (this.activeAttrs.length === 0) {
-      filteredNodes
-        .selectAll('.node-label')
-          .remove();
+    TreeExtraService.buildObjectsLabelText(
+      filteredNodes,
+      this.activeAttrs,
+      this.completeAttrName ? null : TreeExtraService.getAbbvs(this.activeAttrs, this.visibleAttrs),
+      TreeNodeService.styleTextFontSize,
+      TreeNodeService.styleTextSpacing,
+      TreeLinksService.styleColorTextOutline,
+      TreeNodeService.funcNodeXCoord,
+      TreeNodeService.funcNodeYCoord,
+    );
 
-      this.setMouseEvents(nodes);
+    TreeExtraService.buildObjectsLabelRect(
+      filteredNodes,
+      'black',
+      this.showNodeLabelsRect,
+      (TreeNodeService.styleTextFontSize +
+       TreeNodeService.styleTextSpacing),
+      TreeNodeService.funcNodeXCoord,
+      TreeNodeService.funcNodeYCoord);
 
-      return;
-    }
+    filteredNodes
+      .selectAll('.label-text')
+        .raise();
 
-    let rects = null;
-
-    if (nodes.select('.node').select('rect').empty()) {
-      rects = this.buildNodesLabelRect(nodes);
-
-    } else {
-      rects = filteredNodes
-        .select('rect')
-          .attr('height', (TreeNodeService.styleTextFontSize +
-                           TreeNodeService.styleTextSpacing) *
-                           this.activeAttrs.length);
-    }
-
-    this.buildNodesLabelText(filteredNodes);
-
-    if (rects) {
-      let labelWidth = 0;
-
-      filteredNodes
-        .selectAll('text')
-          .each(function(i) {
-            labelWidth = Math.max(4 + this.getComputedTextLength(), labelWidth);
-          });
-
-      rects
-        .attr('width', labelWidth)
-        .attr('x', TreeNodeService.funcNodeXCoord)
-        .attr('y', TreeNodeService.funcNodeYCoord);
-    }
-
-    this.setMouseEvents(nodes);
+    TreeExtraService.setMouseEvents(
+      nodes,
+      this.funcMouseEnter,
+      this.funcMouseLeave);
   }
 
   toggleAttr(newValue: string): void {
