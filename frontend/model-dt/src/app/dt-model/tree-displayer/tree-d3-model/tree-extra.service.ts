@@ -164,15 +164,6 @@ export class TreeExtraService {
         })
         .append('text')
           .classed('draggable label label-text', true)
-          .attr('transform', function(): string {
-            const activeAttrs = +d3.select(this.parentNode)
-              .selectAll('.label-text').size();
-
-            const translationValue = (
-              fontSize + (fontSize + fontSpacing) * (activeAttrs - 1));
-
-            return 'translate(0, ' + translationValue + ')';
-          })
           .text(function(): string {
             let value: string | number = d3.select(this.parentNode).attr(curAttr);
 
@@ -191,11 +182,22 @@ export class TreeExtraService {
         .attr('font-weight', 900)
         .attr('fill', 'white')
         .attr('text-anchor', 'middle')
-        .attr('alignment-baseline', 'central')
         .attr('x', funcXCoord)
         .attr('y', funcYCoord)
         .style('stroke', textOutline)
-        .style('stroke-width', 1);
+        .style('stroke-width', 1)
+        .each(function(d, i) {
+          d3.select(this)
+            .attr('transform', function(): string {
+              const activeAttrs = +d3.select((<SVGElement>this).parentNode)
+                .selectAll('.label-text').size();
+
+              const translationValue = (
+                fontSize + (fontSize + fontSpacing) * (i - 0.5 * activeAttrs));
+
+              return 'translate(0, ' + translationValue + ')';
+          })
+        });
   }
 
   static setMouseEvents(
