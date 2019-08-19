@@ -13,6 +13,7 @@ export class TreeLinksService {
   static readonly styleColorLinkDefault = 'rgb(128, 128, 128)';
   static readonly styleColorLinkSelected = 'rgb(0, 0, 0)';
   static readonly styleColorLinkPredict = 'rgb(192, 0, 0)';
+  static readonly styleColorLinkPredictSelected = 'rgb(96, 0, 0)';
   static readonly styleWidthLinkDefault = 2;
   static readonly styleWidthLinkSelected = 6;
   static readonly styleWidthLinkDragFactor = 2.0;
@@ -47,6 +48,16 @@ export class TreeLinksService {
     const height = curElem.attr('height') ? +curElem.attr('height') : 0.0;
 
     return 0.5 * (+link.attr('y2') + +link.attr('y1') - height);
+  };
+
+  static funcDragStartSelectStrokeStyle = function(): string {
+    const predictPathLink = d3.select(this.parentNode)
+      .classed('in-predict-path');
+
+    return (
+      predictPathLink ? 
+      TreeLinksService.styleColorLinkPredictSelected :
+      TreeLinksService.styleColorLinkSelected);
   };
 
   static funcDragEndSelectStrokeStyle = function(): string {

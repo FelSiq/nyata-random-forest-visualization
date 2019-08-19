@@ -65,17 +65,15 @@ export class TreeNodeService {
       .raise()
       .classed('node-active', true);
 
-    if (!circle.empty()) {
-      circle
-        .attr('r', TreeNodeService.radiusSelectScaleFactor * radius);
-    }
+    circle
+      .attr('r', TreeNodeService.radiusSelectScaleFactor * radius);
 
     TreeLinksService.getNodeIncidentEdges(node)
       .classed('link-active', true)
       .select('line')
         .transition()
           .duration(TreeNodeService.transitionDragEffect)
-          .style('stroke', TreeLinksService.styleColorLinkSelected);
+          .style('stroke', TreeLinksService.funcDragStartSelectStrokeStyle);
   };
 
   private funcDragOnEnd = function(): void {
@@ -114,7 +112,7 @@ export class TreeNodeService {
         d3.event.y);
   };
 
-  private funcMouseenter = function(): void {
+  private funcMouseEnter = function(): void {
     const circle = d3.select(this.parentNode)
       .select('circle');
 
@@ -124,7 +122,7 @@ export class TreeNodeService {
         .attr('stroke-width', TreeNodeService.styleWidthCircleHover);
   };
 
-  private funcMouseleave = function(): void {
+  private funcMouseLeave = function(): void {
     const node = d3.select(this.parentNode);
     const circle = node.select('circle');
 
@@ -254,8 +252,8 @@ export class TreeNodeService {
 
     nodes
       .selectAll('.draggable')
-        .on('mouseenter', this.funcMouseenter)
-        .on('mouseleave', this.funcMouseleave);
+        .on('mouseenter', this.funcMouseEnter)
+        .on('mouseleave', this.funcMouseLeave);
   }
 
   private setAggregationDepthNodeTextStyle(text: D3Selection): void {
