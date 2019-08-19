@@ -262,7 +262,7 @@ export class TreeNodeService {
         .classed('draggable', true)
         .attr('stroke', 'gray')
         .attr('stroke-width', 1)
-        .attr('stroke-dasharray', nodeId < 0 ? ('4, 4') : null)
+        .attr('stroke-dasharray', nodeId < 0 ? ('8, 4') : null)
         .attr('fill', circleColor)
         .attr('cx', cx)
         .attr('cy', cy)
@@ -518,7 +518,7 @@ export class TreeNodeService {
     if (this.impurityBasedNodeColor) {
       circles
         .attr('fill', function() {
-          const impurity = d3.select(this.parentNode).attr('impurity');
+          const impurity = d3.select((<SVGElement>this).parentNode).attr('impurity');
           return impurity ? impurityColors(+impurity) : 'white';
         });
 
