@@ -3,7 +3,6 @@ import { Component, OnInit, AfterViewInit, Input, ElementRef } from '@angular/co
 import * as d3 from 'd3-selection';
 import * as d3Zoom from 'd3-zoom';
 import * as d3Drag from 'd3-drag';
-import * as d3Scale from 'd3-scale';
 import * as d3Shape from 'd3-shape';
 
 import { TreeNodeService } from './tree-node.service';
@@ -57,7 +56,6 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private links: D3Selection;
   private nodes: D3Selection;
   private depthMarkers: D3Selection;
-  private impurityColors: d3Scale.ScaleLinear<string, number>;
   private width: number;
   private height: number;
   private maxImpurity: number;
@@ -73,8 +71,6 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private omittedNodesId: number[];
 
   private adjustVisualDepthAuto = true;
-  private instNumBasedNodeRadius = true;
-  private impurityBasedNodeColor = true;
   private showNodeLabelsRect = true;
   private showLinkLabelsRect = true;
   private rearrangeNodes = true;
@@ -86,13 +82,13 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       content: [
         {
           text: 'Node color based on impurity value',
-          attr: this.impurityBasedNodeColor,
-          func: () => { this.impurityBasedNodeColor = !this.impurityBasedNodeColor; },
+          attr: this.nodeService.impurityBasedNodeColor,
+          func: (): void => { this.nodeService.toggleImpurityBasedNodeColor(this.nodes); },
         },
         {
           text: 'Node radius size based on number of instances within',
-          attr: this.instNumBasedNodeRadius,
-          func: () => { this.instNumBasedNodeRadius = !this.instNumBasedNodeRadius; },
+          attr: this.nodeService.instNumBasedNodeRadius,
+          func: (): void => { this.nodeService.toggleInstNumBasedNodeRadius(this.nodes); },
         },
       ],
     },
@@ -103,27 +99,27 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         {
           text: 'Show node labels rectangle',
           attr: this.nodeService.showNodeLabelsRect,
-          func: () => { this.nodeService.toggleRectVisibility(this.nodes); },
+          func: (): void => { this.nodeService.toggleRectVisibility(this.nodes); },
         },
         {
           text: 'Show link labels rectangle',
           attr: this.linkService.showLinkLabelsRect,
-          func: () => { this.linkService.toggleRectVisibility(this.links); },
+          func: (): void => { this.linkService.toggleRectVisibility(this.links); },
         },
         {
           text: 'Show node attributes full name',
           attr: this.nodeService.completeAttrName,
-          func: () => { this.nodeService.toggleCompleteAttrName(this.nodes); },
+          func: (): void => { this.nodeService.toggleCompleteAttrName(this.nodes); },
         },
         {
           text: 'Show link attributes full name',
           attr: this.linkService.completeAttrName,
-          func: () => { this.linkService.toggleCompleteAttrName(this.links); },
+          func: (): void => { this.linkService.toggleCompleteAttrName(this.links); },
         },
         {
           text: 'Rearrange nodes to fit available space',
           attr: this.rearrangeNodes,
-          func: () => { this.rearrangeNodes = !this.rearrangeNodes; },
+          func: (): void => { this.rearrangeNodes = !this.rearrangeNodes; },
         },
       ],
     },
@@ -305,9 +301,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       (criterion === 'entropy' ? Math.log2(curTree.maximum_number_of_classes) :
       (Math.max(...curTree.impurity))));
 
-    this.impurityColors = d3Scale.scaleLinear<string, number>()
-        .domain([0.0, this.maxImpurity])
-        .range(['white', 'black']);
+    this.nodeService.setImpurityScale(this.maxImpurity);
 
     const { rootXCoord,
             rootYCoord,
@@ -316,8 +310,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
     this.extraService.buildDepthMarkers(
         this.depthMarkers,
-        0.01 * (this.verticalAngle ? this.width : this.height),
-        0.99 * (this.verticalAngle ? this.width : this.height),
+        ((1.0 - TreeExtraService.depthMarkersPercentageSize) *
+         (this.verticalAngle ? this.width : this.height)),
+        ((TreeExtraService.depthMarkersPercentageSize) *
+         (this.verticalAngle ? this.width : this.height)),
         this.verticalAngle ? rootYCoord : rootXCoord,
         this.verticalAngle ? cyDelta : cxDelta,
         2 + this.visualDepthFromRoot + this.visualDepthFromLeaves,
@@ -387,7 +383,6 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           this.verticalAngle ? 0.5 * this.width : cx,
           !this.verticalAngle ? 0.5 * this.height : cy,
           TreeNodeService.aggregationNodeDepthRadius,
-          'white',
           nodeAttrs);
 
       this.aggregationDepthNodeDepth = depth;
@@ -412,16 +407,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const threshold = +curTree.threshold[nodeId];
     const feature = +curTree.feature[nodeId];
     const nodeClassId = curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
-    const circleColor = this.impurityBasedNodeColor ? this.impurityColors(impurity) : 'white';
     const sonLeftId = +curTree.children_left[nodeId];
     const sonRightId = +curTree.children_right[nodeId];
 
-    const radius = (this.instNumBasedNodeRadius ? (
-        TreeNodeService.radiusMinimum +
-        TreeNodeService.radiusScaleFactor *
-        (numInstInNode /
-        +curTree.weighted_number_of_node_samples[0])) :
-      TreeNodeService.radiusDefault);
+    const radiusFactor = (numInstInNode / +curTree.weighted_number_of_node_samples[0])
 
     const nodeAttrs = {
       'impurity': impurity,
@@ -439,8 +428,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         nodeId,
         cx,
         cy,
-        radius,
-        circleColor,
+        radiusFactor,
         nodeAttrs);
   }
 
@@ -488,8 +476,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       this.updateAggregationDepthNode(cx, cy, depth);
 
       if (depth !== this.aggregationDepthNodeDepth) {
-        cx -= cxDelta;
-        cy -= cyDelta;
+        cx -= !this.verticalAngle ? cxDelta : 0;
+        cy -= this.verticalAngle ? cyDelta : 0;
       }
 
     } else {

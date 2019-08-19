@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 
 import * as d3 from 'd3-selection';
 import * as d3Drag from 'd3-drag';
+import * as d3Scale from 'd3-scale';
 
 import { TreeExtraService } from './tree-extra.service';
 import { TreeLinksService } from './tree-links.service';
@@ -28,6 +29,8 @@ export class TreeNodeService {
   static readonly styleWidthCirclePredict = 2;
   static readonly styleWidthCircleHover = 3;
 
+  private impurityColors: d3Scale.ScaleLinear<string, number>;
+
   readonly visibleAttrs = [
     { name: 'impurity', abbv: null },
     { name: 'decision-feature', abbv: null },
@@ -41,6 +44,8 @@ export class TreeNodeService {
   activeAttrs: string[] = [];
   completeAttrName = false;
   showNodeLabelsRect = true;
+  instNumBasedNodeRadius = true;
+  impurityBasedNodeColor = true;
 
   private funcDragOnStart = function(): void {
     const node = d3.select(this);
@@ -206,13 +211,20 @@ export class TreeNodeService {
     TreeNodeService.moveNodeLinks(node);
   }
 
+  private static calculateRadiusLength(radiusFactor: number): number {
+    return (
+      TreeNodeService.radiusMinimum +
+      TreeNodeService.radiusScaleFactor *
+      radiusFactor);
+  }
+
   generateNode(nodes: D3Selection,
                nodeId: number,
                cx: number,
                cy: number,
-               radius: number,
-               circleColor: number | string,
+               radiusFactor: number,
                nodeAttrs: {}): void {
+
     const node = nodes.append('g')
       .classed('node', true)
       .style('cursor', 'move')
@@ -227,11 +239,23 @@ export class TreeNodeService {
       }
     }
 
+    const impurity = node.attr('impurity');
+
+    const circleColor = (
+      this.impurityBasedNodeColor && impurity ?
+      this.impurityColors(+impurity) :
+      'white');
+
     node
       .call(d3Drag.drag()
         .on('start', this.funcDragOnStart)
         .on('end', this.funcDragOnEnd)
         .on('drag', this.funcDragOnDrag));
+
+    const radius = (
+      radiusFactor <= 1.0 ?
+      TreeNodeService.calculateRadiusLength(radiusFactor) :
+      radiusFactor);
 
     node
       .append('circle')
@@ -242,7 +266,8 @@ export class TreeNodeService {
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('r', radius)
-        .attr('original-radius', radius);
+        .attr('original-radius', radius)
+        .attr('radius-factor', radiusFactor);
   }
 
   setMouseEvents(nodes: D3Selection): void {
@@ -467,6 +492,69 @@ export class TreeNodeService {
           .select('circle')
             .attr('stroke', TreeLinksService.styleColorLinkPredict)
             .attr('stroke-width', TreeNodeService.styleWidthCirclePredict);
+  }
+
+  setImpurityScale(maxImpurity: number): void {
+    this.impurityColors = d3Scale.scaleLinear<string, number>()
+        .domain([0.0, maxImpurity])
+        .range(['white', 'black']);
+  }
+
+  toggleImpurityBasedNodeColor(nodes: D3Selection): void {
+    if (nodes.empty()) {
+      return;
+    }
+
+    this.impurityBasedNodeColor = !this.impurityBasedNodeColor;
+
+    const impurityColors = this.impurityColors;
+
+    const circles = nodes
+        .selectAll('.node')
+          .select(this.filterAggregationNode)
+            .select('circle');
+
+    if (this.impurityBasedNodeColor) {
+      circles
+        .attr('fill', function() {
+          const impurity = d3.select(this.parentNode).attr('impurity');
+          return impurity ? impurityColors(+impurity) : 'white';
+        });
+
+    } else {
+      circles
+        .attr('fill', 'white');
+    }
+  }
+
+  toggleInstNumBasedNodeRadius(nodes: D3Selection): void {
+    if (nodes.empty()) {
+      return;
+    }
+
+    this.instNumBasedNodeRadius = !this.instNumBasedNodeRadius;
+
+    const circles = nodes
+      .selectAll('.node')
+        .select(this.filterAggregationNode)
+          .select('circle');
+
+    if (this.instNumBasedNodeRadius) {
+      circles
+        .attr('original-radius', function(): number {
+          const radiusFactor = +d3.select(this).attr('radius-factor');
+          return TreeNodeService.calculateRadiusLength(radiusFactor);
+        });
+
+    } else {
+      circles
+        .attr('original-radius', TreeNodeService.radiusDefault);
+    }
+
+    circles
+      .attr('r', function(): string {
+        return d3.select(this).attr('original-radius');
+      });
   }
 
 }
