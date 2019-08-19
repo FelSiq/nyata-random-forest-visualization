@@ -3,7 +3,8 @@
     <!-- Actual tree model. Should be visible no matter the option selected. -->
     <app-tree-d3-model
       [treeNodes]="treeModel.tree_ ? [treeModel] : (treeModel.estimators_ ? treeModel.estimators_.value : [])"
-      [decisionPath]="predictResults ? predictResults.decision_path.value : undefined">
+      [decisionPath]="predictResults ? predictResults.decision_path.value : null"
+      [singleInstAttrs]="singleInstAttrs">
     </app-tree-d3-model>
   </mat-drawer-content>
 

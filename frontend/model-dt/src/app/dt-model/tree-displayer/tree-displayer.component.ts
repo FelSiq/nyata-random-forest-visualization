@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 
 import { DTInterface } from '../../dt-interface';
 import { PredictResults } from './predict-results';
+import { SingleInstRestEmitterInterface } from './data-loader-pannel/data-loader-pannel.component';
 
 @Component({
   selector: 'app-tree-displayer',
@@ -11,6 +12,8 @@ import { PredictResults } from './predict-results';
 export class TreeDisplayerComponent implements OnInit {
   @Input() treeModel: DTInterface;
   predictResults: PredictResults;
+  singleInstAttrs: Array<string | number>;
+  attrNames: string[];
 
   readonly bannedModelAttrs: string[] = [
     'estimators_',
@@ -24,11 +27,16 @@ export class TreeDisplayerComponent implements OnInit {
   ngOnInit() {
   }
 
-  updatePredictionResults(value: PredictResults) {
+  updatePredictionResults(value: SingleInstRestEmitterInterface): void {
     if (value) {
-      this.predictResults = { ...value };
+      this.predictResults = { ...value['predictResults'] };
+      this.singleInstAttrs = value['singleInstAttrs'];
+      this.attrNames = null;
+
     } else {
-      this.predictResults = undefined;
+      this.predictResults = null;
+      this.singleInstAttrs = null;
+      this.attrNames = null;
     }
   }
 

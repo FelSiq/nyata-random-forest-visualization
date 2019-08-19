@@ -21,27 +21,19 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   @Input() treeNodes: DTInterface[];
 
   private _decisionPath: Array<Array<number | string>>;
+  @Input() singleInstAttrs: Array<string | number>;
+  @Input() attrNames: string[];
 
   @Input() set decisionPath(decisionPath: Array<Array<number | string>>) {
     this._decisionPath = decisionPath;
 
     if (this._decisionPath && this.chosenTree) {
-      this.linkService.cleanPredictionPaths(
-        this.links,
-        this.nodes,
-        true);
-
-      this.linkService.drawPredictionPaths(
-        this.links,
-        this.nodes,
-        this._decisionPath[+this.chosenTree],
-        this.omittedNodesId);
+      this.solvePredictionIssues();
 
     } else {
       this.linkService.cleanPredictionPaths(this.links, this.nodes, false);
+      this.nodeService.toggleNodeInPredictPath(this.nodes, null, null);
     }
-
-    this.nodeService.toggleNodeInPredictPath(this.nodes);
   }
 
   chosenTree: string | number;
@@ -342,6 +334,18 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       this.adjustNodePositions();
     }
 
+    this.solvePredictionIssues();
+
+    if (this.links) {
+      this.linkService.updateLinkLabel(this.links);
+    }
+
+    if (this.nodes) {
+      this.nodeService.updateNodeLabel(this.nodes);
+    }
+  }
+
+  private solvePredictionIssues(): void {
     if (this._decisionPath && this.chosenTree) {
       this.linkService.cleanPredictionPaths(
         this.links,
@@ -354,14 +358,13 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         this._decisionPath[+this.chosenTree],
         this.omittedNodesId);
 
-      this.nodeService.toggleNodeInPredictPath(this.nodes);
-    }
+      this.nodeService.toggleNodeInPredictPath(
+        this.nodes,
+        this.singleInstAttrs,
+        this.attrNames);
 
-    if (this.links) {
-      this.linkService.updateLinkLabel(this.links);
-    }
+      this.nodeService.activeAttrs.push('predict-log');
 
-    if (this.nodes) {
       this.nodeService.updateNodeLabel(this.nodes);
     }
   }
@@ -409,6 +412,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const nodeClassId = curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
     const sonLeftId = +curTree.children_left[nodeId];
     const sonRightId = +curTree.children_right[nodeId];
+    const isLeaf = (sonLeftId < 0 && sonRightId < 0);
 
     const radiusFactor = (numInstInNode / +curTree.weighted_number_of_node_samples[0])
 
@@ -422,6 +426,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       'son-left-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
       'son-right-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
       'depth': depth,
+      'is-leaf': isLeaf,
     };
 
     this.nodeService.generateNode(

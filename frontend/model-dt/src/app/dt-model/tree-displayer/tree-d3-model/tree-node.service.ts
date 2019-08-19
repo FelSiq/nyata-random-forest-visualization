@@ -359,7 +359,10 @@ export class TreeNodeService {
     this.updateNodeLabel(nodes);
   }
 
-  toggleNodeInPredictPath(nodes: D3Selection) {
+  toggleNodeInPredictPath(
+        nodes: D3Selection,
+        instAttrValues: Array<string | number>,
+        attrNames: string[] | null): void {
     if (!nodes || nodes.empty()) {
       return;
     }
@@ -369,6 +372,7 @@ export class TreeNodeService {
         .select(function() {
           return !d3.select(this).classed('in-predict-path') ? this : null;
         })
+          .attr('predict-log', null)
           .select('circle')
             .attr('stroke', 'gray')
             .attr('stroke-width', TreeNodeService.styleWidthCircleDefault);
@@ -378,6 +382,27 @@ export class TreeNodeService {
         .select(function() {
           return d3.select(this).classed('in-predict-path') ? this : null;
         })
+          .attr('predict-log', instAttrValues ? function(): string {
+            const node = d3.select(this),
+                  isLeaf = node.attr('is-leaf') === 'true';
+
+            if (!isLeaf) {
+              const attrIndex = +node.attr('decision-feature');
+
+              let instAttrVal = '' + instAttrValues[attrIndex],
+                  threshold = node.attr('threshold');
+
+              const decision = (+instAttrVal <= +threshold) ? ' <= ' : ' > ',
+                    attrName = attrNames ? attrNames[attrIndex] : 'ATTR#' + attrIndex;
+
+              instAttrVal = TreeExtraService.toFixed(instAttrVal);
+              threshold = TreeExtraService.toFixed(threshold);
+
+              return (attrName + ' (' + instAttrVal + ') ' + decision + threshold);
+            }
+
+            return 'Output: ' + node.attr('node-class');
+          } : null)
           .select('circle')
             .attr('stroke', TreeLinksService.styleColorLinkPredict)
             .attr('stroke-width', TreeNodeService.styleWidthCirclePredict);

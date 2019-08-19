@@ -122,9 +122,8 @@ export class TreeExtraService {
     for (let i = 0; i < labels.length; i++) {
       const curAttr = labels[i];
 
-      let curAbbv = visibleAttrs[
-        visibleAttrs.map(item => item.name).indexOf(curAttr)
-      ].abbv;
+      const abbvIndex = visibleAttrs.map(item => item.name).indexOf(curAttr);
+      let curAbbv = abbvIndex >= 0 ? visibleAttrs[abbvIndex].abbv : null;
 
       if (!curAbbv) {
         curAbbv = TreeExtraService.abbreviateAttrLabel(curAttr);
@@ -134,6 +133,14 @@ export class TreeExtraService {
     }
 
     return abbvs;
+  }
+
+  static toFixed(value: string, places = 2): string {
+    if (+value && value.indexOf('.') > -1 && value.length > 4) {
+      value = (+value).toFixed(2);
+    }
+
+    return value;
   }
 
   static buildObjectsLabelText(
@@ -166,12 +173,7 @@ export class TreeExtraService {
           .classed('draggable label label-text', true)
           .text(function(): string {
             let value: string | number = d3.select(this.parentNode).attr(curAttr);
-
-            if (+value && value.indexOf('.') > -1 && value.length > 4) {
-              value = (+value).toFixed(2);
-            }
-
-            return attrLabelPrefix + value;
+            return attrLabelPrefix + TreeExtraService.toFixed(value);
           });
     }
 

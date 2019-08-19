@@ -11,6 +11,11 @@ interface SepOption {
   label: string; 
 }
 
+export interface SingleInstRestEmitterInterface {
+  singleInstAttrs: Array<number | string>;
+  predictResults: PredictResults;
+}
+
 @Component({
   selector: 'app-data-loader-pannel',
   templateUrl: './data-loader-pannel.component.html',
@@ -18,7 +23,7 @@ interface SepOption {
 })
 export class DataLoaderPannelComponent implements OnInit {
   @Input() datasetDim: number;
-  @Output() resultsEmitter = new EventEmitter<PredictResults>();
+  @Output() resultsEmitter = new EventEmitter<SingleInstRestEmitterInterface>();
   predictResults: PredictResults;
   isValidFormSubmitted: boolean;
   calledPredictService = false;
@@ -87,7 +92,10 @@ export class DataLoaderPannelComponent implements OnInit {
         .subscribe((results: PredictResults) => {
           this.predictResults = { ...results };
           this.calledPredictService = false;
-          this.resultsEmitter.emit(this.predictResults);
+          this.resultsEmitter.emit({
+            singleInstAttrs: splittedValues,
+            predictResults: this.predictResults,
+          });
         });
     }
   }
