@@ -247,13 +247,22 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     if (this.adjustVisualDepthAuto ||
         this.visualDepthFromRoot === null ||
         this.visualDepthFromRoot === undefined) {
+      const halfLevelsUpper = Math.ceil(0.5 * this.maxHiddenLevels),
+            halfLevelsLower = Math.floor(0.5 * this.maxHiddenLevels);
+
       this.visualDepthFromRoot = Math.min(
         this.minDefaultDepthFromRoot,
-        Math.ceil(0.5 * this.maxHiddenLevels));
+        halfLevelsUpper);
 
       this.visualDepthFromLeaves = Math.min(
         this.minDefaultDepthFromLeaf,
-        Math.floor(0.5 * this.maxHiddenLevels));
+        halfLevelsLower);
+
+      if (this.maxHiddenLevels -
+          (this.visualDepthFromRoot + this.visualDepthFromLeaves) === 1) {
+        this.visualDepthFromRoot = halfLevelsUpper;
+        this.visualDepthFromLeaves = halfLevelsLower;
+      }
 
     } else {
       this.visualDepthFromRoot = Math.min(
