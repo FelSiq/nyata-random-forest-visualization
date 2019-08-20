@@ -72,9 +72,9 @@ class PredictDataset(flask_restful.Resource):
 
         self.reqparse.add_argument("sep", type=str, location="form")
 
-        self.reqparse.add_argument("hasHeader", type=bool, location="form")
+        self.reqparse.add_argument("hasHeader", type=str, location="form")
 
-        self.reqparse.add_argument("hasClasses", type=bool, location="form")
+        self.reqparse.add_argument("hasClasses", type=str, location="form")
 
     def post(self):
         """Make predictions and give metrics for the user-given dataset."""
@@ -82,8 +82,10 @@ class PredictDataset(flask_restful.Resource):
 
         dataset_file = args["file"]
         sep = args["sep"]
-        has_header = args["hasHeader"]
-        has_classes = args["hasClasses"]
+        has_header = args["hasHeader"] == 'True'
+        has_classes = args["hasClasses"] == 'True'
+
+        print(sep, has_header, has_classes)
 
         data = pd.read_csv(
             filepath_or_buffer=dataset_file,
@@ -136,7 +138,7 @@ class PredictSingleInstance(flask_restful.Resource):
         err_msg = {}
 
         if "ERROR_MISSING_VAL" in err_code:
-            err_msg["na_error"] = "Currently missing values are not supported."
+            err_msg["error"] = {"value" : "Currently missing values are not supported."}
 
         return err_msg
 
