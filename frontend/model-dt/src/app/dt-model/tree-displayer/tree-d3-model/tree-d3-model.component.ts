@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, Input, ElementRef } from '@angular/co
 
 import * as d3 from 'd3-selection';
 import * as d3Zoom from 'd3-zoom';
+import * as d3Transform from 'd3-transform';
 import * as d3Drag from 'd3-drag';
 import * as d3Shape from 'd3-shape';
 
@@ -48,14 +49,14 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   chosenTree: string | number;
-  zoomValue = 0;
 
-  readonly zoomMin: number = 0;
-  readonly zoomMax: number = 3;
+  readonly zoomMin: number = 1;
+  readonly zoomMax: number = 4;
   readonly minDefaultDepthFromRoot = 3;
   readonly minDefaultDepthFromLeaf = 3;
 
   private svg: D3Selection;
+  private basePack: D3Selection;
   private links: D3Selection;
   private nodes: D3Selection;
   private depthMarkers: D3Selection;
@@ -63,6 +64,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private height: number;
   private maxImpurity: number;
   private treeAngle = 180;
+  private zoomValue = 1;
+  private xTranslate = 0;
+  private yTranslate = 0;
   private classes: Array<string | number>;
   private maxDepth: number;
   private maxHiddenLevels: number;
@@ -148,8 +152,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   private updateZoomValue(increment: number): void {
-    const aux = this.zoomValue + increment;
-    this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
+    if (increment) {
+      const aux = this.zoomValue + increment;
+      this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
+    }
   }
 
   private abbreviateAttrLabel(attrLabel: string, separator = '-'): string {
@@ -159,30 +165,38 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private initSvg() {
     this.svg = d3.select('svg');
 
+    const transformation = d3Transform.transform()
+      .scale(this.zoomValue);
+      //.translate([this.xTranslate, this.yTranslate]);
+
+    // Necessary to apply zoom
+    this.basePack = this.svg.append('g')
+      .attr('transform', transformation);
+
     this.nodeIDByDepth = {};
 
     this.cleanSvg();
 
-    this.depthMarkers = this.svg.append('g')
+    this.depthMarkers = this.basePack.append('g')
         .classed('group-depth-markers cleanable', true);
 
-    this.links = this.svg.append('g')
+    this.links = this.basePack.append('g')
         .classed('group-links cleanable', true);
 
-    this.nodes = this.svg.append('g')
+    this.nodes = this.basePack.append('g')
         .classed('group-nodes cleanable', true);
 
     this.width = (
         +this.svg.attr('width') ?
         +this.svg.attr('width') :
-        this.eleRef.nativeElement.offsetWidth
+        +this.eleRef.nativeElement.offsetWidth
     ) - 2 * (TreeNodeService.radiusMinimum +
              TreeNodeService.radiusScaleFactor);
 
     this.height = (
         +this.svg.attr('height') ?
         +this.svg.attr('height') :
-        this.eleRef.nativeElement.offsetHeight
+        +this.eleRef.nativeElement.offsetHeight
     );
 
     this.nodeService.width = this.width;
@@ -190,15 +204,18 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this.linkService.width = this.width;
     this.linkService.height = this.height;
 
-    /*
     this.svg
       .call(d3Zoom.zoom()
-      .scaleExtent([0.5, 3])
-      .on('zoom', function() {
-        d3.select(this)
-          .attr('transform', d3.event.transform);
-      }));
-    */
+        .extent([[0, 0], [this.width, this.height]])
+        .scaleExtent([this.zoomMin, this.zoomMax])
+        .on('zoom', () => {
+          this.zoomValue = d3.event.transform.k;
+          this.xTranslate = d3.event.transform.x;
+          this.yTranslate = d3.event.transform.y;
+
+          this.basePack
+            .attr('transform', d3.event.transform);
+        }));
   }
 
   private cleanSvg(): void {
