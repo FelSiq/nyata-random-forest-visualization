@@ -192,7 +192,13 @@ class PredictSingleInstance(flask_restful.Resource):
                     "Frequency of every class "
                     "for every tree in the model.",
                 }),
-                ("margin", margin),
+                ("margin", {
+                    "value":
+                    margin,
+                    "description":
+                    "Margin is the instance highest class probability "
+                    "minus second highest class probability.",
+                }),
                 ("decision_path", {
                     "value": self._decision_path(inst_proc),
                 }),

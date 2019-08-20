@@ -89,10 +89,10 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     return obj
 
 
-def get_class_freqs(dt_model: sklearn.ensemble.forest.RandomForestClassifier,
-                    instance: np.ndarray
-                    ) -> t.Tuple[t.Optional[t.Dict[str, t.Dict[str, str]]], t.
-                                 Optional[t.Dict[str, str]]]:
+def get_class_freqs(
+        dt_model: sklearn.ensemble.forest.RandomForestClassifier,
+        instance: np.ndarray
+) -> t.Tuple[t.Optional[t.Dict[str, t.Dict[str, str]]], t.Optional[str]]:
     """Get the frequency of every class from a RF Classifier prediction."""
     if not isinstance(dt_model,
                       sklearn.ensemble.forest.RandomForestClassifier):
@@ -118,15 +118,13 @@ def get_class_freqs(dt_model: sklearn.ensemble.forest.RandomForestClassifier,
         for key, value in class_by_tree.items()
     }
 
-    sorted_freqs = sorted(list(class_by_tree.values()), reverse=True)
+    margin = None  # type: t.Optional[str]
 
-    margin = {
-        "value":
-        "{:.2f}".format(
-            (sorted_freqs[0] - sorted_freqs[1]) / dt_model.n_estimators),
-        "description": ("Margin is the instance highest class probability "
-                        "minus second highest class probability."),
-    }
+    if len(class_by_tree) > 1:
+        sorted_freqs = sorted(list(class_by_tree.values()), reverse=True)
+
+        margin = "{:.2f}".format(
+            (sorted_freqs[0] - sorted_freqs[1]) / dt_model.n_estimators)
 
     return ret, margin
 
