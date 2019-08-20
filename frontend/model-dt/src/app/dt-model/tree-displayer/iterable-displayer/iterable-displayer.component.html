@@ -9,7 +9,7 @@
                   matTooltip="{{ item.value.description ? item.value.description : noDescMsg }}">
           help_outline
         </mat-icon>
-        <strong *ngIf="item.key !== 'error'" [class]="item-key">
+        <strong *ngIf="item.key !== 'error'" class="item-key">
           {{ format(item.key | titlecase) }}:
         </strong>
         {{ item.value.value }}
