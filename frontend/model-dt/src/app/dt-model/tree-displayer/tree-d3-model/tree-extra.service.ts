@@ -85,7 +85,8 @@ export class TreeExtraService {
         hide: boolean,
         lineHeight: number,
         funcXCoord,
-        funcYCoord): void {
+        funcYCoord,
+        funcMove): void {
     if (objects.empty()) {
       return;
     }
@@ -112,6 +113,23 @@ export class TreeExtraService {
         .attr('x', funcXCoord)
         .attr('y', funcYCoord)
         .attr('visibility', hide ? 'visible' : 'hidden');
+
+    if (funcMove) {
+      objects
+        .select(function() {
+          return d3.select(this).select('.label-text').empty() ? null : this;
+        })
+          .each(function() {
+            const obj = d3.select(this);
+            const attr = obj.attr('cx') ? 'cx' : 'x';
+
+            const diff = +obj.attr(attr) - 0.5 * +obj.select('rect').attr('width');
+
+            if (diff < 0) {
+              funcMove(obj, +obj.attr(attr) - diff, +obj.attr('cy'));
+            }
+          });
+    }
   }
 
   static getAbbvs(

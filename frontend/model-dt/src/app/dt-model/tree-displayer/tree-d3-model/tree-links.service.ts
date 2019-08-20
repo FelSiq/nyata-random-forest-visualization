@@ -154,22 +154,34 @@ export class TreeLinksService {
     }
   }
 
-  cleanPredictionPaths(links: D3Selection, nodes: D3Selection, dashed = false): void {
+  cleanPredictionPaths(links: D3Selection,
+                       nodes: D3Selection,
+                       dashed = false): [ D3Selection, D3Selection ] {
+    let inPredPathNodes,
+        inPredPathLinks;
+
     if (links && !links.empty()) {
-      links
-        .selectAll('.link')
-          .classed('in-predict-path', false)
-          .select('line')
-            .style('stroke', TreeLinksService.styleColorLinkDefault)
-            .style('stroke-width', TreeLinksService.styleWidthLinkDefault)
-            .style('stroke-dasharray', dashed ? ('4, 4') : 'none');
+      inPredPathLinks = links
+        .selectAll('.in-predict-path');
+
+      inPredPathLinks
+        .classed('in-predict-path', false)
+        .select('line')
+          .style('stroke', TreeLinksService.styleColorLinkDefault)
+          .style('stroke-width', TreeLinksService.styleWidthLinkDefault)
+          .style('stroke-dasharray', dashed ? ('4, 4') : 'none');
     }
 
     if (nodes && !nodes.empty()) {
-      nodes
-        .selectAll('.in-predict-path')
-          .classed('in-predict-path', false);
+      inPredPathNodes = nodes
+        .selectAll('.in-predict-path');
+        
+      inPredPathNodes
+        .classed('in-predict-path', false)
+        .attr('predict-log', null);
     }
+
+    return [ inPredPathNodes, inPredPathLinks ];
   }
 
   drawPredictionPaths(links: D3Selection,
@@ -225,13 +237,17 @@ export class TreeLinksService {
   }
 
   updateLinkLabel(links): void {
-    if (links.empty()) {
+    if (!links || links.empty()) {
       return;
     }
 
+    const aux = links.selectAll('.link');
+    if (!aux.empty()) {
+      links = aux;
+    }
+  
     const filteredLinks = links
-      .selectAll('.link')
-        .select(this.filterAggregationLink);
+      .select(this.filterAggregationLink);
 
     TreeExtraService.buildObjectsLabelText(
       filteredLinks,
@@ -251,7 +267,9 @@ export class TreeLinksService {
       (TreeLinksService.styleTextFontSize +
        TreeLinksService.styleTextSpacing),
       TreeLinksService.funcLinkHalfXCoord,
-      TreeLinksService.funcLinkHalfYCoord);
+      TreeLinksService.funcLinkHalfYCoord,
+      null,
+    );
 
     filteredLinks
       .selectAll('.label-text')

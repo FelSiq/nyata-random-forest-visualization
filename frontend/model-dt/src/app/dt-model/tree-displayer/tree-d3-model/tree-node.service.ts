@@ -289,13 +289,15 @@ export class TreeNodeService {
   }
 
   updateNodeLabel(nodes): void {
-    if (nodes.empty()) {
+    if (!nodes || nodes.empty()) {
       return;
     }
+    const aux = nodes.selectAll('.node');
+    if (!aux.empty()) {
+      nodes = aux;
+    }
 
-    const filteredNodes = nodes
-      .selectAll('.node')
-        .select(this.filterAggregationNode);
+    const filteredNodes = nodes.select(this.filterAggregationNode);
 
     TreeExtraService.buildObjectsLabelText(
       filteredNodes,
@@ -315,7 +317,9 @@ export class TreeNodeService {
       (TreeNodeService.styleTextFontSize +
        TreeNodeService.styleTextSpacing),
       TreeNodeService.funcNodeXCoord,
-      TreeNodeService.funcNodeYCoord);
+      TreeNodeService.funcNodeYCoord,
+      TreeNodeService.moveNode,
+    );
 
     filteredNodes
       .selectAll('.label-text')
@@ -378,10 +382,7 @@ export class TreeNodeService {
             .attr('stroke-width', TreeNodeService.styleWidthCircleDefault);
 
     const nodesInPath = nodes
-      .selectAll('.node')
-        .select(function() {
-          return d3.select(this).classed('in-predict-path') ? this : null;
-        })
+      .selectAll('.in-predict-path')
           .attr('predict-log', instAttrValues ? function(): string {
             const node = d3.select(this),
                   isLeaf = node.attr('is-leaf') === 'true';
