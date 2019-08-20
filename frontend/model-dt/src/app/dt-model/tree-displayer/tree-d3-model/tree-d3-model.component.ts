@@ -33,6 +33,11 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     } else {
       this.linkService.cleanPredictionPaths(this.links, this.nodes, false);
       this.nodeService.toggleNodeInPredictPath(this.nodes, null, null);
+
+      const predictLogIndex = this.nodeService.activeAttrs.indexOf('predict-log');
+      if (predictLogIndex > -1) {
+        this.nodeService.activeAttrs.splice(predictLogIndex, 1);
+      }
     }
   }
 
@@ -363,7 +368,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         this.singleInstAttrs,
         this.attrNames);
 
-      this.nodeService.activeAttrs.push('predict-log');
+      if (this.nodeService.activeAttrs.indexOf('predict-log') < 0) {
+        this.nodeService.activeAttrs.push('predict-log');
+      }
 
       this.nodeService.updateNodeLabel(this.nodes);
     }
