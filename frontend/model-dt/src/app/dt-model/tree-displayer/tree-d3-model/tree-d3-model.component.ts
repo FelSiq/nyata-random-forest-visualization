@@ -31,10 +31,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       this.solvePredictionIssues();
 
     } else {
-      const [ inPredPathNodes, inPredPathLinks ] = (
-        this.linkService.cleanPredictionPaths(this.links,
-          this.nodes,
-          false));
+      this.linkService.cleanPredictionPaths(this.links,
+        this.nodes,
+        false);
 
       this.nodeService.toggleNodeInPredictPath(this.nodes, null, null);
 
@@ -43,8 +42,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         this.nodeService.activeAttrs.splice(predictLogIndex, 1);
       }
 
-      this.nodeService.updateNodeLabel(inPredPathNodes);
-      this.linkService.updateLinkLabel(inPredPathLinks);
+      this.nodeService.updateNodeLabel(this.nodes);
+      this.linkService.updateLinkLabel(this.links);
     }
   }
 
