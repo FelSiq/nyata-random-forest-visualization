@@ -37,15 +37,10 @@ export class DatasetUploadService {
   }
 
   private handleError(error: HttpErrorResponse) {
-    if (error.error instanceof ErrorEvent) {
-      console.error('An error occurred:', error.error.message);
-    } else {
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        `body was: ${error.error}`);
-    }
     return throwError(
-      'Something went wrong while predicting a whole test dataset.');
+      `Something went wrong while predicting a whole test dataset.
+       Please check if given custom options corresponds to the dataset format,
+       and if the given dataset is correctly formatted.`);
   }
 
 }

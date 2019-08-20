@@ -5,3 +5,7 @@
 .small-icon {
   transform: scale(0.75);
 }
+
+.item-key {
+  margin-right: 4px;
+}

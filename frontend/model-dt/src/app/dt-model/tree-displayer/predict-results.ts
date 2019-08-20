@@ -8,4 +8,5 @@ export interface PredictResults {
   classes_by_tree?: ValDescPair<string[]>;
   decision_path?: ValDescPair<number[]>;
   leaf_id?: ValDescPair<number | number[]>;
+  error?: { value: string };
 }

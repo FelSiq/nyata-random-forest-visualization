@@ -90,13 +90,22 @@ export class DataLoaderPannelComponent implements OnInit {
 
       this.predictor.predictSingleInstance(splittedValues)
         .subscribe((results: PredictResults) => {
-          this.predictResults = { ...results };
-          this.calledPredictService = false;
-          this.resultsEmitter.emit({
-            singleInstAttrs: splittedValues,
-            predictResults: this.predictResults,
+            this.predictResults = { ...results };
+            this.calledPredictService = false;
+            this.resultsEmitter.emit({
+              singleInstAttrs: splittedValues,
+              predictResults: this.predictResults,
+            });
+          }, error => {
+            this.predictResults = {
+              'error': { 'value': error },
+            };
+            this.calledPredictService = false;
+            this.resultsEmitter.emit({
+              singleInstAttrs: null,
+              predictResults: this.predictResults,
+            });
           });
-        });
     }
   }
 
@@ -140,12 +149,15 @@ export class DataLoaderPannelComponent implements OnInit {
           this.datasetHasHeader,
           this.datasetHasClasses)
           .subscribe((results: PredictResults) => {
-              console.log(results);
               this.predictResults = { ...results };
               this.calledPredictService = false;
               // this.resultsEmitter.emit(this.predictResults);
             }, error => {
-              console.log(error);
+              this.predictResults = {
+                'error': { 'value': error },
+              };
+              this.calledPredictService = false;
+              // this.resultsEmitter.emit(this.predictResults);
             });
   }
 
