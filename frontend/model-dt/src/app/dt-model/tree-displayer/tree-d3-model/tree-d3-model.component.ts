@@ -186,6 +186,11 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         this.eleRef.nativeElement.offsetHeight
     );
 
+    this.nodeService.width = this.width;
+    this.nodeService.height = this.height;
+    this.linkService.width = this.width;
+    this.linkService.height = this.height;
+
     /*
     this.svg
       .call(d3Zoom.zoom()

@@ -30,6 +30,8 @@ export class TreeNodeService {
   static readonly styleWidthCircleHover = 3;
 
   private impurityColors: d3Scale.ScaleLinear<string, number>;
+  height: number;
+  width: number;
 
   readonly visibleAttrs = [
     { name: 'impurity', abbv: null },
@@ -288,7 +290,7 @@ export class TreeNodeService {
     this.setAggregationDepthNodeTextStyle(textDepth);
   }
 
-  updateNodeLabel(nodes): void {
+  updateNodeLabel(nodes: D3Selection): void {
     if (!nodes || nodes.empty()) {
       return;
     }
@@ -318,6 +320,12 @@ export class TreeNodeService {
        TreeNodeService.styleTextSpacing),
       TreeNodeService.funcNodeXCoord,
       TreeNodeService.funcNodeYCoord,
+    );
+
+    TreeExtraService.adjustObjectsCoordsByLabel(
+      filteredNodes,
+      this.height,
+      this.width,
       TreeNodeService.moveNode,
     );
 

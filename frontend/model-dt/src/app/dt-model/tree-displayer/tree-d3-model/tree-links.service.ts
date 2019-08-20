@@ -21,6 +21,9 @@ export class TreeLinksService {
   static readonly styleTextFontSize = 16;
   static readonly styleTextSpacing = 4;
 
+  height: number;
+  width: number;
+
   readonly visibleAttrs = [
     { name: 'weight', abbv: null },
     { name: 'decision', abbv: null },
@@ -268,6 +271,12 @@ export class TreeLinksService {
        TreeLinksService.styleTextSpacing),
       TreeLinksService.funcLinkHalfXCoord,
       TreeLinksService.funcLinkHalfYCoord,
+    );
+
+    TreeExtraService.adjustObjectsCoordsByLabel(
+      filteredLinks,
+      this.height,
+      this.width,
       null,
     );
 

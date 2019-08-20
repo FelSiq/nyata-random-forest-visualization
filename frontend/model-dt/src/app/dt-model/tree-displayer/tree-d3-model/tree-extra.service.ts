@@ -85,8 +85,7 @@ export class TreeExtraService {
         hide: boolean,
         lineHeight: number,
         funcXCoord,
-        funcYCoord,
-        funcMove): void {
+        funcYCoord): void {
     if (objects.empty()) {
       return;
     }
@@ -114,20 +113,49 @@ export class TreeExtraService {
         .attr('y', funcYCoord)
         .attr('visibility', hide ? 'visible' : 'hidden');
 
+  }
+
+  static adjustObjectsCoordsByLabel(
+      objects: D3Selection,
+      maxHeight: number,
+      maxWidth: number,
+      funcMove): void {
+    if (objects.empty()) {
+      return;
+    }
+
     if (funcMove) {
       objects
         .select(function() {
           return d3.select(this).select('.label-text').empty() ? null : this;
         })
           .each(function() {
-            const obj = d3.select(this);
-            const attr = obj.attr('cx') ? 'cx' : 'x';
+            const obj = d3.select(this),
+                  rect = obj.select('rect');
 
-            const diff = +obj.attr(attr) - 0.5 * +obj.select('rect').attr('width');
+            const rectWidth = +rect.attr('width'),
+                  rectHeight = +rect.attr('height');
 
-            if (diff < 0) {
-              funcMove(obj, +obj.attr(attr) - diff, +obj.attr('cy'));
+            let xCoordObj = obj.attr('cx') ? +obj.attr('cx') : +obj.attr('x'),
+                yCoordObj = obj.attr('cy') ? +obj.attr('cy') : +obj.attr('y'),
+                xCoordRect = +rect.attr('x'),
+                yCoordRect = +rect.attr('y');
+
+            if (xCoordRect < 0) {
+              xCoordObj -= xCoordRect;
+
+            } else if (xCoordRect + rectWidth > maxWidth) {
+              xCoordObj -= (xCoordRect + rectWidth - maxWidth);
             }
+
+            if (yCoordRect < 0) {
+              yCoordObj -= yCoordRect;
+
+            } else if (yCoordRect + rectHeight > maxHeight) {
+              yCoordObj -= (yCoordRect + rectHeight - maxHeight);
+            }
+
+            funcMove(obj, xCoordObj, yCoordObj);
           });
     }
   }
