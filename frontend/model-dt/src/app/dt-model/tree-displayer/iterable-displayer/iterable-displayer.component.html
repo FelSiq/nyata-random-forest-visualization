@@ -2,15 +2,14 @@
   <ng-container *ngFor="let item of data | keyvalue">
     <span *ngIf="isElegibleAttr(item.key, item.value.value)">
       <mat-list-item *ngIf="isSingleValue(item.value.value)">
-        &nbsp;&nbsp;
         <mat-icon *ngIf="item.key !== 'error'"
                   aria-hidden="false"
-                  class="large-icon"
+                  class="large-icon extra-space-icon"
                   attr.aria-label="Description for the {{ item.key }} attribute."
                   matTooltip="{{ item.value.description ? item.value.description : noDescMsg }}">
           help_outline
         </mat-icon>
-        <strong class="item-key">
+        <strong *ngIf="item.key !== 'error'" [class]="item-key">
           {{ format(item.key | titlecase) }}:
         </strong>
         {{ item.value.value }}
