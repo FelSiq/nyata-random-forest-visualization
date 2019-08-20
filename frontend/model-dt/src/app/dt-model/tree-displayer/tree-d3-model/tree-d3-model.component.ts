@@ -428,17 +428,25 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const impurity = +curTree.impurity[nodeId];
     const threshold = +curTree.threshold[nodeId];
     const feature = +curTree.feature[nodeId];
-    const nodeClassId = curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
     const sonLeftId = +curTree.children_left[nodeId];
     const sonRightId = +curTree.children_right[nodeId];
     const isLeaf = (sonLeftId < 0 && sonRightId < 0);
+
+    let nodeClass;
+
+    if (this.classes) {
+      const nodeClassId = +curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
+      nodeClass = this.classes[nodeClassId];
+    } else {
+      nodeClass = +curTree.value[nodeId][0][0];
+    }
 
     const radiusFactor = (numInstInNode / +curTree.weighted_number_of_node_samples[0])
 
     const nodeAttrs = {
       'impurity': impurity,
       'decision-feature': feature >= 0 ? feature : null,
-      'node-class': this.classes ? this.classes[+nodeClassId] : null,
+      'node-class': nodeClass,
       'threshold': feature >= 0 ? threshold : null,
       'number-of-instances': numInstInNode,
       'parent-id': parentId,
