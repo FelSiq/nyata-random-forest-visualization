@@ -173,7 +173,11 @@ class PredictSingleInstance(flask_restful.Resource):
             err_code.append("ERROR_MISSING_VAL")
 
         if err_code:
-            return flask.jsonify(PredictSingleInstance._handle_errors(err_code))
+            return flask.jsonify(
+                PredictSingleInstance._handle_errors(err_code))
+
+        classes_by_tree, margin = model_dt.get_class_freqs(
+            self.model, inst_proc)
 
         pred_vals = model_dt.json_encoder_type_manager(
             collections.OrderedDict((
@@ -182,10 +186,13 @@ class PredictSingleInstance(flask_restful.Resource):
                     "description": "Final value predicted by the model.",
                 }),
                 ("classes_by_tree", {
-                    "value": model_dt.get_class_freqs(self.model, inst_proc),
-                    "description": "Frequency of every class "
-                                   "for every tree in the model.",
+                    "value":
+                    classes_by_tree,
+                    "description":
+                    "Frequency of every class "
+                    "for every tree in the model.",
                 }),
+                ("margin", margin),
                 ("decision_path", {
                     "value": self._decision_path(inst_proc),
                 }),

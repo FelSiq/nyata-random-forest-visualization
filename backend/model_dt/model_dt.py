@@ -7,7 +7,6 @@ import sklearn.tree
 import sklearn.ensemble
 import sklearn.metrics
 import numpy as np
-import scipy.sparse
 
 RE_KEY_NUMBEROF = re.compile(r"\bn \b")
 """Regular expression for getting 'n ' string, to format JSON keys."""
@@ -33,7 +32,6 @@ METRICS_REGRESSION = {
     "explained_variance_score": sklearn.metrics.explained_variance_score,
     "mean_squared_error": sklearn.metrics.mean_squared_error,
     "median_absolute_error": sklearn.metrics.median_absolute_error,
-    "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
 }
 """Chosen metrics to evaluate regressor models."""
 
@@ -92,11 +90,13 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
 
 
 def get_class_freqs(dt_model: sklearn.ensemble.forest.RandomForestClassifier,
-                    instance: np.ndarray) -> t.Optional[t.Dict[str, t.Dict[str, str]]]:
+                    instance: np.ndarray
+                    ) -> t.Tuple[t.Optional[t.Dict[str, t.Dict[str, str]]], t.
+                                 Optional[t.Dict[str, str]]]:
     """Get the frequency of every class from a RF Classifier prediction."""
     if not isinstance(dt_model,
                       sklearn.ensemble.forest.RandomForestClassifier):
-        return None
+        return None, None
 
     class_by_tree = {str(class_label): 0
                      for class_label in dt_model.classes_
@@ -118,7 +118,17 @@ def get_class_freqs(dt_model: sklearn.ensemble.forest.RandomForestClassifier,
         for key, value in class_by_tree.items()
     }
 
-    return ret
+    sorted_freqs = sorted(list(class_by_tree.values()), reverse=True)
+
+    margin = {
+        "value":
+        "{:.2f}".format(
+            (sorted_freqs[0] - sorted_freqs[1]) / dt_model.n_estimators),
+        "description": ("Margin is the instance highest class probability "
+                        "minus second highest class probability."),
+    }
+
+    return ret, margin
 
 
 def serialize_decision_tree(
@@ -148,7 +158,7 @@ def serialize_decision_tree(
         new_model["feature_importances_"] = {
             "value": json_encoder_type_manager(
                 list(map(lambda item: "{}: {:.2f} %".format(item[1], 100 * item[0]),
-                zip(dt_model.feature_importances_, attr_labels)))),
+                         zip(dt_model.feature_importances_, attr_labels)))),
             "description": "TODO: this documentation properly."
         }
 
@@ -167,6 +177,7 @@ def get_metrics(
         true_labels: np.array,
 ) -> t.Dict[str, t.Any]:
     """Evaluate given DT/RF models using some chosen metrics."""
+
     def safe_call_func(func, true_labels, preds) -> t.Optional[str]:
         """Call an evaluation metric, catching ValueError exceptions."""
         try:
@@ -177,7 +188,7 @@ def get_metrics(
 
             return res
 
-        except ValueError as val_err:
+        except ValueError:
             return None
 
     chosen_metrics = None
@@ -194,8 +205,7 @@ def get_metrics(
         return {
             metric_name: {
                 "value": safe_call_func(metric_func, true_labels, preds),
-                "description":
-                "Todo.",
+                "description": "Todo.",
             }
             for metric_name, metric_func in chosen_metrics.items()
         }
@@ -203,7 +213,7 @@ def get_metrics(
     return {}
 
 
-def get_toy_model(forest: bool = False, regressor: bool = False):
+def get_toy_model(forest: bool = True, regressor: bool = False):
     """Create a DT/RF toy model for testing purposes."""
     from sklearn.datasets import load_iris
     iris = load_iris()  # type: sklearn.utils.Bunch
@@ -212,7 +222,7 @@ def get_toy_model(forest: bool = False, regressor: bool = False):
     y = iris.target
     attr_labels = iris.feature_names
 
-    ALGORITHMS = {
+    algorithms = {
         (False, False): sklearn.tree.DecisionTreeClassifier,
         (False, True): sklearn.tree.DecisionTreeRegressor,
         (True, False): sklearn.ensemble.RandomForestClassifier,
@@ -224,9 +234,8 @@ def get_toy_model(forest: bool = False, regressor: bool = False):
     else:
         args = {}
 
-    model = ALGORITHMS.get(
-        (forest, regressor),
-        sklearn.tree.DecisionTreeClassifier)(**args)
+    model = algorithms.get((forest, regressor),
+                           sklearn.tree.DecisionTreeClassifier)(**args)
     model.fit(iris.data, iris.target)
 
     return model, X, y, attr_labels
