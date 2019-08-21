@@ -195,7 +195,7 @@
         <mat-icon (click)="updateZoomValue(-0.25)"
                   (dblclick)="updateZoomValue(-0.75)"
                   [style.cursor]="zoomValue <= zoomMin ? 'not-allowed' : 'pointer'"
-                  matTooltip="Zoom out"
+                  matTooltip="Zoom out (temporarily disabled to maintenance)"
                   matTooltipShowDelay="400"
                   class="zoom-icon">
           zoom_out
@@ -205,12 +205,14 @@
                     [(value)]="zoomValue"
                     (change)="updateZoomValue(+0.0)"
                     step="0.01"
+                    disabled="true"
+                    matTooltip="(temporarily disabled to maintenance)"
                     class="zoom-slider">
         </mat-slider>
         <mat-icon (click)="updateZoomValue(+0.25)"
                   (dblclick)="updateZoomValue(+0.75)"
                   [style.cursor]="zoomValue >= zoomMax ? 'not-allowed' : 'pointer'"
-                  matTooltip="Zoom in"
+                  matTooltip="Zoom in (temporarily disabled to maintenance)"
                   matTooltipShowDelay="400"
                   class="zoom-icon">
           zoom_in

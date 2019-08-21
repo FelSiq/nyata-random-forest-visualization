@@ -217,6 +217,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   private updateZoomValue(increment: number): void {
+    // Temporarily disabled
+    return;
+
     if (increment) {
       const aux = this.zoomValue + increment;
       this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
