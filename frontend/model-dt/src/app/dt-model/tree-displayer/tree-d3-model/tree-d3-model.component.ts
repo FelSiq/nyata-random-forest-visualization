@@ -165,8 +165,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private initSvg() {
     this.svg = d3.select('svg');
 
-    const transformation = d3Transform.transform()
-      .scale(this.zoomValue);
+    const transformation = d3Transform.transform();
+      //.scale(this.zoomValue);
       //.translate([this.xTranslate, this.yTranslate]);
 
     // Necessary to apply zoom
