@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { PredictResults } from '../predict-results';
@@ -21,7 +21,7 @@ export interface SingleInstRestEmitterInterface {
   templateUrl: './data-loader-pannel.component.html',
   styleUrls: ['./data-loader-pannel.component.css'],
 })
-export class DataLoaderPannelComponent implements OnInit {
+export class DataLoaderPannelComponent implements OnInit, OnDestroy {
   @Input() datasetDim: number;
   @Output() resultsEmitter = new EventEmitter<SingleInstRestEmitterInterface>();
   predictResults: PredictResults;
@@ -62,6 +62,10 @@ export class DataLoaderPannelComponent implements OnInit {
               private fb: FormBuilder) { }
 
   ngOnInit() { }
+
+  ngOnDestroy() {
+    this.cleanPredictResults();
+  }
 
   validateTestInstAttr(): void {
     this.testInstForm
