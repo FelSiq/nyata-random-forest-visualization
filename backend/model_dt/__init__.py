@@ -85,8 +85,6 @@ class PredictDataset(flask_restful.Resource):
         has_header = args["hasHeader"] == 'True'
         has_classes = args["hasClasses"] == 'True'
 
-        print(sep, has_header, has_classes)
-
         data = pd.read_csv(
             filepath_or_buffer=dataset_file,
             sep=sep,
