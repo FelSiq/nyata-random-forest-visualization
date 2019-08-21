@@ -56,6 +56,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   readonly minDefaultDepthFromLeaf = 3;
 
   private svg: D3Selection;
+  private zoomObj;
   private basePack: D3Selection;
   private links: D3Selection;
   private nodes: D3Selection;
@@ -65,8 +66,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private maxImpurity: number;
   private treeAngle = 180;
   private zoomValue = 1;
-  private xTranslate = 0;
-  private yTranslate = 0;
+  private translateX = 0;
+  private translateY = 0;
   private classes: Array<string | number>;
   private maxDepth: number;
   private maxHiddenLevels: number;
@@ -151,13 +152,6 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this.createTree();
   }
 
-  private updateZoomValue(increment: number): void {
-    if (increment) {
-      const aux = this.zoomValue + increment;
-      this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
-    }
-  }
-
   private abbreviateAttrLabel(attrLabel: string, separator = '-'): string {
     return TreeExtraService.abbreviateAttrLabel(attrLabel, separator);
   }
@@ -165,9 +159,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private initSvg() {
     this.svg = d3.select('svg');
 
-    const transformation = d3Transform.transform();
-      //.scale(this.zoomValue);
-      //.translate([this.xTranslate, this.yTranslate]);
+    const transformation = d3Transform.transform()
+      .translate([this.translateX, this.translateY])
+      .scale(this.zoomValue);
 
     // Necessary to apply zoom
     this.basePack = this.svg.append('g')
@@ -204,20 +198,37 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this.linkService.width = this.width;
     this.linkService.height = this.height;
 
-    /*
-    this.svg
-      .call(d3Zoom.zoom()
-        .extent([[0, 0], [this.width, this.height]])
-        .scaleExtent([this.zoomMin, this.zoomMax])
-        .on('zoom', () => {
+    this.zoomObj = d3Zoom.zoom()
+      .extent([[0, 0], [this.width, this.height]])
+      .scaleExtent([this.zoomMin, this.zoomMax])
+      .on('zoom', () => {
+        if (d3.event.transform.k || d3.event.transform.k === 0) {
           this.zoomValue = d3.event.transform.k;
-          this.xTranslate = d3.event.transform.x;
-          this.yTranslate = d3.event.transform.y;
+        }
+        
+        this.translateX = d3.event.transform.x;
+        this.translateY = d3.event.transform.y;
 
-          this.basePack
-            .attr('transform', d3.event.transform);
-        }));
-    */
+        this.basePack
+          .attr('transform', d3.event.transform);
+      });
+
+    this.svg.call(this.zoomObj);
+  }
+
+  private updateZoomValue(increment: number): void {
+    if (increment) {
+      const aux = this.zoomValue + increment;
+      this.zoomValue = Math.max(this.zoomMin, Math.min(aux, this.zoomMax));
+    }
+
+    const transformation = d3Transform.transform()
+      .translate([ 0.5 * this.width, 0.5 * this.height ])
+      .scale(this.zoomValue)
+      .translate([ -0.5 * this.width, -0.5 * this.height ]);
+
+    this.basePack
+      .call(this.zoomObj.transform, transformation);
   }
 
   private cleanSvg(): void {
