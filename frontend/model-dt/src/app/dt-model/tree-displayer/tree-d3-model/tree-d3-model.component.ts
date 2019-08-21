@@ -221,8 +221,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   private cleanSvg(): void {
     this.svg
       .selectAll('.cleanable')
-        .selectAll('*')
-          .remove();
+        .remove();
   }
 
   private calcRootCoordAndDeltas(curTree: TreeInterface) {

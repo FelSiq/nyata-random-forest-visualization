@@ -12,7 +12,7 @@ interface SepOption {
 }
 
 export interface SingleInstRestEmitterInterface {
-  singleInstAttrs: Array<number | string>;
+  singleInstAttrs?: Array<number | string>;
   predictResults: PredictResults;
 }
 
@@ -110,29 +110,29 @@ export class DataLoaderPannelComponent implements OnInit {
   }
 
   handleFileInput(files: FileList) {
-      this.datasetErrorLogs = [];
+    this.datasetErrorLogs = [];
 
-      this.fileToUpload = files.item(0);
+    this.fileToUpload = files.item(0);
 
-      const fileSize = +this.fileToUpload.size / 1024 / 1024;
-      const fileType = this.fileToUpload.type;
+    const fileSize = +this.fileToUpload.size / 1024 / 1024;
+    const fileType = this.fileToUpload.type;
 
-      if (fileSize > 50) {
-        this.datasetErrorLogs.push(
-          'This file is too large! (size: ' + fileSize.toFixed(2) + 'MB)'
-        );
-      }
+    if (fileSize > 50) {
+      this.datasetErrorLogs.push(
+        'This file is too large! (size: ' + fileSize.toFixed(2) + 'MB)'
+      );
+    }
 
-      if (this.fileToUpload.type !== 'text/csv') {
-        this.datasetErrorLogs.push(
-          "The file must be a '.csv' text file! (received type: " +
-          (fileType ? fileType : 'unknown') + ')'
-        );
-      }
+    if (this.fileToUpload.type !== 'text/csv') {
+      this.datasetErrorLogs.push(
+        "The file must be a '.csv' text file! (received type: " +
+        (fileType ? fileType : 'unknown') + ')'
+      );
+    }
 
-      if (this.datasetErrorLogs.length) {
-        this.fileToUpload = null;
-      }
+    if (this.datasetErrorLogs.length) {
+      this.fileToUpload = null;
+    }
   }
 
   uploadDatasetToPredict(): void {
@@ -151,13 +151,17 @@ export class DataLoaderPannelComponent implements OnInit {
           .subscribe((results: PredictResults) => {
               this.predictResults = { ...results };
               this.calledPredictService = false;
-              // this.resultsEmitter.emit(this.predictResults);
+              this.resultsEmitter.emit({
+                predictResults: this.predictResults,
+              });
             }, error => {
               this.predictResults = {
                 'error': { 'value': error },
               };
               this.calledPredictService = false;
-              // this.resultsEmitter.emit(this.predictResults);
+              this.resultsEmitter.emit({
+                predictResults: this.predictResults,
+              });
             });
   }
 
@@ -165,6 +169,12 @@ export class DataLoaderPannelComponent implements OnInit {
     this.predictResults = null;
     this.calledPredictService = false;
     this.resultsEmitter.emit(null);
+  }
+
+  private toggleDatasetOptions(prop): void {
+    if (this.hasOwnProperty(prop)) {
+      this[prop] = !this[prop];
+    }
   }
 
 }

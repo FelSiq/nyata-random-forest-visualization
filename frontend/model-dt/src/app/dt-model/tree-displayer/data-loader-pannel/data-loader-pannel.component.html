@@ -107,22 +107,6 @@
             Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}.
           </mat-list-item>
           <mat-list-item>
-            <mat-checkbox [checked]="datasetHasHeader"
-                          color="primary"
-                          (change)="datasetHasHeader = !datasetHasHeader"
-                          matTooltip="Select this option if the first row of your dataset is the attribute labels.">
-              First row is the attribute labels
-            </mat-checkbox>
-          </mat-list-item>
-          <mat-list-item>
-            <mat-checkbox [checked]="datasetHasClasses"
-                          color="primary"
-                          (change)="datasetHasClasses = !datasetHasClasses"
-                          matTooltip="Select this option if the last column of your dataset is the dependent attribute and, thus, should be used just for computing performance metrics.">
-              Last column is the dependent attribute
-            </mat-checkbox>
-          </mat-list-item>
-          <mat-list-item>
             <label for="file-upload-input"> Choose your file: </label>
             <input type="file"
                    id="file-upload-input"
@@ -138,6 +122,24 @@
             </mat-list>
           </mat-list-item>
         </mat-list>
+        <mat-selection-list dense
+                            color="primary"
+                            (selectionChange)="toggleDatasetOptions($event.option.value)">
+          <mat-list-option [selected]="datasetHasHeader"
+                           value="datasetHasHeader"
+                           checkboxPosition="before"
+                           matTooltip="Select this option if the first row of your dataset is the attribute labels.">
+              <mat-icon matListIcon> maximize </mat-icon>
+              First row is the attribute labels
+          </mat-list-option>
+          <mat-list-option [selected]="datasetHasClasses"
+                           value="datasetHasClasses"
+                           checkboxPosition="before"
+                           matTooltip="Select this option if the last column of your dataset is the dependent attribute and, thus, should be used just for computing performance metrics.">
+              <mat-icon matListIcon> vertical_split </mat-icon>
+              Last column is the dependent attribute
+          </mat-list-option>
+        </mat-selection-list>
         <mat-action-row>
           <button mat-raised-button [disabled]="datasetErrorLogs.length || !fileToUpload"
                   [style.cursor]="!(datasetErrorLogs.length || !fileToUpload) ? 'default' : 'not-allowed'"

@@ -374,7 +374,7 @@ export class TreeNodeService {
   toggleNodeInPredictPath(
         nodes: D3Selection,
         instAttrValues: Array<string | number>,
-        attrNames: string[] | null): void {
+        attrNames: string[]): void {
     if (!nodes || nodes.empty()) {
       return;
     }
