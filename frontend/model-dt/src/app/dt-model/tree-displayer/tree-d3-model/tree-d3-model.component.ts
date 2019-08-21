@@ -204,6 +204,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this.linkService.width = this.width;
     this.linkService.height = this.height;
 
+    /*
     this.svg
       .call(d3Zoom.zoom()
         .extent([[0, 0], [this.width, this.height]])
@@ -216,6 +217,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
           this.basePack
             .attr('transform', d3.event.transform);
         }));
+    */
   }
 
   private cleanSvg(): void {
