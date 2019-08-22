@@ -356,7 +356,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
          (this.verticalAngle ? this.width : this.height)),
         this.verticalAngle ? rootYCoord : rootXCoord,
         this.verticalAngle ? cyDelta : cxDelta,
-        2 + this.visualDepthFromRoot + this.visualDepthFromLeaves,
+        1 + this.visualDepthFromRoot + this.visualDepthFromLeaves,
         this.verticalAngle);
 
     this.omittedNodesId = [];

@@ -172,6 +172,9 @@ export class TreeLinksService {
         .select('line')
           .style('stroke', TreeLinksService.styleColorLinkDefault)
           .style('stroke-width', TreeLinksService.styleWidthLinkDefault)
+
+      links
+        .selectAll('.link')
           .style('stroke-dasharray', dashed ? ('4, 4') : 'none');
     }
 
@@ -191,9 +194,13 @@ export class TreeLinksService {
                       nodes: D3Selection,
                       curPath: Array<number | string>,
                       omittedNodes: number[]): void {
-    if (links.empty()) {
+    if (links.empty() || !curPath) {
       return;
     }
+
+    links
+      .selectAll('.link')
+        .attr('stroke-dasharray', ('4, 4'));
 
     let nodeAId,
         nodeAIsDrawn,
