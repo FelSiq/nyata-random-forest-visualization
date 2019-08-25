@@ -28,6 +28,9 @@
                              [value]="nodeAttr.name"
                              [matTooltip]="nodeAttr.desc">
               Show {{ (nodeAttr.name | titlecase).split('-').join(' ') }} ({{ nodeAttr.abbv ? nodeAttr.abbv : abbreviateAttrLabel(nodeAttr.name) }})
+              <span *ngIf="nodeAttr.constraint" class="constraint-text">
+                {{ nodeAttr.constraint }}
+              </span>
             </mat-list-option>
           </mat-selection-list>
         </ng-template>
@@ -49,6 +52,9 @@
                              [value]="linkAttr.name"
                              [matTooltip]="linkAttr.desc">
               Show {{ (linkAttr.name | titlecase).split('-').join(' ') }} ({{ linkAttr.abbv ? linkAttr.abbv : abbreviateAttrLabel(linkAttr.name) }})
+              <span *ngIf="linkAttr.constraint" class="constraint-text">
+                {{ linkAttr.constraint }}
+              </span>
             </mat-list-option>
           </mat-selection-list>
         </ng-template>

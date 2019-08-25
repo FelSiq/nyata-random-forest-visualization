@@ -38,3 +38,7 @@
 .item-key {
   margin-right: 4px;
 }
+
+.constraint-text {
+  color: gray;
+}

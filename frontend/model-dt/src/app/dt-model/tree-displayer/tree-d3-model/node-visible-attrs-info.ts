@@ -40,7 +40,7 @@ export class NodeVisibleAttrsInfo {
     {
       name: 'output-delta',
       abbv: null,
-      constraint: 'regression',
+      constraint: 'For regression tasks only',
       desc: 'Show the variation of the model output between the current node and its parent node.',
     },
     {
