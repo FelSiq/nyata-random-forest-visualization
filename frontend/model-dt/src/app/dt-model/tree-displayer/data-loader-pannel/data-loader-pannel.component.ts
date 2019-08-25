@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { PredictResults } from '../predict-results';
 import { TreePredictCallerService } from './tree-predict-caller.service';
@@ -33,6 +34,7 @@ export class DataLoaderPannelComponent implements OnInit, OnDestroy {
   datasetHasClasses = true;
   datasetSep = ',';
 
+  private snackBarDurationInSecs = 5;
   readonly maxFileSize: number = 50;
   readonly maxFileSizeUnit: string = 'MB';
   readonly sepOptions: SepOption[] = [
@@ -59,12 +61,33 @@ export class DataLoaderPannelComponent implements OnInit, OnDestroy {
 
   constructor(public predictor: TreePredictCallerService,
               public fileUploadService: DatasetUploadService,
-              private fb: FormBuilder) { }
+              private fb: FormBuilder,
+              private _snackBar: MatSnackBar) { }
 
   ngOnInit() { }
 
   ngOnDestroy() {
     this.cleanPredictResults();
+  }
+
+  private showCopiedSnackBar(): void {
+    this._snackBar.open(
+      'Successfully copied attributes to clipboard.',
+      'Ok',
+      {
+        duration: 1000 * this.snackBarDurationInSecs,
+      });
+
+
+    if (this.snackBarDurationInSecs > 1) {
+      // Decrease snack bar duration to prevent user get bored of
+      // the same message over and over again
+      this.snackBarDurationInSecs -= 1;
+    }
+  }
+
+  cleanTestInstAttr(): void {
+    this.testInstForm.get('attrs').setValue('');
   }
 
   validateTestInstAttr(): void {

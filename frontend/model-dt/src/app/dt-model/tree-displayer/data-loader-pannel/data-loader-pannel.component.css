@@ -9,6 +9,10 @@
   width: 20%;
 }
 
+.test-attr-inst-input {
+  width: calc(100% - 2 * 48px);
+}
+
 .text-field-full-width {
   width: 98%;
 }

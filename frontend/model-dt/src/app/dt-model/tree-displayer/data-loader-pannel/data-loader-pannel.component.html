@@ -32,16 +32,39 @@
       <form (ngSubmit)="predictTestInstValues()" [formGroup]="testInstForm">
         <div>
           <mat-form-field
-              class="text-field-full-width"
+              class="test-attr-inst-input"
               hideRequiredMarker="true"
               floatLabel="never">
             <input matInput
+                   #testAttrInstInput
                    type="text"
                    formControlName="attrs"
                    placeholder="Test instance attribute values"
                    (input)="validateTestInstAttr()"
                    required>
           </mat-form-field>
+          <button mat-icon-button
+                  [disabled]="!testAttrInstInput.value"
+                  color="warn"
+                  type="button"
+                  (click)="cleanTestInstAttr()"
+                  matTooltip="Clean custom instance attribute values"
+                  matTooltipShowDelay="800">
+            <mat-icon>
+              backspace
+            </mat-icon>
+          </button>
+          <button mat-icon-button
+                  [disabled]="!testAttrInstInput.value"
+                  type="button"
+                  [ngxClipboard]="testAttrInstInput"
+                  (cbOnSuccess)="showCopiedSnackBar()"
+                  matTooltip="Copy custom instance attributes values"
+                  matTooltipShowDelay="800">
+            <mat-icon>
+              file_copy
+            </mat-icon>
+          </button>
         </div>
   
         <div class="form-separator-section">
