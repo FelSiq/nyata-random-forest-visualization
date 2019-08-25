@@ -464,13 +464,21 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const sonRightId = +curTree.children_right[nodeId];
     const isLeaf = (sonLeftId < 0 && sonRightId < 0);
 
-    let nodeClass;
+    let nodeClass, parentClass, outputDelta;
 
     if (this.classes) {
       const nodeClassId = +curTree.value[nodeId][0].indexOf(Math.max(...curTree.value[nodeId][0]));
       nodeClass = this.classes[nodeClassId];
     } else {
       nodeClass = +curTree.value[nodeId][0][0];
+
+      if ((parentId || parentId === 0) && parentId >= 0) {
+        parentClass = +curTree.value[parentId][0][0];
+        outputDelta = (nodeClass - parentClass).toFixed(2);
+        outputDelta = (outputDelta >= 0 ? '(+)' : '(-)') + Math.abs(outputDelta);
+      } else if (nodeId === 0) {
+        outputDelta = '(+)' + Math.abs(nodeClass.toFixed(2));
+      }
     }
 
     const radiusFactor = (numInstInNode / +curTree.weighted_number_of_node_samples[0])
@@ -486,6 +494,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
       'son-right-id': aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonRightId,
       'depth': depth,
       'is-leaf': isLeaf,
+      'output-delta': outputDelta,
     };
 
     this.nodeService.generateNode(
