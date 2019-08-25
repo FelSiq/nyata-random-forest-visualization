@@ -7,6 +7,7 @@ import * as d3Scale from 'd3-scale';
 import { TreeExtraService } from './tree-extra.service';
 import { TreeLinksService } from './tree-links.service';
 import { ObjectLabelInfoService } from './object-label-info.service';
+import { NodeVisibleAttrsInfo } from './node-visible-attrs-info';
 
 type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
 
@@ -33,15 +34,7 @@ export class TreeNodeService {
   height: number;
   width: number;
 
-  readonly visibleAttrs = [
-    { name: 'impurity', abbv: null },
-    { name: 'decision-feature', abbv: null },
-    { name: 'number-of-instances', abbv: null },
-    { name: 'threshold', abbv: null },
-    { name: 'node-class', abbv: null },
-    { name: 'depth', abbv: null },
-    { name: 'index', abbv: 'ID' },
-  ];
+  readonly visibleAttrsInfo = new NodeVisibleAttrsInfo();
 
   activeAttrs: string[] = [];
   completeAttrName = false;
@@ -304,7 +297,10 @@ export class TreeNodeService {
     TreeExtraService.buildObjectsLabelText(
       filteredNodes,
       this.activeAttrs,
-      this.completeAttrName ? null : TreeExtraService.getAbbvs(this.activeAttrs, this.visibleAttrs),
+      (this.completeAttrName ?
+         null :
+         TreeExtraService.getAbbvs(this.activeAttrs,
+                                   this.visibleAttrsInfo.visibleAttrs)),
       TreeNodeService.styleTextFontSize,
       TreeNodeService.styleTextSpacing,
       TreeLinksService.styleColorTextOutline,
@@ -391,30 +387,30 @@ export class TreeNodeService {
 
     const nodesInPath = nodes
       .selectAll('.in-predict-path')
-          .attr('predict-log', instAttrValues ? function(): string {
-            const node = d3.select(this),
-                  isLeaf = node.attr('is-leaf') === 'true';
+        .attr('predict-log', instAttrValues ? function(): string {
+          const node = d3.select(this),
+                isLeaf = node.attr('is-leaf') === 'true';
 
-            if (!isLeaf) {
-              const attrIndex = +node.attr('decision-feature');
+          if (!isLeaf) {
+            const attrIndex = +node.attr('decision-feature');
 
-              let instAttrVal = '' + instAttrValues[attrIndex],
-                  threshold = node.attr('threshold');
+            let instAttrVal = '' + instAttrValues[attrIndex],
+                threshold = node.attr('threshold');
 
-              const decision = (+instAttrVal <= +threshold) ? ' <= ' : ' > ',
-                    attrName = attrNames ? attrNames[attrIndex] : 'ATTR#' + attrIndex;
+            const decision = (+instAttrVal <= +threshold) ? ' <= ' : ' > ',
+                  attrName = attrNames ? attrNames[attrIndex] : 'ATTR#' + attrIndex;
 
-              instAttrVal = TreeExtraService.toFixed(instAttrVal);
-              threshold = TreeExtraService.toFixed(threshold);
+            instAttrVal = TreeExtraService.toFixed(instAttrVal);
+            threshold = TreeExtraService.toFixed(threshold);
 
-              return (attrName + ' (' + instAttrVal + ') ' + decision + threshold);
-            }
+            return (attrName + ' (' + instAttrVal + ') ' + decision + threshold);
+          }
 
-            return 'Output: ' + node.attr('node-class');
-          } : null)
-          .select('circle')
-            .attr('stroke', TreeLinksService.styleColorLinkPredict)
-            .attr('stroke-width', TreeNodeService.styleWidthCirclePredict);
+          return 'Output: ' + node.attr('node-class');
+        } : null)
+        .select('circle')
+          .attr('stroke', TreeLinksService.styleColorLinkPredict)
+          .attr('stroke-width', TreeNodeService.styleWidthCirclePredict);
   }
 
   setImpurityScale(maxImpurity: number): void {

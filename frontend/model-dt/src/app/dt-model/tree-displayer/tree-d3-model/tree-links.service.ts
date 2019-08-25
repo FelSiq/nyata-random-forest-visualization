@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import * as d3 from 'd3-selection';
 
 import { TreeExtraService } from './tree-extra.service';
+import { LinkVisibleAttrsInfo } from './link-visible-attrs-info';
 
 type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
 
@@ -24,12 +25,7 @@ export class TreeLinksService {
   height: number;
   width: number;
 
-  readonly visibleAttrs = [
-    { name: 'weight', abbv: null },
-    { name: 'decision', abbv: null },
-    { name: 'decision-feature', abbv: null },
-    { name: 'threshold', abbv: null },
-  ];
+  readonly visibleAttrsInfo = new LinkVisibleAttrsInfo();
 
   activeAttrs: string[] = [];
   completeAttrName = false;
@@ -262,7 +258,10 @@ export class TreeLinksService {
     TreeExtraService.buildObjectsLabelText(
       filteredLinks,
       this.activeAttrs,
-      this.completeAttrName ? null : TreeExtraService.getAbbvs(this.activeAttrs, this.visibleAttrs),
+      (this.completeAttrName ?
+         null :
+         TreeExtraService.getAbbvs(this.activeAttrs,
+                                   this.visibleAttrsInfo.visibleAttrs)),
       TreeLinksService.styleTextFontSize,
       TreeLinksService.styleTextSpacing,
       TreeLinksService.styleColorTextOutline,
