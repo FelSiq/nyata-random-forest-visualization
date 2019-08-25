@@ -21,12 +21,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+
+import { ClipboardModule } from 'ngx-clipboard';
+import { D3Service } from 'd3-ng2-service';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DtModelComponent } from './dt-model/dt-model.component';
-
-import { D3Service } from 'd3-ng2-service';
 import { TreeDisplayerComponent } from './dt-model/tree-displayer/tree-displayer.component';
 import { DataLoaderPannelComponent } from './dt-model/tree-displayer/data-loader-pannel/data-loader-pannel.component';
 import { TreeD3ModelComponent } from './dt-model/tree-displayer/tree-d3-model/tree-d3-model.component';
@@ -69,6 +71,8 @@ import { IterableDisplayerComponent } from './dt-model/tree-displayer/iterable-d
     MatSliderModule,
     MatSlideToggleModule,
     MatCheckboxModule,
+    MatSnackBarModule,
+    ClipboardModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],
