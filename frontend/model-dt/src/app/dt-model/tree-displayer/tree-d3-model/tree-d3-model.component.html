@@ -22,10 +22,11 @@
           <mat-selection-list #nodeAttrList
                               dense
                               (selectionChange)="nodeService.toggleAttr($event.option.value); nodeService.updateNodeLabel(nodes)">
-            <mat-list-option *ngFor="let nodeAttr of nodeService.visibleAttrs"
+            <mat-list-option *ngFor="let nodeAttr of nodeService.visibleAttrsInfo.visibleAttrs"
                              color="primary"
                              [selected]="nodeService.activeAttrs.indexOf(nodeAttr.name) > -1"
-                             [value]="nodeAttr.name">
+                             [value]="nodeAttr.name"
+                             [matTooltip]="nodeAttr.desc">
               Show {{ (nodeAttr.name | titlecase).split('-').join(' ') }} ({{ nodeAttr.abbv ? nodeAttr.abbv : abbreviateAttrLabel(nodeAttr.name) }})
             </mat-list-option>
           </mat-selection-list>
@@ -42,10 +43,11 @@
           <mat-selection-list #linkAttrList
                               dense
                               (selectionChange)="linkService.toggleAttr($event.option.value); linkService.updateLinkLabel(links)">
-            <mat-list-option *ngFor="let linkAttr of linkService.visibleAttrs"
+            <mat-list-option *ngFor="let linkAttr of linkService.visibleAttrsInfo.visibleAttrs"
                              color="primary"
                              [selected]="linkService.activeAttrs.indexOf(linkAttr.name) > -1"
-                             [value]="linkAttr.name">
+                             [value]="linkAttr.name"
+                             [matTooltip]="linkAttr.desc">
               Show {{ (linkAttr.name | titlecase).split('-').join(' ') }} ({{ linkAttr.abbv ? linkAttr.abbv : abbreviateAttrLabel(linkAttr.name) }})
             </mat-list-option>
           </mat-selection-list>
