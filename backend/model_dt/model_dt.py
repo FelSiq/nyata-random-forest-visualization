@@ -6,6 +6,7 @@ import re
 import sklearn.tree
 import sklearn.ensemble
 import sklearn.metrics
+import sklearn.preprocessing
 import numpy as np
 
 RE_KEY_NUMBEROF = re.compile(r"\bn \b")
@@ -18,21 +19,67 @@ RE_KEY_PARAMS = re.compile(r"\bparams\b")
 """Regular expression for getting 'params' string, to format JSON keys."""
 
 METRICS_CLASSIFICATION = {
-    "accuracy": sklearn.metrics.accuracy_score,
-    "balanced_accuracy": sklearn.metrics.balanced_accuracy_score,
-    "average_precision": sklearn.metrics.average_precision_score,
-    "precision": sklearn.metrics.precision_score,
-    "recall": sklearn.metrics.recall_score,
-}
+    "accuracy": (sklearn.metrics.accuracy_score, None),
+    "balanced_accuracy": (sklearn.metrics.balanced_accuracy_score, None),
+    "roc_auc_binary": (sklearn.metrics.roc_auc_score, {
+        "average": "binary"
+    }),
+    "roc_auc_micro": (sklearn.metrics.roc_auc_score, {
+        "average": "micro"
+    }),
+    "roc_auc_macro": (sklearn.metrics.roc_auc_score, {
+        "average": "macro"
+    }),
+    "roc_auc_weighted": (sklearn.metrics.roc_auc_score, {
+        "average": "weighted"
+    }),
+    "average_precision_binary": (sklearn.metrics.average_precision_score, {
+        "average": "binary"
+    }),
+    "average_precision_micro": (sklearn.metrics.average_precision_score, {
+        "average": "micro"
+    }),
+    "average_precision_macro": (sklearn.metrics.average_precision_score, {
+        "average": "macro"
+    }),
+    "average_precision_weighted": (sklearn.metrics.average_precision_score, {
+        "average": "weighted"
+    }),
+    "precision_binary": (sklearn.metrics.precision_score, {
+        "average": "binary"
+    }),
+    "precision_micro": (sklearn.metrics.precision_score, {
+        "average": "micro"
+    }),
+    "precision_macro": (sklearn.metrics.precision_score, {
+        "average": "macro"
+    }),
+    "precision_weighted": (sklearn.metrics.precision_score, {
+        "average": "weighted"
+    }),
+    "recall_binary": (sklearn.metrics.recall_score, {
+        "average": "binary"
+    }),
+    "recall_micro": (sklearn.metrics.recall_score, {
+        "average": "micro"
+    }),
+    "recall_macro": (sklearn.metrics.recall_score, {
+        "average": "macro"
+    }),
+    "recall_weighted": (sklearn.metrics.recall_score, {
+        "average": "weighted"
+    }),
+}  # type: t.Dict[str, t.Tuple[t.Callable[[np.ndarray, np.ndarray], float], t.Optional[t.Dict[str, t.Any]]]]
 """Chosen metrics to evaluate classifier models."""
 
 METRICS_REGRESSION = {
-    "mean_absolute_error": sklearn.metrics.mean_absolute_error,
-    "mean_squared_log_error": sklearn.metrics.mean_squared_log_error,
-    "explained_variance_score": sklearn.metrics.explained_variance_score,
-    "mean_squared_error": sklearn.metrics.mean_squared_error,
-    "median_absolute_error": sklearn.metrics.median_absolute_error,
-}
+    "mean_absolute_error": (sklearn.metrics.mean_absolute_error, None),
+    "mean_squared_log_error": (sklearn.metrics.mean_squared_log_error, None),
+    "explained_variance_score": (sklearn.metrics.explained_variance_score,
+                                 None),
+    "mean_squared_error": (sklearn.metrics.mean_squared_error, None),
+    "median_absolute_error": (sklearn.metrics.median_absolute_error, None),
+}  # type: t.Dict[str, t.Tuple[t.Callable[[np.ndarray, np.ndarray], float], t.Optional[t.Dict[str, t.Any]]]]
 """Chosen metrics to evaluate regressor models."""
 
 
@@ -166,20 +213,39 @@ def serialize_decision_tree(
     return new_model
 
 
+def hot_encoding(labels: np.ndarray) -> np.ndarray:
+    """One-Hot Encoding labels."""
+    if labels.ndim == 1:
+        labels = labels.reshape(-1, 1)
+
+    labels_ohe = sklearn.preprocessing.OneHotEncoder().fit_transform(
+        labels).todense()
+
+    return labels_ohe
+
+
 def get_metrics(
         dt_model: t.
         Union[sklearn.ensemble.forest.RandomForestClassifier, sklearn.ensemble.
               forest.RandomForestRegressor, sklearn.tree.tree.
               DecisionTreeRegressor, sklearn.tree.tree.DecisionTreeClassifier],
-        preds: np.array,
-        true_labels: np.array,
+        preds: np.ndarray,
+        true_labels: np.ndarray,
+        preds_proba: t.Optional[np.ndarray] = None,
+        true_labels_ohe: t.Optional[np.ndarray] = None,
 ) -> t.Dict[str, t.Any]:
     """Evaluate given DT/RF models using some chosen metrics."""
 
-    def safe_call_func(func, true_labels, preds) -> t.Optional[str]:
+    def safe_call_func(func: t.Callable[[np.ndarray, np.ndarray], float],
+                       args: t.Optional[t.Dict[str, t.Any]],
+                       true_labels: np.ndarray,
+                       preds: np.ndarray) -> t.Optional[str]:
         """Call an evaluation metric, catching ValueError exceptions."""
+        if args is None:
+            args = {}
+
         try:
-            res = func(true_labels, preds)
+            res = func(true_labels, preds, **args)  # type: t.Union[str, float]
 
             if res is not None:
                 res = "{:.2f}".format(res)
@@ -202,10 +268,10 @@ def get_metrics(
     if chosen_metrics:
         return {
             metric_name: {
-                "value": safe_call_func(metric_func, true_labels, preds),
+                "value": safe_call_func(*metric_pack, true_labels, preds),
                 "description": "Todo.",
             }
-            for metric_name, metric_func in chosen_metrics.items()
+            for metric_name, metric_pack in chosen_metrics.items()
         }
 
     return {}

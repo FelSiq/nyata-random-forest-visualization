@@ -93,16 +93,24 @@ class PredictDataset(flask_restful.Resource):
         if has_classes:
             X = data.iloc[:, :-1].values
             y = data.iloc[:, -1].values
+            y_ohe = None  # model_dt.hot_encoding(y)
+            preds_proba = None  # self.model.predict_proba(X)
 
         else:
             X = data.values
             y = None
+            y_ohe = None
+            preds_proba = None
 
         preds = self.model.predict(X)
 
         return flask.jsonify(
             model_dt.get_metrics(
-                dt_model=self.model, preds=preds, true_labels=y))
+                dt_model=self.model,
+                preds=preds,
+                true_labels=y,
+                preds_proba=preds_proba,
+                true_labels_ohe=y_ohe))
 
 
 class PredictSingleInstance(flask_restful.Resource):
@@ -131,12 +139,14 @@ class PredictSingleInstance(flask_restful.Resource):
         return preproc_inst.astype(np.float32).reshape(1, -1)
 
     @staticmethod
-    def _handle_errors(err_code: t.Sequence[str]) -> t.Dict[str, str]:
+    def _handle_errors(err_code: t.Sequence[str]) -> t.Dict[str, t.Dict[str, str]]:
         """Handle probable errors found while predicting the instance."""
         err_msg = {}
 
         if "ERROR_MISSING_VAL" in err_code:
-            err_msg["error"] = {"value" : "Currently missing values are not supported."}
+            err_msg["error"] = {
+                "value": "Currently missing values are not supported."
+            }
 
         return err_msg
 
