@@ -173,7 +173,8 @@ export class TreeLinksService {
 
       links
         .selectAll('.link')
-          .style('stroke-dasharray', dashed ? ('4, 4') : 'none');
+          .select('line')
+            .style('stroke-dasharray', dashed ? ('4, 4') : 'none');
     }
 
     if (nodes && !nodes.empty()) {
@@ -198,7 +199,10 @@ export class TreeLinksService {
 
     links
       .selectAll('.link')
-        .attr('stroke-dasharray', ('4, 4'));
+        .classed('hovered', false)
+        .select('line')
+          .style('stroke', TreeLinksService.styleColorLinkDefault)
+          .style('stroke-dasharray', ('4, 4'));
 
     let nodeAId,
         nodeAIsDrawn,
