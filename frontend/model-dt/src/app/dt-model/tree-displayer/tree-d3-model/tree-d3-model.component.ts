@@ -420,7 +420,10 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private updateAggregationDepthNode(cx: number, cy: number, depth: number): void {
+  private updateAggregationDepthNode(cx: number,
+                                     cy: number,
+                                     depth: number,
+                                     parentId: number): void {
     const aggregationNodeId = TreeExtraService
       .formatNodeId(TreeNodeService.aggregationDepthNodeId, true);
 
@@ -429,6 +432,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     if (aggregationNode.empty()) {
       const nodeAttrs = {
         'number-of-nodes': 1,
+        'parent-id': parentId,
       };
 
       this.nodeService.generateNode(
@@ -547,7 +551,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
       nodeId = TreeNodeService.aggregationDepthNodeId;
 
-      this.updateAggregationDepthNode(cx, cy, depth);
+      this.updateAggregationDepthNode(cx, cy, depth, parentId);
 
       if (depth !== this.aggregationDepthNodeDepth) {
         cx -= !this.verticalAngle ? cxDelta : 0;
