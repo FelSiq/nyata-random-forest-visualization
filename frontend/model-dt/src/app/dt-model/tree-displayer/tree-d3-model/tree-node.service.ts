@@ -98,28 +98,63 @@ export class TreeNodeService {
         d3.event.y);
   };
 
-  private funcMouseEnter = function(): void {
-    const circle = d3.select(this.parentNode)
-      .select('circle');
+  static applyHoveredClassRecursively(node: D3Selection, value: boolean) {
+    node
+      .classed('hovered', value);
+
+    const circle = node.select('circle');
 
     circle
-      .transition()
-        .duration(350)
-        .attr('stroke-width', TreeNodeService.styleWidthCircleHover);
+      .attr('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
+
+    if (value) {
+      circle
+        .transition()
+          .duration(350)
+          .attr('stroke-width', TreeNodeService.styleWidthCircleHover);
+
+    } else {
+      circle
+        .transition()
+          .duration(350)
+          .attr('stroke-width',
+            node.classed('in-predict-path') ?
+              TreeNodeService.styleWidthCirclePredict :
+              TreeNodeService.styleWidthCircleDefault)
+          .attr('r', circle.attr('original-radius'));
+    }
+
+    const nodeId = node.attr('index'),
+          parentId = node.attr('parent-id');
+
+    const parentNode = d3.select(
+      TreeExtraService.formatNodeId(parentId, true));
+
+    if (!parentNode.empty()) {
+      d3.select(TreeExtraService.formatLinkId(parentId, nodeId, true))
+        .classed('hovered', value)
+          .select('line')
+            .style('stroke', TreeLinksService.funcDragEndSelectStrokeStyle);
+
+      TreeNodeService.applyHoveredClassRecursively(parentNode, value);
+    }
+  }
+
+  private funcMouseEnter = function(): void {
+    const node = d3.select(this.parentNode)
+
+    if (d3.select('.in-predict-path').empty()) {
+      TreeNodeService.applyHoveredClassRecursively(node, true);
+    }
   };
 
   private funcMouseLeave = function(): void {
     const node = d3.select(this.parentNode);
     const circle = node.select('circle');
 
-    circle
-      .transition()
-        .duration(350)
-        .attr('stroke-width',
-          node.classed('in-predict-path') ?
-          TreeNodeService.styleWidthCirclePredict :
-          TreeNodeService.styleWidthCircleDefault)
-        .attr('r', circle.attr('original-radius'));
+    if (d3.select('.in-predict-path').empty()) {
+      TreeNodeService.applyHoveredClassRecursively(node, false);
+    }
   };
 
   private filterAggregationNode = function() {

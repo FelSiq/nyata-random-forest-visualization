@@ -50,21 +50,23 @@ export class TreeLinksService {
   };
 
   static funcDragStartSelectStrokeStyle = function(): string {
-    const predictPathLink = d3.select(this.parentNode)
-      .classed('in-predict-path');
+    const obj = d3.select(this.parentNode),
+          predictPathLink = obj.classed('in-predict-path'),
+          hoveredPathLink = obj.classed('hovered');
 
     return (
-      predictPathLink ? 
+      predictPathLink || hoveredPathLink ? 
       TreeLinksService.styleColorLinkPredictSelected :
       TreeLinksService.styleColorLinkSelected);
   };
 
   static funcDragEndSelectStrokeStyle = function(): string {
-    const predictPathLink = d3.select(this.parentNode)
-      .classed('in-predict-path');
+    const obj = d3.select(this.parentNode),
+          predictPathLink = obj.classed('in-predict-path'),
+          hoveredPathLink = obj.classed('hovered');
 
     return (
-      predictPathLink ? 
+      predictPathLink || hoveredPathLink ? 
       TreeLinksService.styleColorLinkPredict :
       TreeLinksService.styleColorLinkDefault);
   };

@@ -18,7 +18,7 @@ export class TreeExtraService {
     return (addIdHash ? '#' : '') + 'link-' + nodeAId + '-' + nodeBId;
   }
 
-  static formatNodeId(nodeId: number,
+  static formatNodeId(nodeId: number | string,
                       addIdHash = false): string {
     return (addIdHash ? '#' : '') + 'node-' + nodeId;
   }
