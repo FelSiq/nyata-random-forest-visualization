@@ -1,7 +1,8 @@
 run:
 	cd ./model-dt && \
-	ng serve && \
+	ng serve --open && \
 	cd ../
 
 install:
-	npm install ./model-dt
+	cd ./model-dt
+	npm install
