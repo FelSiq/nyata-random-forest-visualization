@@ -4,4 +4,4 @@ run:
 	flask run
 
 install:
-	pip install -r model_dt/requirements.txt
+	pip install -Ur model_dt/requirements.txt
