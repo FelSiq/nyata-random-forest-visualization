@@ -219,6 +219,16 @@ class PredictSingleInstance(flask_restful.Resource):
 
         return flask.jsonify(pred_vals)
 
+class MostCommonAttrSeq(flask_restful.Resource):
+    """Find the most common sequence of attributes in the forest."""
+
+    def __init__(self, model, **kwargs):
+        self.model = model
+
+    def get(self, seq_num: int = 10):
+        top_common_seqs = model_dt.top_common_attr_seq(self.model, seq_num=seq_num)
+        return flask.jsonify(top_common_seqs)
+        
 
 def create_app():
     """DT visualization application factory."""
@@ -247,6 +257,11 @@ def create_app():
     api.add_resource(
         PredictDataset,
         "/predict-dataset",
+        resource_class_kwargs=common_kwargs)
+
+    api.add_resource(
+        MostCommonAttrSeq,
+        "/most-common-attr-seq/<int:seq_num>",
         resource_class_kwargs=common_kwargs)
 
     return app

@@ -277,6 +277,55 @@ def get_metrics(
     return {}
 
 
+def top_most_common_attr_seq(
+        dt_model: t.Union[sklearn.ensemble.forest.RandomForestClassifier,
+                          sklearn.ensemble.forest.RandomForestRegressor,
+                          sklearn.tree.tree.DecisionTreeRegressor,
+                          sklearn.tree.tree.DecisionTreeClassifier],
+        seq_num: int = 10
+) -> t.Tuple[t.Tuple[t.Tuple[int, ...]], t.Tuple[float]]:
+    """."""
+
+    def _traverse_tree(tree: t.Union[sklearn.tree.tree.DecisionTreeRegressor,
+                                     sklearn.tree.tree.DecisionTreeClassifier],
+                       cur_ind: int, cur_attr_seq: t.List[int]) -> None:
+        """Traverse a tree recursively through all possible paths."""
+        if tree.feature[cur_ind] < 0:
+            path = tuple(cur_attr_seq)
+            seqs.setdefault(path, 0)
+            seqs[path] += 1
+            return
+
+        cur_attr_seq.append(tree.feature[cur_ind])
+        _traverse_tree(tree, tree.children_left[cur_ind], cur_attr_seq)
+        _traverse_tree(tree, tree.children_right[cur_ind], cur_attr_seq)
+        cur_attr_seq.pop()
+
+    seqs = {}  # type: t.Dict[t.Tuple[int, ...], int]
+
+    try:
+        trees = dt_model.estimators_
+
+    except AttributeError:
+        trees = [dt_model]
+
+    for tree in trees:
+        _traverse_tree(tree.tree_, cur_ind=0, cur_attr_seq=[])
+
+    if seqs:
+        sorted_seqs, abs_freqs = zip(
+            *sorted(seqs.items(), key=lambda item: item[1], reverse=True))
+        freqs = tuple(np.asarray(abs_freqs, dtype=np.float) / sum(abs_freqs))
+
+    else:
+        sorted_seqs = freqs = tuple() 
+
+    if seq_num >= len(sorted_seqs):
+        return sorted_seqs, freqs
+
+    return sorted_seqs[:seq_num], freqs[:seq_num]
+
+
 def get_toy_model(forest: bool = True, regressor: bool = False):
     """Create a DT/RF toy model for testing purposes."""
     from sklearn.datasets import load_iris
