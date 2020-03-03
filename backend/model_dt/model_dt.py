@@ -282,7 +282,7 @@ def top_most_common_attr_seq(
                           sklearn.ensemble.forest.RandomForestRegressor,
                           sklearn.tree.tree.DecisionTreeRegressor,
                           sklearn.tree.tree.DecisionTreeClassifier],
-        seq_num: int = 10
+        seq_num: int = 10,
 ) -> t.Tuple[t.Tuple[t.Tuple[int, ...]], t.Tuple[float]]:
     """."""
 
