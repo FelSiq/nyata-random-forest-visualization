@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Input, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, AfterViewChecked, Input, ElementRef } from '@angular/core';
 
 import * as d3 from 'd3-selection';
 import * as d3Zoom from 'd3-zoom';
@@ -18,7 +18,7 @@ type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
   templateUrl: './tree-d3-model.component.html',
   styleUrls: ['./tree-d3-model.component.css'],
 })
-export class TreeD3ModelComponent implements OnInit, AfterViewInit {
+export class TreeD3ModelComponent implements OnInit, AfterViewInit, AfterViewChecked {
   @Input() treeNodes: DTInterface[];
 
   private _decisionPath: Array<Array<number | string>>;
@@ -157,7 +157,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   private initSvg() {
-    this.svg = d3.select('svg');
+    this.svg = d3.select('#d3-tree-svg');
 
     const transformation = d3Transform.transform()
       .translate([this.translateX, this.translateY])
@@ -192,6 +192,9 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         +this.svg.attr('height') :
         +this.eleRef.nativeElement.offsetHeight
     );
+
+    this.svg.attr('height', this.height);
+    this.svg.attr('width', this.width);
 
     this.nodeService.width = this.width;
     this.nodeService.height = this.height;

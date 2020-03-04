@@ -9,38 +9,42 @@
     </mat-expansion-panel-header>
 
     <ng-template matExpansionPanelContent>
-      Generate the most frequent attribute sequences for all possible paths in the forest model.
-      Select the number of sequences to show after analysis:
-      <div>
-        <input matInput #numAttr type="number" value="10" min="1"/>
-      </div>
-      <div *ngIf="calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)">
-	<ng-container *ngIf="rankCommonAttrSeq && rankCommonAttrSeq.length; else waitingForCommonAttrSeq">
-	  <mat-list>
-	    <mat-list-item>
-	      <span class="common-attr-table-rank"><strong>Rank</strong></span>
-	      <span class="common-attr-table-left"><strong>Frequency (total: {{ 100 * totalRelFreq | number: '.2-2'}}%)</strong></span>
-	      <span class="common-attr-table-right"><strong>Sequence of Attribute indices</strong></span>
-	    </mat-list-item>
-	    <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
-	      <span class="common-attr-table-rank"> {{ i + 1 }} </span>
-	      <span class="common-attr-table-left">
-	        <mat-progress-bar [mode]="determinate" [value]="100 * attrSeqRelFreq[i]" style="width: 90%;"></mat-progress-bar>
-		<div style="text-align: center;">{{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}%</div>
-	      </span>
-	      <span class="common-attr-table-right">{{ seq }} </span>
-	    </mat-list-item>
-	  </mat-list>
-	</ng-container>
-	<ng-template #waitingForCommonAttrSeq>
-	  <mat-spinner style="margin:0 auto;"></mat-spinner>
-	</ng-template>
-      </div>
-      <mat-action-row>
-        <button mat-button color="primary" (click)="getMostCommonAttrSeq(+numAttr.value)">
-            Run
-        </button>
-      </mat-action-row>
+      <mat-card>
+	<mat-card-content>
+	  <p>
+      	    Generate the most frequent attribute sequences for all possible paths in the forest model.
+      	    Select the number of sequences to show after analysis:
+	  </p>
+      	  <div>
+      	    <input matInput #numAttr type="number" value="10" min="1"/>
+      	  </div>
+      	  <div *ngIf="calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)">
+      	    <ng-container *ngIf="rankCommonAttrSeq && rankCommonAttrSeq.length; else waitingForCommonAttrSeq">
+      	      <mat-list>
+      	        <mat-list-item>
+      	          <span class="common-attr-table-rank"><strong>Rank</strong></span>
+      	          <span class="common-attr-table-left-bar"><strong>Frequency (total: {{ 100 * totalRelFreq | number: '.2-2'}}%)</strong></span>
+      	          <span class="common-attr-table-right"><strong>Sequence of Attribute indices</strong></span>
+      	        </mat-list-item>
+      	        <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
+      	          <span class="common-attr-table-rank"> {{ i + 1 }} </span>
+      	          <mat-progress-bar class="common-attr-table-bar" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
+      	          <span class="common-attr-table-left"> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
+      	          <span class="common-attr-table-right">{{ seq }} </span>
+      	        </mat-list-item>
+      	      </mat-list>
+      	    </ng-container>
+      	    <ng-template #waitingForCommonAttrSeq>
+      	      <mat-spinner style="margin:0 auto;"></mat-spinner>
+      	    </ng-template>
+      	  </div>
+	</mat-card-content>
+      	<mat-card-actions>
+      	  <button mat-button color="primary" (click)="getMostCommonAttrSeq(+numAttr.value)">
+      	      Run
+      	  </button>
+      	</mat-card-actions>
+      </mat-card>
     </ng-template>
   </mat-expansion-panel>
 </mat-accordion>
