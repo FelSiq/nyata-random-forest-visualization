@@ -114,14 +114,15 @@ def get_tree_structure(tree: sklearn.tree._tree.Tree) -> t.Dict[str, t.Any]:
 
 def json_encoder_type_manager(obj: t.Any) -> t.Any:
     """Manage non-native python data type to serialize as a JSON."""
-    if isinstance(obj, (sklearn.tree.tree.DecisionTreeClassifier,
-                        sklearn.tree.tree.DecisionTreeRegressor)):
+    if isinstance(obj, (sklearn.tree.DecisionTreeClassifier,
+                        sklearn.tree.DecisionTreeRegressor)):
         return serialize_decision_tree(obj)
 
     if isinstance(obj, (np.ndarray, list, tuple)):
         return list(map(json_encoder_type_manager, obj))
 
-    if isinstance(obj, (np.int8, np.int16, np.int32, np.int64)):
+    if isinstance(obj,
+                  (np.uint, np.int, np.int8, np.int16, np.int32, np.int64)):
         return int(obj)
 
     if isinstance(obj, sklearn.tree._tree.Tree):
@@ -137,12 +138,10 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
 
 
 def get_class_freqs(
-        dt_model: sklearn.ensemble.forest.RandomForestClassifier,
-        instance: np.ndarray
+        dt_model: sklearn.ensemble.RandomForestClassifier, instance: np.ndarray
 ) -> t.Tuple[t.Optional[t.Dict[str, t.Dict[str, str]]], t.Optional[str]]:
     """Get the frequency of every class from a RF Classifier prediction."""
-    if not isinstance(dt_model,
-                      sklearn.ensemble.forest.RandomForestClassifier):
+    if not isinstance(dt_model, sklearn.ensemble.RandomForestClassifier):
         return None, None
 
     class_by_tree = {str(class_label): 0
@@ -177,10 +176,10 @@ def get_class_freqs(
 
 
 def serialize_decision_tree(
-        dt_model: t.
-        Union[sklearn.ensemble.forest.RandomForestClassifier, sklearn.ensemble.
-              forest.RandomForestRegressor, sklearn.tree.tree.
-              DecisionTreeRegressor, sklearn.tree.tree.DecisionTreeClassifier],
+        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                          sklearn.ensemble.RandomForestRegressor,
+                          sklearn.tree.DecisionTreeRegressor,
+                          sklearn.tree.DecisionTreeClassifier],
         attr_labels: t.Optional[t.Sequence[str]] = None,
 ) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
@@ -210,6 +209,30 @@ def serialize_decision_tree(
     except AttributeError:
         pass
 
+    depth_freqs = {}  # type: t.Dict[int, int]
+
+    try:
+        for tree in dt_model.estimators_:
+            cur_depth = tree.get_depth()
+            depth_freqs.setdefault(cur_depth, 0)
+            depth_freqs[cur_depth] += 1
+
+    except AttributeError:
+        pass
+
+    if depth_freqs:
+        for key in depth_freqs:
+            depth_freqs[key] = 100. * depth_freqs[key] / dt_model.n_estimators
+
+        formatted_depth_freqs = list(
+            map(lambda item: "{0}: {1:.2f}%".format(*item),
+                sorted(depth_freqs.items(), key=lambda item: item[0])))
+
+        new_model["depth_frequencies"] = {
+            "value": json_encoder_type_manager(formatted_depth_freqs),
+            "description": "TODO.",
+        }
+
     return new_model
 
 
@@ -225,10 +248,10 @@ def hot_encoding(labels: np.ndarray) -> np.ndarray:
 
 
 def get_metrics(
-        dt_model: t.
-        Union[sklearn.ensemble.forest.RandomForestClassifier, sklearn.ensemble.
-              forest.RandomForestRegressor, sklearn.tree.tree.
-              DecisionTreeRegressor, sklearn.tree.tree.DecisionTreeClassifier],
+        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                          sklearn.ensemble.RandomForestRegressor,
+                          sklearn.tree.DecisionTreeRegressor,
+                          sklearn.tree.DecisionTreeClassifier],
         preds: np.ndarray,
         true_labels: np.ndarray,
         preds_proba: t.Optional[np.ndarray] = None,
@@ -257,12 +280,12 @@ def get_metrics(
 
     chosen_metrics = None
 
-    if isinstance(dt_model, (sklearn.ensemble.forest.RandomForestClassifier,
-                             sklearn.tree.tree.DecisionTreeClassifier)):
+    if isinstance(dt_model, (sklearn.ensemble.RandomForestClassifier,
+                             sklearn.tree.DecisionTreeClassifier)):
         chosen_metrics = METRICS_CLASSIFICATION
 
-    if isinstance(dt_model, (sklearn.ensemble.forest.RandomForestRegressor,
-                             sklearn.tree.tree.DecisionTreeRegressor)):
+    if isinstance(dt_model, (sklearn.ensemble.RandomForestRegressor,
+                             sklearn.tree.DecisionTreeRegressor)):
         chosen_metrics = METRICS_REGRESSION
 
     if chosen_metrics:
@@ -278,16 +301,16 @@ def get_metrics(
 
 
 def top_most_common_attr_seq(
-        dt_model: t.Union[sklearn.ensemble.forest.RandomForestClassifier,
-                          sklearn.ensemble.forest.RandomForestRegressor,
-                          sklearn.tree.tree.DecisionTreeRegressor,
-                          sklearn.tree.tree.DecisionTreeClassifier],
+        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                          sklearn.ensemble.RandomForestRegressor,
+                          sklearn.tree.DecisionTreeRegressor,
+                          sklearn.tree.DecisionTreeClassifier],
         seq_num: int = 10,
 ) -> t.Tuple[t.Tuple[t.Tuple[int, ...]], t.Tuple[float]]:
     """."""
 
-    def _traverse_tree(tree: t.Union[sklearn.tree.tree.DecisionTreeRegressor,
-                                     sklearn.tree.tree.DecisionTreeClassifier],
+    def _traverse_tree(tree: t.Union[sklearn.tree.DecisionTreeRegressor,
+                                     sklearn.tree.DecisionTreeClassifier],
                        cur_ind: int, cur_attr_seq: t.List[int]) -> None:
         """Traverse a tree recursively through all possible paths."""
         if tree.feature[cur_ind] < 0:
@@ -318,7 +341,7 @@ def top_most_common_attr_seq(
         freqs = tuple(np.asarray(abs_freqs, dtype=np.float) / sum(abs_freqs))
 
     else:
-        sorted_seqs = freqs = tuple() 
+        sorted_seqs = freqs = tuple()
 
     if seq_num >= len(sorted_seqs):
         return sorted_seqs, freqs

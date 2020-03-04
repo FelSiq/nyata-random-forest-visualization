@@ -157,7 +157,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   private initSvg() {
-    this.svg = d3.select('svg');
+    this.svg = d3.select('#d3-tree-svg');
 
     const transformation = d3Transform.transform()
       .translate([this.translateX, this.translateY])
@@ -180,18 +180,24 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     this.nodes = this.basePack.append('g')
         .classed('group-nodes cleanable', true);
 
+    const widthReduction = 2 * (
+        TreeNodeService.radiusMinimum +
+        TreeNodeService.radiusScaleFactor);
+
     this.width = (
         +this.svg.attr('width') ?
         +this.svg.attr('width') :
         +this.eleRef.nativeElement.offsetWidth
-    ) - 2 * (TreeNodeService.radiusMinimum +
-             TreeNodeService.radiusScaleFactor);
+    ) - widthReduction;
 
     this.height = (
         +this.svg.attr('height') ?
         +this.svg.attr('height') :
         +this.eleRef.nativeElement.offsetHeight
     );
+
+    this.svg.attr('height', this.height);
+    this.svg.attr('width', this.width + widthReduction);
 
     this.nodeService.width = this.width;
     this.nodeService.height = this.height;

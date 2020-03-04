@@ -1,0 +1,28 @@
+#numAttrInput {
+  width: 100%;
+}
+
+.panel-option-icon {
+  margin-right: 8px;
+}
+
+.common-attr-table-bar {
+  width: 14%;
+  margin-right: 8px;
+} 
+
+.common-attr-table-rank {
+  width: 9%;
+}
+
+.common-attr-table-left-bar {
+  width: 34%;
+}
+
+.common-attr-table-left {
+  width: 19%;
+}
+
+.common-attr-table-right {
+  width: 54%;
+}

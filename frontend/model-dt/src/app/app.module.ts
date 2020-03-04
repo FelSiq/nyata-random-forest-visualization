@@ -23,6 +23,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { ClipboardModule } from 'ngx-clipboard';
 import { D3Service } from 'd3-ng2-service';
@@ -35,6 +36,7 @@ import { DataLoaderPannelComponent } from './dt-model/tree-displayer/data-loader
 import { TreeD3ModelComponent } from './dt-model/tree-displayer/tree-d3-model/tree-d3-model.component';
 import { ForbiddenSymbolValidatorDirective } from './dt-model/tree-displayer/data-loader-pannel/forbidden-symbol-validator.directive';
 import { IterableDisplayerComponent } from './dt-model/tree-displayer/iterable-displayer/iterable-displayer.component';
+import { ForestAnalysisComponent } from './dt-model/tree-displayer/forest-analysis/forest-analysis.component';
 
 
 @NgModule({
@@ -46,6 +48,7 @@ import { IterableDisplayerComponent } from './dt-model/tree-displayer/iterable-d
     TreeD3ModelComponent,
     ForbiddenSymbolValidatorDirective,
     IterableDisplayerComponent,
+    ForestAnalysisComponent,
   ],
   imports: [
     BrowserModule,
@@ -74,6 +77,7 @@ import { IterableDisplayerComponent } from './dt-model/tree-displayer/iterable-d
     MatCheckboxModule,
     MatSnackBarModule,
     ClipboardModule,
+    MatProgressBarModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],

@@ -139,7 +139,8 @@ class PredictSingleInstance(flask_restful.Resource):
         return preproc_inst.astype(np.float32).reshape(1, -1)
 
     @staticmethod
-    def _handle_errors(err_code: t.Sequence[str]) -> t.Dict[str, t.Dict[str, str]]:
+    def _handle_errors(
+            err_code: t.Sequence[str]) -> t.Dict[str, t.Dict[str, str]]:
         """Handle probable errors found while predicting the instance."""
         err_msg = {}
 
@@ -153,8 +154,8 @@ class PredictSingleInstance(flask_restful.Resource):
     def _decision_path(self,
                        inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
         """Get the decision path of the instace for every tree in the model."""
-        if isinstance(self.model, (sklearn.tree.tree.DecisionTreeClassifier,
-                                   sklearn.tree.tree.DecisionTreeRegressor)):
+        if isinstance(self.model, (sklearn.tree.DecisionTreeClassifier,
+                                   sklearn.tree.DecisionTreeRegressor)):
             nodes = [self.model.decision_path(inst_proc).indices]
 
         else:
@@ -219,6 +220,7 @@ class PredictSingleInstance(flask_restful.Resource):
 
         return flask.jsonify(pred_vals)
 
+
 class MostCommonAttrSeq(flask_restful.Resource):
     """Find the most common sequence of attributes in the forest."""
 
@@ -226,8 +228,9 @@ class MostCommonAttrSeq(flask_restful.Resource):
         self.model = model
 
     def get(self, seq_num: int = 10):
-        top_common_seqs = model_dt.top_common_attr_seq(self.model, seq_num=seq_num)
-        return flask.jsonify(top_common_seqs)
+        top_common_seqs = model_dt.top_most_common_attr_seq(
+            self.model, seq_num=seq_num)
+        return flask.jsonify(model_dt.json_encoder_type_manager(top_common_seqs))
 
 
 def create_app():
