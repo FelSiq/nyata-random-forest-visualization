@@ -121,7 +121,8 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     if isinstance(obj, (np.ndarray, list, tuple)):
         return list(map(json_encoder_type_manager, obj))
 
-    if isinstance(obj, (np.uint, np.int, np.int8, np.int16, np.int32, np.int64)):
+    if isinstance(obj,
+                  (np.uint, np.int, np.int8, np.int16, np.int32, np.int64)):
         return int(obj)
 
     if isinstance(obj, sklearn.tree._tree.Tree):
@@ -175,10 +176,10 @@ def get_class_freqs(
 
 
 def serialize_decision_tree(
-        dt_model: t.
-        Union[sklearn.ensemble.RandomForestClassifier, sklearn.ensemble.
-              RandomForestRegressor, sklearn.tree.
-              DecisionTreeRegressor, sklearn.tree.DecisionTreeClassifier],
+        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                          sklearn.ensemble.RandomForestRegressor,
+                          sklearn.tree.DecisionTreeRegressor,
+                          sklearn.tree.DecisionTreeClassifier],
         attr_labels: t.Optional[t.Sequence[str]] = None,
 ) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
@@ -208,6 +209,30 @@ def serialize_decision_tree(
     except AttributeError:
         pass
 
+    depth_freqs = {}  # type: t.Dict[int, int]
+
+    try:
+        for tree in dt_model.estimators_:
+            cur_depth = tree.get_depth()
+            depth_freqs.setdefault(cur_depth, 0)
+            depth_freqs[cur_depth] += 1
+
+    except AttributeError:
+        pass
+
+    if depth_freqs:
+        for key in depth_freqs:
+            depth_freqs[key] = 100. * depth_freqs[key] / dt_model.n_estimators
+
+        formatted_depth_freqs = list(
+            map(lambda item: "{0}: {1:.2f}%".format(*item),
+                sorted(depth_freqs.items(), key=lambda item: item[0])))
+
+        new_model["depth_frequencies"] = {
+            "value": json_encoder_type_manager(formatted_depth_freqs),
+            "description": "TODO.",
+        }
+
     return new_model
 
 
@@ -223,10 +248,10 @@ def hot_encoding(labels: np.ndarray) -> np.ndarray:
 
 
 def get_metrics(
-        dt_model: t.
-        Union[sklearn.ensemble.RandomForestClassifier, sklearn.ensemble.
-              RandomForestRegressor, sklearn.tree.
-              DecisionTreeRegressor, sklearn.tree.DecisionTreeClassifier],
+        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                          sklearn.ensemble.RandomForestRegressor,
+                          sklearn.tree.DecisionTreeRegressor,
+                          sklearn.tree.DecisionTreeClassifier],
         preds: np.ndarray,
         true_labels: np.ndarray,
         preds_proba: t.Optional[np.ndarray] = None,
@@ -276,18 +301,17 @@ def get_metrics(
 
 
 def top_most_common_attr_seq(
-        dt_model: t.
-        Union[sklearn.ensemble.RandomForestClassifier, sklearn.ensemble.
-              RandomForestRegressor, sklearn.tree.
-              DecisionTreeRegressor, sklearn.tree.DecisionTreeClassifier],
+        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                          sklearn.ensemble.RandomForestRegressor,
+                          sklearn.tree.DecisionTreeRegressor,
+                          sklearn.tree.DecisionTreeClassifier],
         seq_num: int = 10,
 ) -> t.Tuple[t.Tuple[t.Tuple[int, ...]], t.Tuple[float]]:
     """."""
 
-    def _traverse_tree(
-            tree: t.Union[sklearn.tree.DecisionTreeRegressor, sklearn.tree.
-                          DecisionTreeClassifier], cur_ind: int,
-            cur_attr_seq: t.List[int]) -> None:
+    def _traverse_tree(tree: t.Union[sklearn.tree.DecisionTreeRegressor,
+                                     sklearn.tree.DecisionTreeClassifier],
+                       cur_ind: int, cur_attr_seq: t.List[int]) -> None:
         """Traverse a tree recursively through all possible paths."""
         if tree.feature[cur_ind] < 0:
             path = tuple(cur_attr_seq)
