@@ -3,55 +3,90 @@
     <mat-expansion-panel-header
           matTooltip="Generate the most frequent attribute sequences for all possible paths in the forest model.">
       <mat-panel-title>
-        <mat-icon class="panel-option-icon">account_tree</mat-icon>
+        <mat-icon class="panel-option-icon">sort</mat-icon>
         Rank most common attribute sequences
       </mat-panel-title>
     </mat-expansion-panel-header>
 
     <ng-template matExpansionPanelContent>
-    <mat-card>
-      <mat-card-content>
-        <p>
-          Generate the most frequent attribute sequences from all possible paths (from each tree root to every tree leaf) in the forest model.
-        </p>
-        <p>
-          <strong>Each path is weighted by the number of training instances that pass through it.</strong>
-        </p>
-        <p>
-          Please select the number of sequences to show after analysis:
-        </p>
-        <mat-form-field appearance="outline" id="numAttrInput">
-          <input matInput #numAttr type="number" value="10" min="1"/>
-        </mat-form-field>
-        <div *ngIf="calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)">
-          <div><strong>Results:</strong></div>
-          <div> Total of combinations obtained: {{ attrSeqRelFreq.length }} </div>
-          <div> Total of weighted combination frequency captured: {{ 100 * totalRelFreq | number: '.2-2'}}% </div>
-          <ng-container *ngIf="rankCommonAttrSeq && rankCommonAttrSeq.length; else waitingForCommonAttrSeq">
-            <mat-list>
-              <mat-list-item>
-                <span class="common-attr-table-rank"><strong>Rank</strong></span>
-                <span class="common-attr-table-left-bar"><strong>Frequency</strong></span>
-                <span class="common-attr-table-right"><strong>Attribute indices sequences</strong></span>
-              </mat-list-item>
-              <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
-                <span class="common-attr-table-rank"> {{ i + 1 }} </span>
-                <mat-progress-bar class="common-attr-table-bar" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
-                <span class="common-attr-table-left"> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
-                <span class="common-attr-table-right">{{ seq }} </span>
-              </mat-list-item>
-            </mat-list>
-          </ng-container>
-          <ng-template #waitingForCommonAttrSeq>
-            <mat-spinner style="margin:0 auto;"></mat-spinner>
-          </ng-template>
-        </div>
-      </mat-card-content>
-      <mat-card-actions align="end">
-        <button mat-raised-button [disabled]="(+numAttr.value) < 1" color="primary" (click)="getMostCommonAttrSeq(+numAttr.value)">
-          Run
-        </button>
-      </mat-card-actions>
+      <mat-card>
+        <mat-card-content>
+          <p>
+            Generate the most frequent attribute sequences from all possible paths (from each tree root to every tree leaf) in the forest model.
+          </p>
+          <p>
+            <strong>Each path is weighted by the number of training instances that pass through it.</strong>
+          </p>
+          <p>
+            Please select the number of sequences to show after analysis:
+          </p>
+          <mat-form-field appearance="outline" id="numAttrInput">
+            <input matInput #numAttr type="number" value="10" min="1"/>
+          </mat-form-field>
+          <div *ngIf="calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)">
+            <div><strong>Results:</strong></div>
+            <div> Total of combinations obtained: {{ attrSeqRelFreq.length }} </div>
+            <div> Total of weighted combination frequency captured: {{ 100 * totalRelFreq | number: '.2-2'}}% </div>
+            <ng-container *ngIf="rankCommonAttrSeq && rankCommonAttrSeq.length; else waitingForCommonAttrSeq">
+              <mat-list>
+                <mat-list-item>
+                  <span class="common-attr-table-rank"><strong>Rank</strong></span>
+                  <span class="common-attr-table-left-bar"><strong>Frequency</strong></span>
+                  <span class="common-attr-table-right"><strong>Attribute indices sequences</strong></span>
+                </mat-list-item>
+                <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
+                  <span class="common-attr-table-rank"> {{ i + 1 }} </span>
+                  <mat-progress-bar class="common-attr-table-bar" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
+                  <span class="common-attr-table-left"> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
+                  <span class="common-attr-table-right">{{ seq }} </span>
+                </mat-list-item>
+              </mat-list>
+            </ng-container>
+            <ng-template #waitingForCommonAttrSeq>
+              <mat-spinner style="margin:0 auto;"></mat-spinner>
+            </ng-template>
+          </div>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-raised-button [disabled]="(+numAttr.value) < 1" color="primary" (click)="getMostCommonAttrSeq(+numAttr.value)">
+            Run
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </ng-template>
+  </mat-expansion-panel>
+
+  <mat-expansion-panel>
+    <mat-expansion-panel-header
+          matTooltip="">
+      <mat-panel-title>
+        <mat-icon class="panel-option-icon">account_tree</mat-icon>
+        Forest hierarchical clustering
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <ng-template matExpansionPanelContent>
+      <mat-card>
+        <mat-card-content>
+          <p>
+            Perform a hierarchical clustering to agglomerate the most common trees.
+          </p>
+          <p>
+            The clustering is performed using the median linkage and the Cohen's Kappa score as a distance
+            measure between the DNA vectors of every tree. The DNA vector of a tree is the predictions of
+            the tree for every instance.
+          </p>
+          <p>
+            The user may choose to upload a dataset to build the DNA vectors, or else a random dataset will
+            be generated using a uniform distribution for every attribute, within the maximum and minimum
+            values for each attribute.
+          </p>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-raised-button color="primary" (click)="false">
+            Run
+          </button>
+        </mat-card-actions>
       </mat-card>
     </ng-template>
   </mat-expansion-panel>
