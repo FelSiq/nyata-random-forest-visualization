@@ -1,3 +1,15 @@
 .panel-option-icon {
   margin-right: 8px;
 }
+
+.common-attr-table-rank {
+  width: 10%;
+}
+
+.common-attr-table-left {
+  width: 30%;
+}
+
+.common-attr-table-right {
+  width: 60%;
+}

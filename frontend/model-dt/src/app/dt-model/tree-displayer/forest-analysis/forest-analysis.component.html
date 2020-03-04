@@ -12,7 +12,26 @@
       Generate the most frequent attribute sequences for all possible paths in the forest model.
       Select the number of sequences to show after analysis:
       <div>
-        <input #numAttr type="number" value="10" min="1"/>
+        <input matInput #numAttr type="number" value="10" min="1"/>
+      </div>
+      <div *ngIf="calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)">
+	<ng-container *ngIf="rankCommonAttrSeq && rankCommonAttrSeq.length; else waitingForCommonAttrSeq">
+	  <mat-list>
+	    <mat-list-item>
+	      <span class="common-attr-table-rank"><strong>Rank</strong></span>
+	      <span class="common-attr-table-left"><strong>Frequency (total %: {{ 100 * totalRelFreq | number: '.2-2'}})</strong></span>
+	      <span class="common-attr-table-right"><strong>Sequence of Attribute indices</strong></span>
+	    </mat-list-item>
+	    <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
+	      <span class="common-attr-table-rank"> {{ i + 1 }} </span>
+	      <span class="common-attr-table-left">{{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}%</span>
+	      <span class="common-attr-table-right">{{ seq }} </span>
+	    </mat-list-item>
+	  </mat-list>
+	</ng-container>
+	<ng-template #waitingForCommonAttrSeq>
+	  <mat-spinner style="margin:0 auto;"></mat-spinner>
+	</ng-template>
       </div>
       <mat-action-row>
         <button mat-button color="primary" (click)="getMostCommonAttrSeq(+numAttr.value)">

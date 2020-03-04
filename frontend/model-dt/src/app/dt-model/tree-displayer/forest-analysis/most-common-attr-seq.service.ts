@@ -18,7 +18,7 @@ export class MostCommonAttrSeqService {
 
   getMostCommonAttrSeq(attrNum: number): Observable<Array<any>> {
     return this.httpClient
-      .get<Array<any>(this.urlPostInstance + attrNum.toString(), httpOptions)
+    .get<Array<any>>(this.urlPostInstance + attrNum.toString(), httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)
