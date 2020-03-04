@@ -11,7 +11,7 @@ export class LinkVisibleAttrsInfo {
       name: 'decision',
       abbv: null,
       constraint: null,
-      desc: "Show the matematical relation, 'less or equal than' ('<=') or 'greater than' ('>'), associated with the link. ",
+      desc: "Show the matematical relation, 'less or equal than' ('≤') or 'greater than' ('>'), associated with the link.",
     },
     {
       name: 'decision-feature',

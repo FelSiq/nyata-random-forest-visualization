@@ -97,8 +97,8 @@ export class TreeExtraService {
         .append('rect')
           .raise()
           .classed('draggable label', true)
-          .attr('rx', 5)
-          .attr('opacity', 0.5)
+          .attr('rx', 3)
+          .attr('opacity', 0.85)
           .attr('fill', rectColor);
 
     objects

@@ -20,7 +20,7 @@ export class TreeNodeService {
   static readonly radiusScaleFactor = 24;
   static readonly radiusSelectScaleFactor = 1.2;
   static readonly styleColorTextOutline = 'black';
-  static readonly styleTextFontSize = 16;
+  static readonly styleTextFontSize = 14;
   static readonly styleTextSpacing = 4;
   static readonly styleDepthNodeTextFontSize = 14;
   static readonly transitionDragEffect = 300;
@@ -432,13 +432,13 @@ export class TreeNodeService {
             let instAttrVal = '' + instAttrValues[attrIndex],
                 threshold = node.attr('threshold');
 
-            const decision = (+instAttrVal <= +threshold) ? ' <= ' : ' > ',
+            const decision = (+instAttrVal <= +threshold) ? ' ≤ ' : ' > ',
                   attrName = attrNames ? attrNames[attrIndex] : 'ATTR#' + attrIndex;
 
             instAttrVal = TreeExtraService.toFixed(instAttrVal);
             threshold = TreeExtraService.toFixed(threshold);
 
-            return (attrName + ' (' + instAttrVal + ') ' + decision + threshold);
+            return (attrName + ': ' + instAttrVal + decision + threshold);
           }
 
           return 'Output: ' + node.attr('node-class');
