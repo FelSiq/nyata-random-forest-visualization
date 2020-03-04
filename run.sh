@@ -1,2 +1,2 @@
-x-terminal-emulator --working-directory="backend" -e "make run" && \
-x-terminal-emulator --working-directory="frontend" -e "make run"
+x-terminal-emulator -e "cd ./backend; make run;"
+x-terminal-emulator -e "cd ./frontend; make run;"
