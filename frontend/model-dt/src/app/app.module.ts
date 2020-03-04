@@ -23,6 +23,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { ClipboardModule } from 'ngx-clipboard';
 import { D3Service } from 'd3-ng2-service';
@@ -76,6 +77,7 @@ import { ForestAnalysisComponent } from './dt-model/tree-displayer/forest-analys
     MatCheckboxModule,
     MatSnackBarModule,
     ClipboardModule,
+    MatProgressBarModule,
   ],
   providers: [D3Service],
   bootstrap: [AppComponent],

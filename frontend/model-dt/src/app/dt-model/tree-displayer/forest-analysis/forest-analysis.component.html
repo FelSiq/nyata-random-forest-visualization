@@ -19,12 +19,15 @@
 	  <mat-list>
 	    <mat-list-item>
 	      <span class="common-attr-table-rank"><strong>Rank</strong></span>
-	      <span class="common-attr-table-left"><strong>Frequency (total %: {{ 100 * totalRelFreq | number: '.2-2'}})</strong></span>
+	      <span class="common-attr-table-left"><strong>Frequency (total: {{ 100 * totalRelFreq | number: '.2-2'}}%)</strong></span>
 	      <span class="common-attr-table-right"><strong>Sequence of Attribute indices</strong></span>
 	    </mat-list-item>
 	    <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
 	      <span class="common-attr-table-rank"> {{ i + 1 }} </span>
-	      <span class="common-attr-table-left">{{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}%</span>
+	      <span class="common-attr-table-left">
+	        <mat-progress-bar [mode]="determinate" [value]="100 * attrSeqRelFreq[i]" style="width: 90%;"></mat-progress-bar>
+		<div style="text-align: center;">{{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}%</div>
+	      </span>
 	      <span class="common-attr-table-right">{{ seq }} </span>
 	    </mat-list-item>
 	  </mat-list>
