@@ -316,7 +316,7 @@ def top_most_common_attr_seq(
         if tree.feature[cur_ind] < 0:
             path = tuple(cur_attr_seq)
             seqs.setdefault(path, 0)
-            seqs[path] += 1
+            seqs[path] += tree.weighted_n_node_samples[cur_ind]
             return
 
         cur_attr_seq.append(tree.feature[cur_ind])

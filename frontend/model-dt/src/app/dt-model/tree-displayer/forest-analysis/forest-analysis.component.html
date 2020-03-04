@@ -12,8 +12,13 @@
     <mat-card>
       <mat-card-content>
         <p>
-          Generate the most frequent attribute sequences for all possible paths in the forest model.
-          Select the number of sequences to show after analysis:
+          Generate the most frequent attribute sequences from all possible paths (from each tree root to every tree leaf) in the forest model.
+        </p>
+        <p>
+          <strong>Each path is weighted by the number of training instances that pass through it.</strong>
+        </p>
+        <p>
+          Please select the number of sequences to show after analysis:
         </p>
         <mat-form-field appearance="outline" id="numAttrInput">
           <input matInput #numAttr type="number" value="10" min="1"/>
@@ -21,7 +26,7 @@
         <div *ngIf="calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)">
           <div><strong>Results:</strong></div>
           <div> Total of combinations obtained: {{ attrSeqRelFreq.length }} </div>
-          <div> Total of combinations frequency captured: {{ 100 * totalRelFreq | number: '.2-2'}}% </div>
+          <div> Total of weighted combination frequency captured: {{ 100 * totalRelFreq | number: '.2-2'}}% </div>
           <ng-container *ngIf="rankCommonAttrSeq && rankCommonAttrSeq.length; else waitingForCommonAttrSeq">
             <mat-list>
               <mat-list-item>
