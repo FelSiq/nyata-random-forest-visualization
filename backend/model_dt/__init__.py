@@ -230,7 +230,7 @@ class MostCommonAttrSeq(flask_restful.Resource):
     def get(self, seq_num: int = 10):
         top_common_seqs = model_dt.top_most_common_attr_seq(
             self.model, seq_num=seq_num)
-        return flask.jsonify(top_common_seqs)
+        return flask.jsonify(model_dt.json_encoder_type_manager(top_common_seqs))
 
 
 def create_app():
