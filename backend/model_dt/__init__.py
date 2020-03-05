@@ -233,6 +233,20 @@ class MostCommonAttrSeq(flask_restful.Resource):
         return flask.jsonify(model_dt.json_encoder_type_manager(top_common_seqs))
 
 
+class ForestHierarchicalClustering(flask_restful.Resource):
+    """Perform a hierarchical clustering using each tree DNA."""
+
+    def __init__(self, model, X: np.ndarray, **kwargs):
+        self.model = model
+        self.X = X
+
+    def get(self, threshold_cut: t.Union[int, float] = 1.0):
+        hierarchical_cluster = model_dt.get_hierarchical_cluster(
+            self.model, X=self.X)
+
+        return flask.jsonify(model_dt.json_encoder_type_manager(hierarchical_cluster))
+
+
 def create_app():
     """DT visualization application factory."""
     app = flask.Flask(__name__, instance_relative_config=True)
@@ -265,6 +279,11 @@ def create_app():
     api.add_resource(
         MostCommonAttrSeq,
         "/most-common-attr-seq/<int:seq_num>",
+        resource_class_kwargs=common_kwargs)
+
+    api.add_resource(
+        ForestHierarchicalClustering,
+        "/forest-hierarchical-clustering/<float:threshold_cut>",
         resource_class_kwargs=common_kwargs)
 
     return app

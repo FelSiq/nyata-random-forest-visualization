@@ -8,6 +8,7 @@ import sklearn.ensemble
 import sklearn.metrics
 import sklearn.preprocessing
 import numpy as np
+import scipy.cluster.hierarchy
 
 RE_KEY_NUMBEROF = re.compile(r"\bn \b")
 """Regular expression for getting 'n ' string, to format JSON keys."""
@@ -347,6 +348,34 @@ def top_most_common_attr_seq(
         return sorted_seqs, freqs
 
     return sorted_seqs[:seq_num], freqs[:seq_num]
+
+
+def get_hierarchical_cluster(
+        model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                       sklearn.ensemble.RandomForestRegressor],
+        X: np.ndarray) -> np.ndarray:
+    """."""
+    inst_num = X.shape[0]
+    dna = np.zeros((model.n_estimators, inst_num), dtype=X.dtype)
+
+    for tree_ind, tree in enumerate(model.estimators_):
+        dna[tree_ind, :] = tree.predict(X)
+
+    # Shift Cohen's Kappa to prevent negative values
+    dna_dists = 1.0 + scipy.spatial.distance.pdist(
+        X=dna, metric=sklearn.metrics.cohen_kappa_score)
+
+    """
+    From scipy.cluster.hierarchical.linkage notes:
+
+    Methods ‘centroid’, ‘median’ and ‘ward’ are correctly defined only if Euclidean pairwise
+    metric is used. If y is passed as precomputed pairwise distances, then it is a user
+    responsibility to assure that these distances are in fact Euclidean, otherwise the
+    produced result will be incorrect.
+    """
+    dendrogram = scipy.cluster.hierarchy.linkage(dna_dists, method="average")
+
+    return dendrogram
 
 
 def get_toy_model(forest: bool = True, regressor: bool = False):
