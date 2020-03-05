@@ -34,7 +34,7 @@ export class ForestAnalysisComponent implements OnInit {
     }
 
     this.rankCommonAttrSeq = null;
-    this.attrSeqRelFreq = null;
+    this.attrSeqRelFreq = [];
     this.totalRelFreq = 0.0;
     this.calledCommonAttrSeqService = true;
 
