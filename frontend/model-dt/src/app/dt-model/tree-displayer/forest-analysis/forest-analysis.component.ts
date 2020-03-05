@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
+import { HierClusService } from './hier-clus.service';
+import { Input } from '@angular/core';
 
 @Component({
   selector: 'app-forest-analysis',
@@ -8,12 +10,17 @@ import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
 })
 export class ForestAnalysisComponent implements OnInit {
   rankCommonAttrSeq = [];
+  hierClusters = [];
   attrSeqRelFreq: number[] = [];
   totalRelFreq: number = 0.0;
   errorMessage: string = '';
   calledCommonAttrSeqService: boolean = false;
+  calledHierClusService = false;
+  @Input() numEstimators: number = -1;
+  propCutSliderValue: number = 0.5;
 
-  constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService) { }
+  constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService,
+              public hierClusService: HierClusService) { }
 
   ngOnInit(): void {
   }
@@ -27,6 +34,8 @@ export class ForestAnalysisComponent implements OnInit {
     }
 
     this.rankCommonAttrSeq = null;
+    this.attrSeqRelFreq = null;
+    this.totalRelFreq = 0.0;
     this.calledCommonAttrSeqService = true;
 
     this.mostCommonAttrSeqService.getMostCommonAttrSeq(numAttr)
@@ -40,6 +49,27 @@ export class ForestAnalysisComponent implements OnInit {
           this.errorMessage = 'Something went wrong while communicating with the backend.';
 	  this.totalRelFreq = 0.0;
           this.calledCommonAttrSeqService = false;
+        });
+  }
+
+  getHierarchicalClustering() {
+    this.errorMessage = '';
+
+    if (this.numEstimators <= 1) {
+      this.errorMessage = 'The mobel must be a forest.';
+    }
+
+    this.hierClusters = null;
+    this.calledHierClusService = true;
+
+    this.hierClusService.getHierarchicalClustering(2.0 * +this.propCutSliderValue)
+      .subscribe((results) => {
+          this.hierClusters = results;
+          this.calledHierClusService = false;
+        }, error => {
+          this.hierClusters = [];
+          this.errorMessage = 'Something went wrong while communicating with the backend.';
+          this.calledHierClusService = false;
         });
   }
 }

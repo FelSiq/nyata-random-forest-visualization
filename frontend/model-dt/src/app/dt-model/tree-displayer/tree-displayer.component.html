@@ -43,7 +43,9 @@
         </ng-template>
     
         <ng-template matTabContent>
-            <app-forest-analysis></app-forest-analysis>
+            <app-forest-analysis
+	        [numEstimators]="treeModel.tree_ ? 1 : (treeModel.estimators_ ? treeModel.estimators_.value.length : 0)">
+	    </app-forest-analysis>
         </ng-template>
       </mat-tab>
     

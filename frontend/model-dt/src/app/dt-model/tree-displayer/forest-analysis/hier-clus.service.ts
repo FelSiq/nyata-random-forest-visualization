@@ -11,14 +11,14 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root',
 })
-export class MostCommonAttrSeqService {
-  private urlPostInstance = 'http://127.0.0.1:5000/most-common-attr-seq/';
+export class HierClusService {
+  private urlPostInstance = 'http://127.0.0.1:5000/forest-hierarchical-clustering/';
 
   constructor(private httpClient: HttpClient) { }
 
-  getMostCommonAttrSeq(attrNum: number): Observable<Array<any>> {
+  getHierarchicalClustering(thresholdCut: number): Observable<Array<any>> {
     return this.httpClient
-    .get<Array<any>>(this.urlPostInstance + attrNum.toString(), httpOptions)
+    .get<Array<any>>(this.urlPostInstance + thresholdCut.toFixed(2).toString(), httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)
@@ -27,8 +27,7 @@ export class MostCommonAttrSeqService {
 
   private handleError(error: HttpErrorResponse) {
     return throwError(
-      `Something went wrong while calculating the most common attribute sequence ranking.
+      `Something went wrong while creating the forest hierarchical clustering.
        Please check your instance values are correct.`);
     }
-
 }
