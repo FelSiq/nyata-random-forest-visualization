@@ -19,14 +19,23 @@
   width: 34%;
 }
 
-.common-attr-table-bar2 {
-  width: 65%;
-  margin-right: 16px;
-} 
-
 .common-attr-table-left {
   width: 19%;
 }
+
 .common-attr-table-right {
   width: 54%;
+}
+
+.common-attr-table-rank2 {
+  width: 14%;
+}
+
+.common-attr-table-bar2 {
+  width: 49%;
+  margin-left: 16px;
+} 
+
+.common-attr-table-left2 {
+  width: 34%;
 }

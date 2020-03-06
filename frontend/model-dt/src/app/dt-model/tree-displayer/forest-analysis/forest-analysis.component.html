@@ -32,54 +32,52 @@
 	        Results:
 	      </mat-card-title>
 	    </mat-card-header>
-            <div> Total of combinations obtained: {{ attrSeqRelFreq.length }} </div>
-            <div> Total of weighted combination frequency captured: {{ 100 * totalRelFreq | number: '.2-2'}}% </div>
-            <ng-container *ngIf="rankCommonAttrSeq && rankCommonAttrSeq.length; else waitingForCommonAttrSeq">
-              <mat-list>
-		<ng-container *ngIf="!featureNameCheckbox.checked; else attrNameLists">
-                  <mat-list-item>
-                    <span class="common-attr-table-rank"><strong>Rank</strong></span>
-                    <span class="common-attr-table-left-bar"><strong>Frequency</strong></span>
-                    <span class="common-attr-table-right"><strong>Attribute indices sequences</strong></span>
-                  </mat-list-item>
-		  <mat-divider></mat-divider>
-                  <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
-                    <span class="common-attr-table-rank"> {{ i + 1 }} </span>
-                    <mat-progress-bar class="common-attr-table-bar" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
-                    <span class="common-attr-table-left"> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
-                    <span class="common-attr-table-right"> {{ seq }} </span>
-                  </mat-list-item>
-		</ng-container>
-
-		<ng-template #attrNameLists>
-                  <mat-list-item>
-                    <span class="common-attr-table-rank"><strong>Rank</strong></span>
-                    <span class="common-attr-table-left-bar2"><strong>Frequency</strong></span>
-                  </mat-list-item>
-		  <mat-divider></mat-divider>
-
-                  <div *ngFor="let seq of rankCommonAttrSeq; index as i">
-		    <mat-list-item>
+	    <mat-card-content>
+	      <mat-list dense>
+                <mat-list-item> Total of combinations obtained: {{ attrSeqRelFreq.length }} </mat-list-item>
+                <mat-list-item> Total of weighted combination frequency captured: {{ 100 * totalRelFreq | number: '.2-2'}}% </mat-list-item>
+	      </mat-list>
+              <ng-container *ngIf="rankCommonAttrSeq && rankCommonAttrSeq.length; else waitingForCommonAttrSeq">
+                <mat-list>
+	          <ng-container *ngIf="!featureNameCheckbox.checked; else attrNameLists">
+                    <mat-list-item>
+                      <span class="common-attr-table-rank"><strong>Rank</strong></span>
+                      <span class="common-attr-table-left-bar"><strong>Frequency</strong></span>
+                      <span class="common-attr-table-right"><strong>Features indices sequences</strong></span>
+                    </mat-list-item>
+	            <mat-divider></mat-divider>
+                    <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
                       <span class="common-attr-table-rank"> {{ i + 1 }} </span>
-                      <mat-progress-bar class="common-attr-table-bar2" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
+                      <mat-progress-bar class="common-attr-table-bar" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
                       <span class="common-attr-table-left"> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
-		    </mat-list-item>
-		    <mat-list-item style="background-color: blue;">
-		      <strong> Sequence feature names: </strong>
-		    </mat-list-item>
-		    <mat-list dense>
-		      <mat-list-item *ngFor="let attr of translateAttrSeq(seq); index as j">
-	                {{ j + 1 }}. {{ attr }}
-		      </mat-list-item>
-		    </mat-list>
-		    <mat-divider></mat-divider>
-                  </div>
-		</ng-template>
-              </mat-list>
-            </ng-container>
-            <ng-template #waitingForCommonAttrSeq>
-              <mat-spinner style="margin:0 auto;"></mat-spinner>
-            </ng-template>
+                      <span class="common-attr-table-right"> {{ seq }} </span>
+                    </mat-list-item>
+	          </ng-container>
+
+	          <ng-template #attrNameLists>
+                    <div *ngFor="let seq of rankCommonAttrSeq; index as i" [style.background-color]="i % 2 ? 'rgb(251, 246, 253)' : 'white'">
+	              <mat-list-item>
+	                <span class="common-attr-table-rank2"> <strong> Rank: </strong> {{ i + 1 }} </span>
+	                <span class="common-attr-table-left2"><strong> Frequency: </strong> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
+	                <mat-progress-bar class="common-attr-table-bar2" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
+	              </mat-list-item>
+	              <mat-list-item>
+	                <strong> Sequence feature names: </strong>
+	              </mat-list-item>
+	              <mat-list dense>
+	                <mat-list-item *ngFor="let attr of translateAttrSeq(seq); index as j">
+				{{ j + 1 }}. {{ attr }} (index: {{ seq[j] }})
+	                </mat-list-item>
+	              </mat-list>
+	              <mat-divider></mat-divider>
+                    </div>
+	          </ng-template>
+                </mat-list>
+              </ng-container>
+              <ng-template #waitingForCommonAttrSeq>
+                <mat-spinner style="margin:0 auto;"></mat-spinner>
+              </ng-template>
+	    </mat-card-content>
           </mat-card>
         </mat-card-content>
         <mat-card-actions align="end">
