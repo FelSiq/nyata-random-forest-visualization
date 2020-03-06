@@ -137,17 +137,17 @@
 	    </mat-card-header>
 	    <mat-card-content>
 	      <mat-list dense>
-		<mat-list-item> Chosen Cohen's kappa metric threshold: {{ 2. * propCutSliderValue }} </mat-list-item>
+		<mat-list-item> Chosen distance (Cohen's kappa metric) threshold: {{ thresholdCut }} </mat-list-item>
 		<mat-list-item> Number of distinct clusters due to chosen threshold: {{ numHierClusters }} </mat-list-item>
 	      </mat-list>
-              <mat-list dense *ngIf="hierClusters && hierClusters.length; else waitingForHierClus">
+              <mat-list *ngIf="hierClusters && hierClusters.length; else waitingForHierClus">
                 <mat-list-item>
-                  <span class="common-attr-table-rank2"><strong>Tree id</strong></span>
-                  <span class="common-attr-table-left-bar2"><strong>Cluster index</strong></span>
+                  <span class="common-attr-table-rank2"><strong>Cluster</strong></span>
+                  <span class="common-attr-table-left-bar2"><strong>Tree indices</strong></span>
                 </mat-list-item>
-                <mat-list-item *ngFor="let clustId of hierClusters; index as i">
+                <mat-list-item *ngFor="let treeInds of hierClusters; index as i">
 	          <span class="common-attr-table-rank2"> {{ i + 1 }}</span>
-	          <span class="common-attr-table-left-bar2"> {{ clustId }} </span>
+	          <span class="common-attr-table-left-bar2"> {{ treeInds }} </span>
                 </mat-list-item>
               </mat-list>
               <ng-template #waitingForHierClus>

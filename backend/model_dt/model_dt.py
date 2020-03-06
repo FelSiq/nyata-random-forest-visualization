@@ -366,7 +366,7 @@ def get_hierarchical_cluster(
         dna[tree_ind, :] = tree.predict(X)
 
     # Shift Cohen's Kappa to prevent negative values
-    dna_dists = 1.0 + scipy.spatial.distance.pdist(
+    dna_dists = 1.0 - scipy.spatial.distance.pdist(
         X=dna, metric=sklearn.metrics.cohen_kappa_score)
 
     """
@@ -386,7 +386,12 @@ def get_hierarchical_cluster(
 
     num_cluster = np.unique(clust_assignment).size
 
-    return {"dendrogram": dendrogram, "clust_assignment": clust_assignment, "num_cluster": num_cluster}
+    clust_buckets = [
+        np.flatnonzero(clust_assignment == i)
+        for i in np.arange(1, 1 + num_cluster)
+    ]
+
+    return {"dendrogram": dendrogram, "clust_assignment": clust_buckets, "num_cluster": num_cluster}
 
 
 def get_toy_model(forest: bool = True, regressor: bool = False):
@@ -406,7 +411,7 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
     }
 
     if forest:
-        args = {"n_estimators": 10, "min_samples_split": 10, "min_samples_leaf": 10}
+        args = {"n_estimators": 10, "min_samples_split": 50, "min_samples_leaf": 30}
     else:
         args = {}
 

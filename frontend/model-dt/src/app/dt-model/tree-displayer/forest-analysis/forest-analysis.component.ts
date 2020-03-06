@@ -21,6 +21,7 @@ export class ForestAnalysisComponent implements OnInit {
   propCutSliderValue: number = 0.5;
   @Input() attrLabels: string[] = [];
   numHierClusters: number = 0;
+  thresholdCut: number;
 
   constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService,
               public hierClusService: HierClusService) { }
@@ -75,8 +76,9 @@ export class ForestAnalysisComponent implements OnInit {
     this.hierClusters = null;
     this.numHierClusters = 0;
     this.calledHierClusService = true;
+    this.thresholdCut = 2.0 * +this.propCutSliderValue;
 
-    this.hierClusService.getHierarchicalClustering(2.0 * +this.propCutSliderValue)
+    this.hierClusService.getHierarchicalClustering(this.thresholdCut)
       .subscribe((results) => {
           this.hierClusters = results['clust_assignment'];
           this.numHierClusters = +results['num_cluster'];
