@@ -210,6 +210,9 @@ def serialize_decision_tree(
     except AttributeError:
         pass
 
+    if attr_labels:
+        new_model["attr_labels"] = attr_labels
+
     depth_freqs = {}  # type: t.Dict[int, int]
 
     try:

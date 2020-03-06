@@ -18,6 +18,7 @@ export class ForestAnalysisComponent implements OnInit {
   calledHierClusService = false;
   @Input() numEstimators: number = -1;
   propCutSliderValue: number = 0.5;
+  @Input() attrLabels: string[] = [];
 
   constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService,
               public hierClusService: HierClusService) { }
@@ -50,6 +51,16 @@ export class ForestAnalysisComponent implements OnInit {
 	  this.totalRelFreq = 0.0;
           this.calledCommonAttrSeqService = false;
         });
+  }
+
+  translateAttrSeq(seq: string): string[] {
+    let splittedVals = [];
+
+    for (let i = 0; i < seq.length; i++) {
+      splittedVals.push(this.attrLabels[seq[i]]);
+    }
+
+    return splittedVals;
   }
 
   getHierarchicalClustering() {
