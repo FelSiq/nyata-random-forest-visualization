@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
 import { HierClusService } from './hier-clus.service';
 import { Input } from '@angular/core';
+import { HierClus } from './hier-clus';
 
 @Component({
   selector: 'app-forest-analysis',
@@ -19,6 +20,7 @@ export class ForestAnalysisComponent implements OnInit {
   @Input() numEstimators: number = -1;
   propCutSliderValue: number = 0.5;
   @Input() attrLabels: string[] = [];
+  numHierClusters: number = 0;
 
   constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService,
               public hierClusService: HierClusService) { }
@@ -71,14 +73,17 @@ export class ForestAnalysisComponent implements OnInit {
     }
 
     this.hierClusters = null;
+    this.numHierClusters = 0;
     this.calledHierClusService = true;
 
     this.hierClusService.getHierarchicalClustering(2.0 * +this.propCutSliderValue)
       .subscribe((results) => {
-          this.hierClusters = results;
+          this.hierClusters = results['clust_assignment'];
+          this.numHierClusters = +results['num_cluster'];
           this.calledHierClusService = false;
         }, error => {
           this.hierClusters = [];
+	  this.numHierClusters = 0;
           this.errorMessage = 'Something went wrong while communicating with the backend.';
           this.calledHierClusService = false;
         });

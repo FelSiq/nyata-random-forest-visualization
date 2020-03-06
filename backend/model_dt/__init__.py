@@ -240,9 +240,9 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         self.model = model
         self.X = X
 
-    def get(self, threshold_cut: t.Union[int, float] = 1.0):
+    def get(self, threshold_cut: t.Union[int, float] = 2.0):
         hierarchical_cluster = model_dt.get_hierarchical_cluster(
-            self.model, X=self.X)
+            self.model, X=self.X, threshold_cut=threshold_cut)
 
         return flask.jsonify(model_dt.json_encoder_type_manager(hierarchical_cluster))
 

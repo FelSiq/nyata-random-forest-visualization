@@ -129,15 +129,32 @@
 	    <mat-slider #propCutSlider min="0.0" max="1.0" step="0.01" [(value)]="propCutSliderValue" color="primary" style="width: 80%; margin-left: 8px;"></mat-slider>
 	    Value: {{ propCutSlider.value | number: '1.2-2'}}
 	  </ng-template>
-	  <div *ngIf="calledHirClusService || (hierClusters && hierClusters.length)">
-            <div *ngIf="hierClusters && hierClusters.length; else waitingForHierClus">
-	      <strong> Results: </strong>
-	      {{ hierClusters }}
-            </div>
-            <ng-template #waitingForHierClus>
-              <mat-spinner style="margin:0 auto;"></mat-spinner>
-            </ng-template>
-	  </div>
+	  <mat-card *ngIf="calledHirClusService || (hierClusters && hierClusters.length)">
+	    <mat-card-header>
+              <mat-card-title>
+	        Results
+              </mat-card-title>
+	    </mat-card-header>
+	    <mat-card-content>
+	      <mat-list dense>
+		<mat-list-item> Chosen Cohen's kappa metric threshold: {{ 2. * propCutSliderValue }} </mat-list-item>
+		<mat-list-item> Number of distinct clusters due to chosen threshold: {{ numHierClusters }} </mat-list-item>
+	      </mat-list>
+              <mat-list dense *ngIf="hierClusters && hierClusters.length; else waitingForHierClus">
+                <mat-list-item>
+                  <span class="common-attr-table-rank2"><strong>Tree id</strong></span>
+                  <span class="common-attr-table-left-bar2"><strong>Cluster index</strong></span>
+                </mat-list-item>
+                <mat-list-item *ngFor="let clustId of hierClusters; index as i">
+	          <span class="common-attr-table-rank2"> {{ i + 1 }}</span>
+	          <span class="common-attr-table-left-bar2"> {{ clustId }} </span>
+                </mat-list-item>
+              </mat-list>
+              <ng-template #waitingForHierClus>
+                <mat-spinner style="margin:0 auto;"></mat-spinner>
+              </ng-template>
+	    </mat-card-content>
+	  </mat-card>
         </mat-card-content>
         <mat-card-actions align="end">
 	    <button [disabled]="numEstimators <= 1"

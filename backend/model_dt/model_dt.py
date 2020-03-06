@@ -356,7 +356,8 @@ def top_most_common_attr_seq(
 def get_hierarchical_cluster(
         model: t.Union[sklearn.ensemble.RandomForestClassifier,
                        sklearn.ensemble.RandomForestRegressor],
-        X: np.ndarray) -> np.ndarray:
+        X: np.ndarray,
+        threshold_cut: t.Union[int, float]) -> t.Dict[str, np.ndarray]:
     """."""
     inst_num = X.shape[0]
     dna = np.zeros((model.n_estimators, inst_num), dtype=X.dtype)
@@ -378,7 +379,14 @@ def get_hierarchical_cluster(
     """
     dendrogram = scipy.cluster.hierarchy.linkage(dna_dists, method="average")
 
-    return dendrogram
+    clust_assignment = scipy.cluster.hierarchy.fcluster(
+        dendrogram,
+        t=threshold_cut,
+        criterion='distance')
+
+    num_cluster = np.unique(clust_assignment).size
+
+    return {"dendrogram": dendrogram, "clust_assignment": clust_assignment, "num_cluster": num_cluster}
 
 
 def get_toy_model(forest: bool = True, regressor: bool = False):
@@ -398,7 +406,7 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
     }
 
     if forest:
-        args = {"n_estimators": 10}
+        args = {"n_estimators": 10, "min_samples_split": 10, "min_samples_leaf": 10}
     else:
         args = {}
 

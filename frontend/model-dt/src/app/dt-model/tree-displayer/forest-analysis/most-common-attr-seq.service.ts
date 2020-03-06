@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
+import { HierClus } from './hier-clus';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
 };
-
 
 @Injectable({
   providedIn: 'root',
@@ -16,9 +16,9 @@ export class MostCommonAttrSeqService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getMostCommonAttrSeq(attrNum: number): Observable<Array<any>> {
+  getMostCommonAttrSeq(attrNum: number): Observable<HierClus> {
     return this.httpClient
-    .get<Array<any>>(this.urlPostInstance + attrNum.toString(), httpOptions)
+    .get<HierClus>(this.urlPostInstance + attrNum.toString(), httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)
