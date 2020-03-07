@@ -36,7 +36,14 @@
           <span *ngIf="item.value.value.length">
             <mat-list dense>
               <mat-list-item *ngFor="let element of item.value.value">
-                {{ element }}
+		<ng-container *ngIf="element.proportion; else noPropItem">
+		  <mat-progress-bar class="list-element-bar" color="primary" [value]="100. * +element.proportion"></mat-progress-bar>
+		  <span style="margin-right: 8px;"><strong> {{ element.value }}: </strong></span>
+		  {{ 100. * +element.proportion | number: '.2-2'}}%
+		</ng-container>
+		<ng-template #noPropItem>
+                  {{ element }}
+		</ng-template>
               </mat-list-item>
             </mat-list>
           </span>
@@ -50,10 +57,19 @@
                             matTooltip="{{ element.value.description ? element.value.description : noDescMsg }}">
                     help_outline
                   </mat-icon>
-                  <strong class="item-key">
-                    {{ format(element.key | titlecase) }}:
-                  </strong>
-                  {{ element.value.value }}
+		  <ng-container *ngIf="element.value.value.proportion !== undefined; else noPropItem2">
+		    <mat-progress-bar class="list-element-bar" color="primary" [value]="100. * +element.value.value.proportion"></mat-progress-bar>
+		    <span style="margin-right: 8px;"><strong> {{ element.key }}: </strong></span>
+		    {{ element.value.value.value }}
+		    ({{ 100. * +element.value.value.proportion | number: '.2-2'}}%)
+		  </ng-container>
+		  <ng-template #noPropItem2>
+                    <strong class="item-key">
+                      {{ format(element.key | titlecase) }}:
+                    </strong>
+                    {{ element.value.value }}
+		  </ng-template>
+
                 </mat-list-item>
               </ng-container>
             </mat-list>

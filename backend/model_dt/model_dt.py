@@ -2,6 +2,7 @@
 import typing as t
 import inspect
 import re
+import collections
 
 import sklearn.tree
 import sklearn.ensemble
@@ -156,36 +157,40 @@ def get_class_freqs(
         pred_class = tree.predict(instance).astype(dt_model.classes_.dtype)
         class_by_tree[str(pred_class[0])] += 1
 
-    ret = {
-        key: {
-            "value":
-            "{} ({:.1f}%)".format(value,
-                                  100.0 * value / dt_model.n_estimators),
+    sorted_class_by_tree = sorted(
+        class_by_tree.items(),
+        key=lambda item: item[1],
+        reverse=True)
+
+    ret = collections.OrderedDict(
+        (key, {
+            "value": {
+                "value": value,
+                "proportion": value / dt_model.n_estimators,
+            },
             "description":
             "Number of trees in the forest that predicted class '{}'.".format(
                 key),
-        }
-        for key, value in class_by_tree.items()
-    }
+        })
+        for key, value in sorted_class_by_tree
+    )
 
     margin = None  # type: t.Optional[str]
 
     if len(class_by_tree) > 1:
-        sorted_freqs = sorted(list(class_by_tree.values()), reverse=True)
-
         margin = "{:.2f}".format(
-            (sorted_freqs[0] - sorted_freqs[1]) / dt_model.n_estimators)
+            (sorted_class_by_tree[0][1] - sorted_class_by_tree[1][1]) / dt_model.n_estimators)
 
     return ret, margin
 
 
-def serialize_generic_obj(obj: t.Any, include_description: bool = False) -> t.Dict[str, t.Any]:
+def serialize_generic_obj(
+        obj: t.Any, include_description: bool = False) -> t.Dict[str, t.Any]:
     """Serialize a generic object."""
     if include_description:
         res = {
             preprocess_key(str(key)): {
-                "value":
-                json_encoder_type_manager(value),
+                "value": json_encoder_type_manager(value),
                 "description": "Description for key {}. TODO.".format(key),
             }
             for key, value in obj.__dict__.items()
@@ -215,11 +220,24 @@ def serialize_decision_tree(
             attr_num = len(dt_model.feature_importances_)
             attr_labels = ["Attribute {}".format(i) for i in range(attr_num)]
 
+        indexed_attr_labels = [
+            "{} (index: {})".format(attr, attr_ind)
+            for attr_ind, attr in enumerate(attr_labels)
+        ]
+
+        sorted_ft_imp = sorted(
+            zip(dt_model.feature_importances_, indexed_attr_labels),
+            key=lambda item: item[0],
+            reverse=True)
+
         new_model["feature_importances_"] = {
-            "value": json_encoder_type_manager(
-                list(map(lambda item: "{}: {:.2f} %".format(item[1], 100 * item[0]),
-                         zip(dt_model.feature_importances_, attr_labels)))),
-            "description": "TODO: this documentation properly."
+            "value":
+            json_encoder_type_manager([{
+                "value": item[1],
+                "proportion": item[0]
+            } for item in sorted_ft_imp]),
+            "description":
+            "TODO: this documentation properly."
         }
 
     except AttributeError:
@@ -241,14 +259,19 @@ def serialize_decision_tree(
 
     if depth_freqs:
         for key in depth_freqs:
-            depth_freqs[key] = 100. * depth_freqs[key] / dt_model.n_estimators
+            depth_freqs[key] = depth_freqs[key] / dt_model.n_estimators
 
-        formatted_depth_freqs = list(
-            map(lambda item: "{0}: {1:.2f}%".format(*item),
-                sorted(depth_freqs.items(), key=lambda item: item[0])))
+        depth_formatted_sorted = list(
+            map(lambda item: {
+                "value": item[0],
+                "proportion": item[1], },
+                sorted(
+                    depth_freqs.items(),
+                    key=lambda item: item[1],
+                    reverse=True)))
 
         new_model["depth_frequencies"] = {
-            "value": json_encoder_type_manager(formatted_depth_freqs),
+            "value": json_encoder_type_manager(depth_formatted_sorted),
             "description": "TODO.",
         }
 
@@ -353,7 +376,6 @@ def top_most_common_attr_seq(
             _traverse_tree(tree, tree.children_left[cur_ind], cur_attr_seq)
             _traverse_tree(tree, tree.children_right[cur_ind], cur_attr_seq)
             cur_attr_seq.pop()
-
 
     seqs = {}  # type: t.Dict[t.Tuple[int, ...], int]
 

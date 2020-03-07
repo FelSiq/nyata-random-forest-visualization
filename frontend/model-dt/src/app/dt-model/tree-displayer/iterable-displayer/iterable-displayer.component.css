@@ -13,3 +13,8 @@
 .extra-space-icon {
   margin-left: 8px;
 }
+
+.list-element-bar {
+  width: 25%;
+  margin-right: 16px;
+}
