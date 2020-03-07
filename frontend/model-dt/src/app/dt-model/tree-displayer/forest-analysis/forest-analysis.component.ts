@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
 import { HierClusService } from './hier-clus.service';
 import { Input } from '@angular/core';
-import { HierClus } from './hier-clus';
+import { HierClus, ClusterNode } from './hier-clus';
 
 @Component({
   selector: 'app-forest-analysis',
@@ -23,6 +23,7 @@ export class ForestAnalysisComponent implements OnInit {
   numHierClusters: number = 0;
   thresholdCut: number;
   includeDecisionFeature: boolean = false;
+  hierClustersTree: ClusterNode = null;
 
   constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService,
               public hierClusService: HierClusService) { }
@@ -100,6 +101,7 @@ export class ForestAnalysisComponent implements OnInit {
 
     this.hierClusters = null;
     this.numHierClusters = 0;
+    this.hierClustersTree = null;
     this.calledHierClusService = true;
     this.thresholdCut = 2.0 * +this.propCutSliderValue;
 
@@ -107,10 +109,13 @@ export class ForestAnalysisComponent implements OnInit {
       .subscribe((results) => {
           this.hierClusters = results['clust_assignment'];
           this.numHierClusters = +results['num_cluster'];
+	  this.hierClustersTree = { ...results['dendrogram_tree'] };
+	  console.log(this.hierClustersTree);
           this.calledHierClusService = false;
         }, error => {
           this.hierClusters = [];
 	  this.numHierClusters = 0;
+	  this.hierClustersTree = null;
           this.errorMessage = 'Something went wrong while communicating with the backend.';
           this.calledHierClusService = false;
         });

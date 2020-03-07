@@ -119,6 +119,9 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
                         sklearn.tree.DecisionTreeRegressor)):
         return serialize_decision_tree(obj)
 
+    if isinstance(obj, scipy.cluster.hierarchy.ClusterNode):
+        return serialize_generic_obj(obj)
+
     if isinstance(obj, (np.ndarray, list, tuple)):
         return list(map(json_encoder_type_manager, obj))
 
@@ -176,6 +179,27 @@ def get_class_freqs(
     return ret, margin
 
 
+def serialize_generic_obj(obj: t.Any, include_description: bool = False) -> t.Dict[str, t.Any]:
+    """Serialize a generic object."""
+    if include_description:
+        res = {
+            preprocess_key(str(key)): {
+                "value":
+                json_encoder_type_manager(value),
+                "description": "Description for key {}. TODO.".format(key),
+            }
+            for key, value in obj.__dict__.items()
+        }
+
+    else:
+        res = {
+            preprocess_key(str(key)): json_encoder_type_manager(value)
+            for key, value in obj.__dict__.items()
+        }
+
+    return res
+
+
 def serialize_decision_tree(
         dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
                           sklearn.ensemble.RandomForestRegressor,
@@ -184,16 +208,7 @@ def serialize_decision_tree(
         attr_labels: t.Optional[t.Sequence[str]] = None,
 ) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
-    new_model = {
-        preprocess_key(str(key)): {
-            "value":
-            json_encoder_type_manager(value),
-            "description":
-            ("Description for key {}. TODO: get description "
-             "directly from sklearn documentation.".format(key)),
-        }
-        for key, value in dt_model.__dict__.items()
-    }
+    new_model = serialize_generic_obj(dt_model, include_description=True)
 
     try:
         if attr_labels is None:
@@ -396,6 +411,8 @@ def get_hierarchical_cluster(
     clust_assignment = scipy.cluster.hierarchy.fcluster(
         dendrogram, t=threshold_cut, criterion='distance')
 
+    dendrogram_tree = scipy.cluster.hierarchy.to_tree(dendrogram)
+
     num_cluster = np.unique(clust_assignment).size
 
     clust_buckets = [
@@ -405,6 +422,7 @@ def get_hierarchical_cluster(
 
     return {
         "dendrogram": dendrogram,
+        "dendrogram_tree": dendrogram_tree,
         "clust_assignment": clust_buckets,
         "num_cluster": num_cluster
     }
