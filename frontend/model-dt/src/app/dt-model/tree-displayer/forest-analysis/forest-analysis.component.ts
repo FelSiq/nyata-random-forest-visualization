@@ -22,6 +22,7 @@ export class ForestAnalysisComponent implements OnInit {
   @Input() attrLabels: string[] = [];
   numHierClusters: number = 0;
   thresholdCut: number;
+  includeDecisionFeature: boolean = false;
 
   constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService,
               public hierClusService: HierClusService) { }
@@ -29,7 +30,7 @@ export class ForestAnalysisComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  getMostCommonAttrSeq(numAttr: number) {
+  getMostCommonAttrSeq(numAttr: number, includeDecision: boolean) {
   this.errorMessage = '';
 
     if (numAttr < 1) {
@@ -41,8 +42,9 @@ export class ForestAnalysisComponent implements OnInit {
     this.attrSeqRelFreq = [];
     this.totalRelFreq = 0.0;
     this.calledCommonAttrSeqService = true;
+    this.includeDecisionFeature = includeDecision;
 
-    this.mostCommonAttrSeqService.getMostCommonAttrSeq(numAttr)
+    this.mostCommonAttrSeqService.getMostCommonAttrSeq(numAttr, includeDecision)
       .subscribe((results) => {
           this.rankCommonAttrSeq = results[0];
           this.attrSeqRelFreq = results[1];
@@ -56,11 +58,34 @@ export class ForestAnalysisComponent implements OnInit {
         });
   }
 
+  formatFeatAndDecision(feat: number | string, decision: string): string {
+    if (decision === "<=") {
+      decision = "≤";
+    }
+    return '(' + feat + ', ' + decision + ')';
+  }
+
+  formatAllFeatAndDecision(rules: Array<[number | string, string]>): string {
+    let res = [];
+
+    for (let i = 0; i < rules.length; i++) {
+      res.push(this.formatFeatAndDecision(rules[i][0], rules[i][1]));
+    }
+
+    return res
+  }
+
   translateAttrSeq(seq: string): string[] {
     let splittedVals = [];
 
     for (let i = 0; i < seq.length; i++) {
-      splittedVals.push(this.attrLabels[seq[i]]);
+      if (!this.includeDecisionFeature) {
+        splittedVals.push(this.attrLabels[seq[i]]);
+      } else {
+        let ind = seq[i][0];
+	let decision = seq[i][1];
+        splittedVals.push(this.formatFeatAndDecision(this.attrLabels[ind], decision));
+      }
     }
 
     return splittedVals;

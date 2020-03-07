@@ -26,6 +26,9 @@
 	  <mat-card>
             <mat-checkbox color="primary" #featureNameCheckbox> Show feature names </mat-checkbox>
 	  </mat-card>
+	  <mat-card>
+	    <mat-checkbox color="primary" #decisionCheckbox> Include node decision relations ('less or equal than' or 'greater than') </mat-checkbox>
+	  </mat-card>
           <mat-card *ngIf="calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)">
 	    <mat-card-header>
               <mat-card-title>
@@ -43,17 +46,16 @@
                     <mat-list-item>
                       <span class="common-attr-table-rank"><strong>Rank</strong></span>
                       <span class="common-attr-table-left-bar"><strong>Frequency</strong></span>
-                      <span class="common-attr-table-right"><strong>Features indices sequences</strong></span>
+		      <span class="common-attr-table-right"><strong>{{ includeDecisionFeature ? 'Rule' : 'Feature' }} indices sequences</strong></span>
                     </mat-list-item>
 	            <mat-divider></mat-divider>
                     <mat-list-item *ngFor="let seq of rankCommonAttrSeq; index as i">
                       <span class="common-attr-table-rank"> {{ i + 1 }} </span>
                       <mat-progress-bar class="common-attr-table-bar" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
                       <span class="common-attr-table-left"> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
-                      <span class="common-attr-table-right"> {{ seq }} </span>
+                      <span class="common-attr-table-right"> {{ includeDecisionFeature ? formatAllFeatAndDecision(seq) : seq }} </span>
                     </mat-list-item>
 	          </ng-container>
-
 	          <ng-template #attrNameLists>
                     <div *ngFor="let seq of rankCommonAttrSeq; index as i" [style.background-color]="i % 2 ? 'rgb(251, 246, 253)' : 'white'">
 	              <mat-list-item>
@@ -62,11 +64,11 @@
 	                <mat-progress-bar class="common-attr-table-bar2" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
 	              </mat-list-item>
 	              <mat-list-item>
-	                <strong> Sequence feature names: </strong>
+			<strong> {{ includeDecisionFeature ? 'Sequence of feature names with decisions:' : 'Sequence feature names:' }} </strong>
 	              </mat-list-item>
 	              <mat-list dense>
 	                <mat-list-item *ngFor="let attr of translateAttrSeq(seq); index as j">
-				{{ j + 1 }}. {{ attr }} (index: {{ seq[j] }})
+			  {{ j + 1 }}. {{ attr }} (index: {{ includeDecisionFeature ? seq[j][0] : seq[j] }})
 	                </mat-list-item>
 	              </mat-list>
 	              <mat-divider></mat-divider>
@@ -81,7 +83,7 @@
           </mat-card>
         </mat-card-content>
         <mat-card-actions align="end">
-          <button mat-raised-button [disabled]="(+numAttr.value) < 1" color="primary" (click)="getMostCommonAttrSeq(+numAttr.value)">
+          <button mat-raised-button [disabled]="(+numAttr.value) < 1" color="primary" (click)="getMostCommonAttrSeq(+numAttr.value, decisionCheckbox.checked)">
             Run
           </button>
         </mat-card-actions>

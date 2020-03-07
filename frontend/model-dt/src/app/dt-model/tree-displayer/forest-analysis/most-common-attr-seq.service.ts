@@ -16,9 +16,9 @@ export class MostCommonAttrSeqService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getMostCommonAttrSeq(attrNum: number): Observable<HierClus> {
+  getMostCommonAttrSeq(attrNum: number, includeDecision: boolean): Observable<HierClus> {
     return this.httpClient
-    .get<HierClus>(this.urlPostInstance + attrNum.toString(), httpOptions)
+    .get<HierClus>(this.urlPostInstance + attrNum.toString() + '/' + (includeDecision ? '1' : '0'), httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)

@@ -310,6 +310,7 @@ def top_most_common_attr_seq(
                           sklearn.tree.DecisionTreeRegressor,
                           sklearn.tree.DecisionTreeClassifier],
         seq_num: int = 10,
+        include_node_decision: bool = False,
 ) -> t.Tuple[t.Tuple[t.Tuple[int, ...]], t.Tuple[float]]:
     """."""
 
@@ -323,10 +324,21 @@ def top_most_common_attr_seq(
             seqs[path] += tree.weighted_n_node_samples[cur_ind]
             return
 
-        cur_attr_seq.append(tree.feature[cur_ind])
-        _traverse_tree(tree, tree.children_left[cur_ind], cur_attr_seq)
-        _traverse_tree(tree, tree.children_right[cur_ind], cur_attr_seq)
-        cur_attr_seq.pop()
+        if include_node_decision:
+            cur_attr_seq.append((tree.feature[cur_ind], "<="))
+            _traverse_tree(tree, tree.children_left[cur_ind], cur_attr_seq)
+            cur_attr_seq.pop()
+
+            cur_attr_seq.append((tree.feature[cur_ind], ">"))
+            _traverse_tree(tree, tree.children_right[cur_ind], cur_attr_seq)
+            cur_attr_seq.pop()
+
+        else:
+            cur_attr_seq.append(tree.feature[cur_ind])
+            _traverse_tree(tree, tree.children_left[cur_ind], cur_attr_seq)
+            _traverse_tree(tree, tree.children_right[cur_ind], cur_attr_seq)
+            cur_attr_seq.pop()
+
 
     seqs = {}  # type: t.Dict[t.Tuple[int, ...], int]
 
@@ -355,8 +367,7 @@ def top_most_common_attr_seq(
 
 def get_hierarchical_cluster(
         model: t.Union[sklearn.ensemble.RandomForestClassifier,
-                       sklearn.ensemble.RandomForestRegressor],
-        X: np.ndarray,
+                       sklearn.ensemble.RandomForestRegressor], X: np.ndarray,
         threshold_cut: t.Union[int, float]) -> t.Dict[str, np.ndarray]:
     """."""
     inst_num = X.shape[0]
@@ -365,10 +376,13 @@ def get_hierarchical_cluster(
     for tree_ind, tree in enumerate(model.estimators_):
         dna[tree_ind, :] = tree.predict(X)
 
-    # Shift Cohen's Kappa to prevent negative values
+    # Shift Cohen's Kappa to prevent negative values, and also transform
+    # it to a distance measure (i.e., the higher is the correlation, the
+    # smaller will be the dna_dists value.)
+    # Note: this distance measure is in [0, 2], with 0 being 'totally
+    # equal' and 2 being 'totally distinct.'
     dna_dists = 1.0 - scipy.spatial.distance.pdist(
         X=dna, metric=sklearn.metrics.cohen_kappa_score)
-
     """
     From scipy.cluster.hierarchical.linkage notes:
 
@@ -380,9 +394,7 @@ def get_hierarchical_cluster(
     dendrogram = scipy.cluster.hierarchy.linkage(dna_dists, method="average")
 
     clust_assignment = scipy.cluster.hierarchy.fcluster(
-        dendrogram,
-        t=threshold_cut,
-        criterion='distance')
+        dendrogram, t=threshold_cut, criterion='distance')
 
     num_cluster = np.unique(clust_assignment).size
 
@@ -391,7 +403,11 @@ def get_hierarchical_cluster(
         for i in np.arange(1, 1 + num_cluster)
     ]
 
-    return {"dendrogram": dendrogram, "clust_assignment": clust_buckets, "num_cluster": num_cluster}
+    return {
+        "dendrogram": dendrogram,
+        "clust_assignment": clust_buckets,
+        "num_cluster": num_cluster
+    }
 
 
 def get_toy_model(forest: bool = True, regressor: bool = False):
@@ -411,7 +427,11 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
     }
 
     if forest:
-        args = {"n_estimators": 10, "min_samples_split": 50, "min_samples_leaf": 30}
+        args = {
+            "n_estimators": 10,
+            "min_samples_split": 10,
+            "min_samples_leaf": 5,
+        }
     else:
         args = {}
 

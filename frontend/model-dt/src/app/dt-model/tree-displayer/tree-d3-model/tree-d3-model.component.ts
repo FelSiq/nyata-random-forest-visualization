@@ -595,7 +595,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
         this.nodes,
         nodeId,
         aggregationIsChildren ? TreeNodeService.aggregationDepthNodeId : sonLeftId,
-        '<=');
+        '≤');
     }
 
     if (sonRightId >= 0 && sonRightId < curTree.capacity) {

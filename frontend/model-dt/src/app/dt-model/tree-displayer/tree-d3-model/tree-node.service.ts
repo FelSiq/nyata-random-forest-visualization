@@ -20,7 +20,7 @@ export class TreeNodeService {
   static readonly radiusScaleFactor = 24;
   static readonly radiusSelectScaleFactor = 1.2;
   static readonly styleColorTextOutline = 'black';
-  static readonly styleTextFontSize = 14;
+  static readonly styleTextFontSize = 16;
   static readonly styleTextSpacing = 4;
   static readonly styleDepthNodeTextFontSize = 14;
   static readonly transitionDragEffect = 300;

@@ -19,7 +19,7 @@ export class TreeLinksService {
   static readonly styleWidthLinkSelected = 6;
   static readonly styleWidthLinkDragFactor = 2.0;
   static readonly styleColorTextOutline = 'black';
-  static readonly styleTextFontSize = 14;
+  static readonly styleTextFontSize = 16;
   static readonly styleTextSpacing = 4;
 
   height: number;

@@ -227,9 +227,10 @@ class MostCommonAttrSeq(flask_restful.Resource):
     def __init__(self, model, **kwargs):
         self.model = model
 
-    def get(self, seq_num: int = 10):
+    def get(self, seq_num: int = 10, include_node_decision: t.Union[int, bool] = False):
         top_common_seqs = model_dt.top_most_common_attr_seq(
-            self.model, seq_num=seq_num)
+            self.model, seq_num=seq_num, include_node_decision=include_node_decision > 0)
+
         return flask.jsonify(model_dt.json_encoder_type_manager(top_common_seqs))
 
 
@@ -242,7 +243,9 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
     def get(self, threshold_cut: t.Union[int, float] = 2.0):
         hierarchical_cluster = model_dt.get_hierarchical_cluster(
-            self.model, X=self.X, threshold_cut=threshold_cut)
+            self.model,
+            X=self.X,
+            threshold_cut=threshold_cut)
 
         return flask.jsonify(model_dt.json_encoder_type_manager(hierarchical_cluster))
 
@@ -278,7 +281,7 @@ def create_app():
 
     api.add_resource(
         MostCommonAttrSeq,
-        "/most-common-attr-seq/<int:seq_num>",
+        "/most-common-attr-seq/<int:seq_num>/<int:include_node_decision>",
         resource_class_kwargs=common_kwargs)
 
     api.add_resource(
