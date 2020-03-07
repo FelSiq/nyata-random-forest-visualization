@@ -65,14 +65,14 @@ export class ForestAnalysisComponent implements OnInit {
     return '(' + feat + ', ' + decision + ')';
   }
 
-  formatAllFeatAndDecision(rules: Array<[number | string, string]>): string {
+  formatAllFeatAndDecision(rules: Array<[number | string, string]>): string[] {
     let res = [];
 
     for (let i = 0; i < rules.length; i++) {
       res.push(this.formatFeatAndDecision(rules[i][0], rules[i][1]));
     }
 
-    return res
+    return res;
   }
 
   translateAttrSeq(seq: string): string[] {
