@@ -27,7 +27,11 @@
             <mat-checkbox color="primary" #featureNameCheckbox> Show feature names </mat-checkbox>
 	  </mat-card>
 	  <mat-card>
-	    <mat-checkbox color="primary" #decisionCheckbox> Include node decision relations ('less or equal than' or 'greater than') </mat-checkbox>
+	    <mat-checkbox color="primary"
+		          #decisionCheckbox
+			  (change)="(calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)) ? getMostCommonAttrSeq(+numAttr.value, decisionCheckbox.checked) : false">
+		    Include node decision relations ('less or equal than' or 'greater than')
+	    </mat-checkbox>
 	  </mat-card>
           <mat-card *ngIf="calledCommonAttrSeqService || (rankCommonAttrSeq && rankCommonAttrSeq.length)">
 	    <mat-card-header>
