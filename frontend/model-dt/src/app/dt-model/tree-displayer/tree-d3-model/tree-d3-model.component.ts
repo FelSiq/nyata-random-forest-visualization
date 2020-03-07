@@ -4,7 +4,6 @@ import * as d3 from 'd3-selection';
 import * as d3Zoom from 'd3-zoom';
 import * as d3Transform from 'd3-transform';
 import * as d3Drag from 'd3-drag';
-import * as d3Shape from 'd3-shape';
 
 import { TreeNodeService } from './tree-node.service';
 import { TreeLinksService } from './tree-links.service';
