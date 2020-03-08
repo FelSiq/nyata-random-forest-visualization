@@ -23,7 +23,7 @@ export class ForestAnalysisComponent implements OnInit {
   numHierClusters: number = 0;
   thresholdCut: number;
   includeDecisionFeature: boolean = false;
-  hierClustersTree: ClusterNode = null;
+  hierClustersTree: ClusterNode[] = null;
 
   constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService,
               public hierClusService: HierClusService) { }

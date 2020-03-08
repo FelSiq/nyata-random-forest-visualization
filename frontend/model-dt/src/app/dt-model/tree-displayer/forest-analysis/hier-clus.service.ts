@@ -12,13 +12,13 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class HierClusService {
-  private urlPostInstance = 'http://127.0.0.1:5000/forest-hierarchical-clustering/';
+  private urlGetInstance = 'http://127.0.0.1:5000/forest-hierarchical-clustering/';
 
   constructor(private httpClient: HttpClient) { }
 
   getHierarchicalClustering(thresholdCut: number): Observable<Array<any>> {
     return this.httpClient
-    .get<Array<any>>(this.urlPostInstance + thresholdCut.toFixed(2).toString(), httpOptions)
+    .get<Array<any>>(this.urlGetInstance + thresholdCut.toFixed(2).toString(), httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)

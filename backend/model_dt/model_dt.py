@@ -433,7 +433,7 @@ def get_hierarchical_cluster(
     clust_assignment = scipy.cluster.hierarchy.fcluster(
         dendrogram, t=threshold_cut, criterion='distance')
 
-    dendrogram_tree = scipy.cluster.hierarchy.to_tree(dendrogram)
+    _, dendrogram_tree = scipy.cluster.hierarchy.to_tree(dendrogram, rd=True)
 
     num_cluster = np.unique(clust_assignment).size
 

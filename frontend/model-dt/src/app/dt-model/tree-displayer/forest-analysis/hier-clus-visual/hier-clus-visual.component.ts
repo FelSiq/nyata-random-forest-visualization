@@ -14,13 +14,17 @@ type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
   styleUrls: ['./hier-clus-visual.component.css']
 })
 export class HierClusVisualComponent implements OnInit {
-  @Input() hierClusTree: ClusterNode;
+  @Input() hierClusTree: ClusterNode[];
   @Input() numEstimators: number;
   private svg: D3Selection;
   private links: D3Selection;
   private nodes: D3Selection;
   private svgHeight: number;
   private svgWidth: number;
+  private xLimit: number;
+
+  private readonly textFontSize = 14;
+  private readonly pixelsPerNode = 18;
 
   constructor() { }
 
@@ -34,25 +38,29 @@ export class HierClusVisualComponent implements OnInit {
     this.nodes = this.svg.append('g').classed('cleanable', true);
     this.links = this.svg.append('g').classed('cleanable', true);
 
-    this.svgHeight = +this.svg.attr('height');
-    this.svgWidth = +this.svg.attr('width');
+    this.svgWidth = +this.svg.node().getBoundingClientRect().width;
+    this.svgHeight = Math.max(+this.svg.attr('height'), this.pixelsPerNode * this.numEstimators);
+    this.svg.attr('height', this.svgHeight);
 
     let leafXvals = [];
-    let xDiff = this.svgHeight / (1 + this.numEstimators);
+    let yDiff = this.svgHeight / (1 + this.numEstimators);
+    this.xLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 1;
 
     for (let i = 0; i < this.numEstimators; i++) {
-      leafXvals.push((1 + i) * xDiff);
+      leafXvals.push((1 + i) * yDiff);
     }
 
     let leafNodes = this.nodes.selectAll('.nodes')
     	.data(leafXvals)
 	.enter()
-	  .append('g')
-	  .classed('node', true);
+	  .append('text')
+	    .text( function(d, i) { return i + 1; } )
+	    .attr('font-size', this.textFontSize + 'px')
+	    .classed('node', true);
 
     let leafNodeAttrs = leafNodes
-    			.attr('y', 0.9 * this.svgWidth)
-                        .attr('x', function (d) { return d; });
+    			.attr('x', this.xLimit)
+                        .attr('y', function (d) { return d; });
   }
 
   destroyHierClus() {

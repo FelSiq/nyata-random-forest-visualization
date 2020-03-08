@@ -10,5 +10,5 @@ export interface HierClus {
   dendrogram: number[][];
   clust_assignment: number[];
   num_cluster: number;
-  dendrogram_tree: ClusterNode;
+  dendrogram_tree: ClusterNode[];
 }
