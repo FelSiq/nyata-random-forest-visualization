@@ -158,28 +158,23 @@ def get_class_freqs(
         class_by_tree[str(pred_class[0])] += 1
 
     sorted_class_by_tree = sorted(
-        class_by_tree.items(),
-        key=lambda item: item[1],
-        reverse=True)
+        class_by_tree.items(), key=lambda item: item[1], reverse=True)
 
-    ret = collections.OrderedDict(
-        (key, {
-            "value": {
-                "value": value,
-                "proportion": value / dt_model.n_estimators,
-            },
-            "description":
-            "Number of trees in the forest that predicted class '{}'.".format(
-                key),
-        })
-        for key, value in sorted_class_by_tree
-    )
+    ret = collections.OrderedDict((key, {
+        "value": {
+            "value": value,
+            "proportion": value / dt_model.n_estimators,
+        },
+        "description":
+        "Number of trees in the forest that predicted class '{}'.".format(key),
+    }) for key, value in sorted_class_by_tree)
 
     margin = None  # type: t.Optional[str]
 
     if len(class_by_tree) > 1:
         margin = "{:.2f}".format(
-            (sorted_class_by_tree[0][1] - sorted_class_by_tree[1][1]) / dt_model.n_estimators)
+            (sorted_class_by_tree[0][1] - sorted_class_by_tree[1][1]) /
+            dt_model.n_estimators)
 
     return ret, margin
 
@@ -214,25 +209,25 @@ def serialize_cluster_node(obj: t.Any) -> t.Dict[str, t.Any]:
     }
 
     try:
-        res["left"] = obj.left.id;
+        res["left"] = obj.left.id
 
     except AttributeError:
-        pass;
+        pass
 
     try:
-        res["right"] = obj.right.id;
+        res["right"] = obj.right.id
 
     except AttributeError:
-        pass;
+        pass
 
     return res
 
 
 def serialize_decision_tree(
-        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
-                          sklearn.ensemble.RandomForestRegressor,
-                          sklearn.tree.DecisionTreeRegressor,
-                          sklearn.tree.DecisionTreeClassifier],
+        dt_model: t.
+        Union[sklearn.ensemble.RandomForestClassifier, sklearn.ensemble.
+              RandomForestRegressor, sklearn.tree.
+              DecisionTreeRegressor, sklearn.tree.DecisionTreeClassifier],
         attr_labels: t.Optional[t.Sequence[str]] = None,
 ) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
@@ -285,9 +280,10 @@ def serialize_decision_tree(
             depth_freqs[key] = depth_freqs[key] / dt_model.n_estimators
 
         depth_formatted_sorted = list(
-            map(lambda item: {
-                "value": item[0],
-                "proportion": item[1], },
+            map(
+                lambda item: {
+                    "value": item[0],
+                    "proportion": item[1], },
                 sorted(
                     depth_freqs.items(),
                     key=lambda item: item[1],
@@ -313,10 +309,10 @@ def hot_encoding(labels: np.ndarray) -> np.ndarray:
 
 
 def get_metrics(
-        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
-                          sklearn.ensemble.RandomForestRegressor,
-                          sklearn.tree.DecisionTreeRegressor,
-                          sklearn.tree.DecisionTreeClassifier],
+        dt_model: t.
+        Union[sklearn.ensemble.RandomForestClassifier, sklearn.ensemble.
+              RandomForestRegressor, sklearn.tree.
+              DecisionTreeRegressor, sklearn.tree.DecisionTreeClassifier],
         preds: np.ndarray,
         true_labels: np.ndarray,
         preds_proba: t.Optional[np.ndarray] = None,
@@ -366,18 +362,19 @@ def get_metrics(
 
 
 def top_most_common_attr_seq(
-        dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
-                          sklearn.ensemble.RandomForestRegressor,
-                          sklearn.tree.DecisionTreeRegressor,
-                          sklearn.tree.DecisionTreeClassifier],
+        dt_model: t.
+        Union[sklearn.ensemble.RandomForestClassifier, sklearn.ensemble.
+              RandomForestRegressor, sklearn.tree.
+              DecisionTreeRegressor, sklearn.tree.DecisionTreeClassifier],
         seq_num: int = 10,
         include_node_decision: bool = False,
 ) -> t.Tuple[t.Tuple[t.Tuple[int, ...]], t.Tuple[float]]:
     """."""
 
-    def _traverse_tree(tree: t.Union[sklearn.tree.DecisionTreeRegressor,
-                                     sklearn.tree.DecisionTreeClassifier],
-                       cur_ind: int, cur_attr_seq: t.List[int]) -> None:
+    def _traverse_tree(
+            tree: t.Union[sklearn.tree.DecisionTreeRegressor, sklearn.tree.
+                          DecisionTreeClassifier], cur_ind: int,
+            cur_attr_seq: t.List[int]) -> None:
         """Traverse a tree recursively through all possible paths."""
         if tree.feature[cur_ind] < 0:
             path = tuple(cur_attr_seq)
@@ -426,8 +423,8 @@ def top_most_common_attr_seq(
 
 
 def get_hierarchical_cluster(
-        model: t.Union[sklearn.ensemble.RandomForestClassifier,
-                       sklearn.ensemble.RandomForestRegressor], X: np.ndarray,
+        model: t.Union[sklearn.ensemble.RandomForestClassifier, sklearn.
+                       ensemble.RandomForestRegressor], X: np.ndarray,
         threshold_cut: t.Union[int, float]) -> t.Dict[str, np.ndarray]:
     """."""
     inst_num = X.shape[0]
@@ -454,8 +451,7 @@ def get_hierarchical_cluster(
     dendrogram = scipy.cluster.hierarchy.linkage(dna_dists, method="average")
 
     optimal_leaves_seq = scipy.cluster.hierarchy.leaves_list(
-        scipy.cluster.hierarchy.optimal_leaf_ordering(
-            dendrogram, dna_dists))
+        scipy.cluster.hierarchy.optimal_leaf_ordering(dendrogram, dna_dists))
 
     clust_assignment = scipy.cluster.hierarchy.fcluster(
         dendrogram, t=threshold_cut, criterion="distance")
