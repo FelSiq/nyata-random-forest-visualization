@@ -109,7 +109,7 @@ export class ForestAnalysisComponent implements OnInit {
       .subscribe((results) => {
           this.hierClusters = results['clust_assignment'];
           this.numHierClusters = +results['num_cluster'];
-	  this.hierClustersTree = { ...results['dendrogram_tree'] };
+	  this.hierClustersTree = results['dendrogram_tree'];
           this.calledHierClusService = false;
         }, error => {
           this.hierClusters = [];

@@ -14,7 +14,7 @@ type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
   styleUrls: ['./hier-clus-visual.component.css']
 })
 export class HierClusVisualComponent implements OnInit {
-  @Input() hierClusTree: ClusterNode[];
+  @Input() hierClustersTree: ClusterNode[];
   @Input() numEstimators: number;
   private svg: D3Selection;
   private links: D3Selection;
@@ -54,35 +54,35 @@ export class HierClusVisualComponent implements OnInit {
     	.data(leafXvals)
 	.enter()
 	  .append('text')
+	    .attr('id', function(d, i) { return 'node-' + i; })
+	    .classed('node', true)
 	    .text( function(d, i) { return i + 1; } )
 	    .attr('font-size', this.textFontSize + 'px')
-	    .classed('node', true);
+    	    .attr('x', this.xLimit)
+            .attr('y', function (d) { return d; });
 
-    let leafNodeAttrs = leafNodes
-    			.attr('x', this.xLimit)
-                        .attr('y', function (d) { return d; });
+    const numEstimators = this.numEstimators;
+    const xLimit = this.xLimit;
+
+    console.log(this.hierClustersTree);
+    let innerNodes = this.nodes.selectAll('.nodes')
+        .data(this.hierClustersTree.slice(numEstimators))
+	.enter()
+	  .append('g')
+	    .attr('id', function(d, i) { return 'node-' + (i + numEstimators); })
+	    .classed('node', true)
+	    .attr('x', function(d) { return xLimit * (1 - +d.dist / 2); })
+	    .attr('y', function(d, i) {
+	        let childL = d3.select('#node-' + d.left);
+	        let childR = d3.select('#node-' + d.right);
+	    	return 0.5 * (+childL.attr('y') + +childR.attr('y'));
+	    });
+
   }
 
   destroyHierClus() {
     this.svg
       .selectAll('.cleanable')
         .remove();
-  }
-
-  buildRecursively(node: ClusterNode, x: number) {
-    const x_mod = 0.5 * x;
-
-    this.nodes.append('g')
-    	.classed('node', true)
-	.attr('x', x)
-	.attr('y', node.dist);
-
-    if (node.left) {
-      this.buildRecursively(node.left, x - x_mod);
-    }
-
-    if (node.right) {
-      this.buildRecursively(node.right, x + x_mod);
-    }
   }
 }

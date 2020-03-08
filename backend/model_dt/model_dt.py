@@ -121,7 +121,7 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
         return serialize_decision_tree(obj)
 
     if isinstance(obj, scipy.cluster.hierarchy.ClusterNode):
-        return serialize_generic_obj(obj)
+        return serialize_cluster_node(obj)
 
     if isinstance(obj, (np.ndarray, list, tuple)):
         return list(map(json_encoder_type_manager, obj))
@@ -201,6 +201,29 @@ def serialize_generic_obj(
             preprocess_key(str(key)): json_encoder_type_manager(value)
             for key, value in obj.__dict__.items()
         }
+
+    return res
+
+
+def serialize_cluster_node(obj: t.Any) -> t.Dict[str, t.Any]:
+    """Serialize a Cluster Node object."""
+    res = {
+        preprocess_key(str(key)): json_encoder_type_manager(value)
+        for key, value in obj.__dict__.items()
+        if not isinstance(value, scipy.cluster.hierarchy.ClusterNode)
+    }
+
+    try:
+        res["left"] = obj.left.id;
+
+    except AttributeError:
+        pass;
+
+    try:
+        res["right"] = obj.right.id;
+
+    except AttributeError:
+        pass;
 
     return res
 

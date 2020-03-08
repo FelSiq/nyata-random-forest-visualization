@@ -1,7 +1,7 @@
 export class ClusterNode {
   id: number;
-  left?: ClusterNode;
-  right?: ClusterNode;
+  left?: number;
+  right?: number;
   dist?: number;
   count?: number;
 }
