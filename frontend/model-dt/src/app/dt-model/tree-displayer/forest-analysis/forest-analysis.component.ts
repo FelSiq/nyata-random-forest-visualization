@@ -12,6 +12,7 @@ import { HierClus, ClusterNode } from './hier-clus';
 export class ForestAnalysisComponent implements OnInit {
   rankCommonAttrSeq = [];
   hierClusters = [];
+  leavesOptSeq: number[];
   attrSeqRelFreq: number[] = [];
   totalRelFreq: number = 0.0;
   errorMessage: string = '';
@@ -102,19 +103,22 @@ export class ForestAnalysisComponent implements OnInit {
     this.hierClusters = null;
     this.numHierClusters = 0;
     this.hierClustersTree = null;
+    this.leavesOptSeq =  null;
     this.calledHierClusService = true;
     this.thresholdCut = 2.0 * +this.propCutSliderValue;
 
     this.hierClusService.getHierarchicalClustering(this.thresholdCut)
       .subscribe((results) => {
           this.hierClusters = results['clust_assignment'];
+          this.leavesOptSeq = results['optimal_leaves_seq'];
           this.numHierClusters = +results['num_cluster'];
-	  this.hierClustersTree = results['dendrogram_tree'];
+	      this.hierClustersTree = results['dendrogram_tree'];
           this.calledHierClusService = false;
         }, error => {
           this.hierClusters = [];
-	  this.numHierClusters = 0;
-	  this.hierClustersTree = null;
+	      this.numHierClusters = 0;
+	      this.hierClustersTree = null;
+          this.leavesOptSeq =  null;
           this.errorMessage = 'Something went wrong while communicating with the backend.';
           this.calledHierClusService = false;
         });

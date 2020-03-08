@@ -135,45 +135,48 @@
 	    <mat-slider #propCutSlider min="0.0" max="1.0" step="0.005" [(value)]="propCutSliderValue" color="primary" style="width: 80%; margin-left: 8px;"></mat-slider>
 	    Value: {{ propCutSlider.value | number: '1.3-3'}}
 	  </ng-template>
-	  <mat-card *ngIf="calledHirClusService || (hierClusters && hierClusters.length)">
+	  <mat-card *ngIf="calledHierClusService || (hierClusters && hierClusters.length)">
 	    <mat-card-header>
-              <mat-card-title>
+          <mat-card-title>
 	        Results
-              </mat-card-title>
+          </mat-card-title>
 	    </mat-card-header>
 	    <mat-card-content>
 	      <mat-list dense>
-		<mat-list-item> Chosen threshold (for distance 'f(x) = 1 - Cohen_kappa(x)'): {{ thresholdCut }} </mat-list-item>
-		<mat-list-item> Number of distinct clusters due to chosen threshold: {{ numHierClusters }} </mat-list-item>
+		    <mat-list-item> Chosen threshold (for distance 'f(x) = 1 - Cohen_kappa(x)'): {{ thresholdCut }} </mat-list-item>
+		    <mat-list-item> Number of distinct clusters due to chosen threshold: {{ numHierClusters }} </mat-list-item>
 	      </mat-list>
-              <mat-list *ngIf="hierClusters && hierClusters.length; else waitingForHierClus">
-                <mat-list-item>
-                  <span class="common-attr-table-rank2"><strong>Cluster</strong></span>
-                  <span class="common-attr-table-left-bar2"><strong>Tree indices</strong></span>
-                </mat-list-item>
-                <mat-list-item *ngFor="let treeInds of hierClusters; index as i">
-	          <span class="common-attr-table-rank2"> {{ i + 1 }}</span>
-	          <span class="common-attr-table-left-bar2"> {{ treeInds }} </span>
-                </mat-list-item>
-              </mat-list>
-	      <app-hier-clus-visual [hierClustersTree]="hierClustersTree"
-		                    [numEstimators]="numEstimators"
-		                    [thresholdCut]="thresholdCut"></app-hier-clus-visual>
-              <ng-template #waitingForHierClus>
-                <mat-spinner style="margin:0 auto;"></mat-spinner>
-              </ng-template>
+          <ng-container *ngIf="hierClusters && hierClusters.length && hierClustersTree && hierClustersTree.length; else waitingForHierClus">
+            <mat-list>
+              <mat-list-item>
+                <span class="common-attr-table-rank2"><strong>Cluster</strong></span>
+                <span class="common-attr-table-left-bar2"><strong>Tree indices</strong></span>
+              </mat-list-item>
+              <mat-list-item *ngFor="let treeInds of hierClusters; index as i">
+	            <span class="common-attr-table-rank2"> {{ i + 1 }}</span>
+	            <span class="common-attr-table-left-bar2"> {{ treeInds }} </span>
+              </mat-list-item>
+            </mat-list>
+	        <app-hier-clus-visual [hierClustersTree]="hierClustersTree"
+		                          [numEstimators]="numEstimators"
+		                          [thresholdCut]="thresholdCut"
+                                  [leavesOptSeq]="leavesOptSeq"></app-hier-clus-visual>
+          </ng-container>
+          <ng-template #waitingForHierClus>
+            <mat-spinner style="margin:0 auto;"></mat-spinner>
+          </ng-template>
 	    </mat-card-content>
 	  </mat-card>
-        </mat-card-content>
-        <mat-card-actions align="end">
-	    <button [disabled]="numEstimators <= 1"
-		    mat-raised-button
-	            [matTooltip]="numEstimators <= 1 ? 'It is necessary a forest to run this analysis' : ''" 
-		    color="primary"
-		    (click)="getHierarchicalClustering(+propCutSliderValue)">
-            Run
-          </button>
-        </mat-card-actions>
+    </mat-card-content>
+    <mat-card-actions align="end">
+	  <button [disabled]="numEstimators <= 1"
+	          mat-raised-button
+	          [matTooltip]="numEstimators <= 1 ? 'It is necessary a forest to run this analysis' : ''" 
+	          color="primary"
+	          (click)="getHierarchicalClustering(+propCutSliderValue)">
+        Run
+      </button>
+    </mat-card-actions>
       </mat-card>
     </ng-template>
   </mat-expansion-panel>

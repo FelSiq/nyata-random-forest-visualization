@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Input } from '@angular/core';
 
 import * as d3 from 'd3-selection';
@@ -13,8 +13,9 @@ type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
   templateUrl: './hier-clus-visual.component.html',
   styleUrls: ['./hier-clus-visual.component.css']
 })
-export class HierClusVisualComponent implements OnInit {
+export class HierClusVisualComponent implements OnInit, AfterViewInit {
   @Input() hierClustersTree: ClusterNode[];
+  @Input() leavesOptSeq: number[];
   @Input() numEstimators: number;
   @Input() thresholdCut: number;
   private svg: D3Selection;
@@ -32,16 +33,25 @@ export class HierClusVisualComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  ngAfterViewInit(): void {
     this.buildHierClus();
   }
 
   buildHierClus() {
+    if (!this.hierClustersTree) {
+      return;
+    }
+
     this.svg = d3.select("#hier-clus-svg")
 
     this.nodes = this.svg.append('g').classed('cleanable', true);
 
     this.svgWidth = +this.svg.node().getBoundingClientRect().width;
-    this.svgHeight = Math.max(+this.svg.attr('height'), this.pixelsPerNode * this.numEstimators + this.legendSpace);
+    this.svgHeight = Math.max(
+        +this.svg.attr('height'),
+        this.pixelsPerNode * this.numEstimators + this.legendSpace);
     this.svg.attr('height', this.svgHeight);
 
     this.xLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 1;
@@ -73,22 +83,25 @@ export class HierClusVisualComponent implements OnInit {
           .style('fill', 'red');
     }
 
-    let leafXvals = [];
+    let leafData = [];
 
     for (let i = 0; i < this.numEstimators; i++) {
-      leafXvals.push((1 + i) * yDiff);
+      leafData.push({
+        'y': (1 + i) * yDiff,
+        'id': this.leavesOptSeq[i],
+      });
     }
 
     let leafNodes = this.nodes.selectAll('.nodes')
-    .data(leafXvals)
+    .data(leafData)
     .enter()
       .append('text')
-        .attr('id', function(d, i) { return 'node-' + i; })
+        .attr('id', function(d) { return 'node-' + d.id; })
         .classed('node', true)
-        .text( function(d, i) { return i + 1; } )
+        .text( function(d) { return d.id; } )
         .attr('font-size', this.textFontSize + 'px')
         .attr('x', this.xLimit)
-        .attr('y', function (d) { return d; });
+        .attr('y', function (d) { return d.y; });
 
     const numEstimators = this.numEstimators;
     const xLimit = this.xLimit;

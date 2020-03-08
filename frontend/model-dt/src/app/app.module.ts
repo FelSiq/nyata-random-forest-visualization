@@ -27,7 +27,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { ClipboardModule } from 'ngx-clipboard';
 import { D3Service } from 'd3-ng2-service';
-import { KatexModule } from 'ng-katex';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -55,7 +54,6 @@ import { HierClusVisualComponent } from './dt-model/tree-displayer/forest-analys
   ],
   imports: [
     BrowserModule,
-    KatexModule,
     AppRoutingModule,
     HttpClientModule,
     FormsModule,

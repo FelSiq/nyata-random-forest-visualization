@@ -453,8 +453,12 @@ def get_hierarchical_cluster(
     """
     dendrogram = scipy.cluster.hierarchy.linkage(dna_dists, method="average")
 
+    optimal_leaves_seq = scipy.cluster.hierarchy.leaves_list(
+        scipy.cluster.hierarchy.optimal_leaf_ordering(
+            dendrogram, dna_dists))
+
     clust_assignment = scipy.cluster.hierarchy.fcluster(
-        dendrogram, t=threshold_cut, criterion='distance')
+        dendrogram, t=threshold_cut, criterion="distance")
 
     _, dendrogram_tree = scipy.cluster.hierarchy.to_tree(dendrogram, rd=True)
 
@@ -469,7 +473,8 @@ def get_hierarchical_cluster(
         "dendrogram": dendrogram,
         "dendrogram_tree": dendrogram_tree,
         "clust_assignment": clust_buckets,
-        "num_cluster": num_cluster
+        "num_cluster": num_cluster,
+        "optimal_leaves_seq": optimal_leaves_seq,
     }
 
 
@@ -492,8 +497,8 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
     if forest:
         args = {
             "n_estimators": 10,
-            "min_samples_split": 10,
-            "min_samples_leaf": 5,
+            "min_samples_split": 35,
+            "min_samples_leaf": 20,
         }
     else:
         args = {}
