@@ -36,7 +36,7 @@
           <span *ngIf="item.value.value.length">
             <mat-list dense>
               <mat-list-item *ngFor="let element of item.value.value">
-		<ng-container *ngIf="element.proportion; else noPropItem">
+		<ng-container *ngIf="element.proportion !== undefined; else noPropItem">
 		  <mat-progress-bar class="list-element-bar" color="primary" [value]="100. * +element.proportion"></mat-progress-bar>
 		  <span style="margin-right: 8px;"><strong> {{ element.value }}: </strong></span>
 		  {{ 100. * +element.proportion | number: '.2-2'}}%
