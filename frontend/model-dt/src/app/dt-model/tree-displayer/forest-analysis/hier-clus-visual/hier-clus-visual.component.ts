@@ -20,12 +20,14 @@ export class HierClusVisualComponent implements OnInit {
   private svg: D3Selection;
   private links: D3Selection;
   private nodes: D3Selection;
+  private thresholdLine: D3Selection;
   private svgHeight: number;
   private svgWidth: number;
   private xLimit: number;
 
   private readonly textFontSize = 14;
   private readonly pixelsPerNode = 18;
+  private readonly legendSpace = 16;
 
   constructor() { }
 
@@ -37,59 +39,97 @@ export class HierClusVisualComponent implements OnInit {
     this.svg = d3.select("#hier-clus-svg")
 
     this.nodes = this.svg.append('g').classed('cleanable', true);
-    this.links = this.svg.append('g').classed('cleanable', true);
 
     this.svgWidth = +this.svg.node().getBoundingClientRect().width;
-    this.svgHeight = Math.max(+this.svg.attr('height'), this.pixelsPerNode * this.numEstimators);
+    this.svgHeight = Math.max(+this.svg.attr('height'), this.pixelsPerNode * this.numEstimators + this.legendSpace);
     this.svg.attr('height', this.svgHeight);
 
-    const thresholdLinePos = this.thresholdCut * 0.5 * this.svgWidth;
+    this.xLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 1;
+    let yDiff = (this.svgHeight - this.legendSpace) / this.numEstimators;
 
-    this.thresholdLine = this.svg.append('line')
-    	.classed('cleanable', true)
-	.attr('x1', thresholdLinePos)
-	.attr('x2', thresholdLinePos)
-	.attr('y1', 0)
-	.attr('y2', this.svgHeight)
-	.attr('stroke', 'red')
-	.attr('stroke-width', 2)
-	.style('stroke-dasharray', ('3, 3'));
+    this.thresholdLine = null;
+
+    if (this.thresholdCut !== null && this.thresholdCut !== undefined) {
+      const thresholdLinePos = (1.0 - this.thresholdCut * 0.5) * this.xLimit;
+  
+      this.thresholdLine = this.svg.append('g');
+
+      this.thresholdLine.append('line')
+          .classed('cleanable', true)
+          .attr('x1', thresholdLinePos)
+          .attr('x2', thresholdLinePos)
+          .attr('y1', 0)
+          .attr('y2', this.svgHeight - this.legendSpace)
+          .attr('stroke', 'red')
+          .attr('stroke-width', 2)
+          .style('stroke-dasharray', ('3, 3'));
+
+      this.thresholdLine.append('text')
+          .text(this.thresholdCut.toFixed(3).toString())
+          .attr('font-size', '12px')
+          .attr('x', thresholdLinePos)
+          .attr('text-anchor', 'middle')
+          .attr('y', this.svgHeight - 0.5 * this.legendSpace)
+          .style('fill', 'red');
+    }
 
     let leafXvals = [];
-    let yDiff = this.svgHeight / this.numEstimators;
-    this.xLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 1;
 
     for (let i = 0; i < this.numEstimators; i++) {
       leafXvals.push((1 + i) * yDiff);
     }
 
     let leafNodes = this.nodes.selectAll('.nodes')
-    	.data(leafXvals)
-	.enter()
-	  .append('text')
-	    .attr('id', function(d, i) { return 'node-' + i; })
-	    .classed('node', true)
-	    .text( function(d, i) { return i + 1; } )
-	    .attr('font-size', this.textFontSize + 'px')
-    	    .attr('x', this.xLimit)
-            .attr('y', function (d) { return d; });
+    .data(leafXvals)
+    .enter()
+      .append('text')
+        .attr('id', function(d, i) { return 'node-' + i; })
+        .classed('node', true)
+        .text( function(d, i) { return i + 1; } )
+        .attr('font-size', this.textFontSize + 'px')
+        .attr('x', this.xLimit)
+        .attr('y', function (d) { return d; });
 
     const numEstimators = this.numEstimators;
     const xLimit = this.xLimit;
 
     let innerNodes = this.nodes.selectAll('.nodes')
         .data(this.hierClustersTree.slice(numEstimators))
-	.enter()
-	  .append('g')
-	    .attr('id', function(d, i) { return 'node-' + (i + numEstimators); })
-	    .classed('node', true)
-	    .attr('x', function(d) { return xLimit * (1.0 - +d.dist / 2.0); })
-	    .attr('y', function(d, i) {
-	        let childL = d3.select('#node-' + d.left);
-	        let childR = d3.select('#node-' + d.right);
-	    	return 0.5 * (+childL.attr('y') + +childR.attr('y'));
-	    });
+        .enter()
+          .append('g')
+            .attr('id', function(d, i) { return 'node-' + (i + numEstimators); })
+            .classed('node', true)
+            .attr('x', function(d) { return xLimit * (1.0 - +d.dist / 2.0); })
+            .attr('y', function(d, i) {
+                let childL = d3.select('#node-' + d.left);
+                let childR = d3.select('#node-' + d.right);
+                return 0.5 * (+childL.attr('y') + +childR.attr('y'));
+            })
+            .append('polyline')
+              .classed('link', true)
+              .attr('stroke', 'black')
+              .attr('fill', 'none')
+              .attr('stroke-widht', 2)
+              .attr('points', function(d) {
+                let parent = d3.select(this.parentNode);
+                let childL = d3.select('#node-' + d.left);
+                let childR = d3.select('#node-' + d.right);
+                return (childL.attr('x') + ',' + childL.attr('y') + ' ' +
+                    parent.attr('x') + ',' + childL.attr('y') + ' ' +
+                    parent.attr('x') + ',' + childR.attr('y') + ' ' +
+                    childR.attr('x') + ',' + childR.attr('y') + ' ');
+                  });
 
+    const lastNode = d3.select('#node-' + (this.hierClustersTree.length - 1));
+
+    this.nodes.append('line')
+        .classed('link', true)
+        .attr('stroke', 'black')
+        .attr('stroke-width', 1)
+        .attr('x1', lastNode.attr('x'))
+        .attr('y1', lastNode.attr('y'))
+        .attr('x2', 0)
+        .attr('y2', lastNode.attr('y'));
   }
 
   destroyHierClus() {
