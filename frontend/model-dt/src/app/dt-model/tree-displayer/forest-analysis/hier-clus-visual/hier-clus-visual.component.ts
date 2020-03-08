@@ -20,7 +20,6 @@ export class HierClusVisualComponent implements OnInit {
   private svg: D3Selection;
   private links: D3Selection;
   private nodes: D3Selection;
-  private thresholdLine: D3Selection;
   private svgHeight: number;
   private svgWidth: number;
   private xLimit: number;
@@ -44,21 +43,17 @@ export class HierClusVisualComponent implements OnInit {
     this.svgHeight = Math.max(+this.svg.attr('height'), this.pixelsPerNode * this.numEstimators);
     this.svg.attr('height', this.svgHeight);
 
-    this.thresholdLine = null;
+    const thresholdLinePos = this.thresholdCut * 0.5 * this.svgWidth;
 
-    if (this.thresholdCut !== null && this.thresholdCut !== undefined) {
-      const thresholdLinePos = this.thresholdCut * 0.5 * this.svgWidth;
-
-      this.thresholdLine = this.svg.append('line')
-      	.classed('cleanable', true)
-          .attr('x1', thresholdLinePos)
-          .attr('x2', thresholdLinePos)
-          .attr('y1', 0)
-          .attr('y2', this.svgHeight)
-          .attr('stroke', 'red')
-          .attr('stroke-width', 2)
-          .style('stroke-dasharray', ('3, 3'));
-    }
+    this.thresholdLine = this.svg.append('line')
+    	.classed('cleanable', true)
+	.attr('x1', thresholdLinePos)
+	.attr('x2', thresholdLinePos)
+	.attr('y1', 0)
+	.attr('y2', this.svgHeight)
+	.attr('stroke', 'red')
+	.attr('stroke-width', 2)
+	.style('stroke-dasharray', ('3, 3'));
 
     let leafXvals = [];
     let yDiff = this.svgHeight / this.numEstimators;
