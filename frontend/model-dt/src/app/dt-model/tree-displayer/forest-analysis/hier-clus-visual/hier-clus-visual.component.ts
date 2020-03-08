@@ -16,6 +16,7 @@ type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
 export class HierClusVisualComponent implements OnInit {
   @Input() hierClustersTree: ClusterNode[];
   @Input() numEstimators: number;
+  @Input() thresholdCut: number;
   private svg: D3Selection;
   private links: D3Selection;
   private nodes: D3Selection;
@@ -42,8 +43,20 @@ export class HierClusVisualComponent implements OnInit {
     this.svgHeight = Math.max(+this.svg.attr('height'), this.pixelsPerNode * this.numEstimators);
     this.svg.attr('height', this.svgHeight);
 
+    const thresholdLinePos = this.thresholdCut * 0.5 * this.svgWidth;
+
+    this.thresholdLine = this.svg.append('line')
+    	.classed('cleanable', true)
+	.attr('x1', thresholdLinePos)
+	.attr('x2', thresholdLinePos)
+	.attr('y1', 0)
+	.attr('y2', this.svgHeight)
+	.attr('stroke', 'red')
+	.attr('stroke-width', 2)
+	.style('stroke-dasharray', ('3, 3'));
+
     let leafXvals = [];
-    let yDiff = this.svgHeight / (1 + this.numEstimators);
+    let yDiff = this.svgHeight / this.numEstimators;
     this.xLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 1;
 
     for (let i = 0; i < this.numEstimators; i++) {
@@ -64,14 +77,13 @@ export class HierClusVisualComponent implements OnInit {
     const numEstimators = this.numEstimators;
     const xLimit = this.xLimit;
 
-    console.log(this.hierClustersTree);
     let innerNodes = this.nodes.selectAll('.nodes')
         .data(this.hierClustersTree.slice(numEstimators))
 	.enter()
 	  .append('g')
 	    .attr('id', function(d, i) { return 'node-' + (i + numEstimators); })
 	    .classed('node', true)
-	    .attr('x', function(d) { return xLimit * (1 - +d.dist / 2); })
+	    .attr('x', function(d) { return xLimit * (1.0 - +d.dist / 2.0); })
 	    .attr('y', function(d, i) {
 	        let childL = d3.select('#node-' + d.left);
 	        let childR = d3.select('#node-' + d.right);
