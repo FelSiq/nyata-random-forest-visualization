@@ -16,9 +16,13 @@ export class HierClusService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getHierarchicalClustering(thresholdCut: number): Observable<Array<any>> {
+  getHierarchicalClustering(thresholdCut: number, linkage: string): Observable<Array<any>> {
+    if (!linkage) {
+      linkage = 'average';
+    }
+
     return this.httpClient
-    .get<Array<any>>(this.urlGetInstance + thresholdCut.toFixed(2).toString(), httpOptions)
+    .get<Array<any>>(this.urlGetInstance + thresholdCut.toFixed(8).toString() + '/' + linkage, httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)

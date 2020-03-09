@@ -425,7 +425,8 @@ def top_most_common_attr_seq(
 def get_hierarchical_cluster(
         model: t.Union[sklearn.ensemble.RandomForestClassifier, sklearn.
                        ensemble.RandomForestRegressor], X: np.ndarray,
-        threshold_cut: t.Union[int, float]) -> t.Dict[str, np.ndarray]:
+        threshold_cut: t.Union[int, float],
+        linkage: str) -> t.Dict[str, np.ndarray]:
     """."""
     inst_num = X.shape[0]
     dna = np.zeros((model.n_estimators, inst_num), dtype=X.dtype)
@@ -448,7 +449,7 @@ def get_hierarchical_cluster(
     responsibility to assure that these distances are in fact Euclidean, otherwise the
     produced result will be incorrect.
     """
-    dendrogram = scipy.cluster.hierarchy.linkage(dna_dists, method="average")
+    dendrogram = scipy.cluster.hierarchy.linkage(dna_dists, method=linkage)
 
     optimal_leaves_seq = scipy.cluster.hierarchy.leaves_list(
         scipy.cluster.hierarchy.optimal_leaf_ordering(dendrogram, dna_dists))

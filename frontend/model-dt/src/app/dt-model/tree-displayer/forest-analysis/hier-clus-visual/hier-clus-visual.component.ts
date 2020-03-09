@@ -142,17 +142,23 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     }
   }
 
+  updatePixelsPerNode() {
+    if (this.numEstimators > 75) {
+      this.pixelsPerNode = 18;
+
+    } else if (this.numEstimators > 20) {
+      this.pixelsPerNode = 32;
+
+    } else {
+      this.pixelsPerNode = 48;
+    }
+  }
+
   buildHierClus() {
     if (!this.hierClustersTree) {
       return;
     }
 
-    if (this.numEstimators > 20) {
-      this.pixelsPerNode = 18;
-
-    } else {
-      this.pixelsPerNode = 32;
-    }
 
     this.svg = d3.select("#hier-clus-svg")
 

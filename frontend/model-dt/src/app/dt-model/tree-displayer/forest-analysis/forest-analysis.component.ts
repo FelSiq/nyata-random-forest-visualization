@@ -25,6 +25,14 @@ export class ForestAnalysisComponent implements OnInit {
   thresholdCut: number;
   includeDecisionFeature: boolean = false;
   hierClustersTree: ClusterNode[] = null;
+  selectedLinkageType: string;
+
+  availableLinkages: string[] = [
+    'single',
+    'average',
+    'complete',
+    'weighted',
+  ];
 
   constructor(public mostCommonAttrSeqService: MostCommonAttrSeqService,
               public hierClusService: HierClusService) { }
@@ -107,7 +115,7 @@ export class ForestAnalysisComponent implements OnInit {
     this.calledHierClusService = true;
     this.thresholdCut = 2.0 * +this.propCutSliderValue;
 
-    this.hierClusService.getHierarchicalClustering(this.thresholdCut)
+    this.hierClusService.getHierarchicalClustering(this.thresholdCut, this.selectedLinkageType)
       .subscribe((results) => {
           this.hierClusters = results['clust_assignment'];
           this.leavesOptSeq = results['optimal_leaves_seq'];

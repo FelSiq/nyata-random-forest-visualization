@@ -125,6 +125,16 @@
 	    <strong style="style=vertical-align: middle;">It is necessary a forest to run this analysis.</strong>
           </p>
           <ng-template #hierClusInputContainer>
+          <p>
+            Please select the linkage type (the default value will be 'average' linkage.)
+          </p>
+            <mat-form-field class="linkage-selector">
+              <mat-label>Linkage type</mat-label>
+              <mat-select [(value)]="selectedLinkageType">
+                <mat-option> default (average) </mat-option>
+                <mat-option *ngFor="let linkage of availableLinkages" [value]="linkage"> {{ linkage }} </mat-option>
+              </mat-select>
+            </mat-form-field>
 	    <p>
 	      Please select the proportion of similarity of cut the dendrogram distances.
             </p>
