@@ -24,11 +24,14 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
   private thresholdLine: D3Selection;
   private svgHeight: number;
   private svgWidth: number;
-  private xLimit: number;
+  private xSvgLimit: number;
+
+  private xMaxLimit = 2.0;
+  private numLegendTicks = 10;
 
   private readonly textFontSize = 14;
   private readonly pixelsPerNode = 18;
-  private readonly legendSpace = 16;
+  private readonly legendSpace = 64;
 
   constructor() { }
 
@@ -54,13 +57,13 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
         this.pixelsPerNode * this.numEstimators + this.legendSpace);
     this.svg.attr('height', this.svgHeight);
 
-    this.xLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 1;
+    this.xSvgLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 1;
     let yDiff = (this.svgHeight - this.legendSpace) / this.numEstimators;
 
     this.thresholdLine = null;
 
     if (this.thresholdCut !== null && this.thresholdCut !== undefined) {
-      const thresholdLinePos = (1.0 - this.thresholdCut * 0.5) * this.xLimit;
+    const thresholdLinePos = (1.0 - this.thresholdCut / this.xMaxLimit) * this.xSvgLimit;
   
       this.thresholdLine = this.svg.append('g');
 
@@ -79,7 +82,7 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
           .attr('font-size', '12px')
           .attr('x', thresholdLinePos)
           .attr('text-anchor', 'middle')
-          .attr('y', this.svgHeight - 0.5 * this.legendSpace)
+          .attr('y', this.svgHeight - this.legendSpace + 8)
           .style('fill', 'red');
     }
 
@@ -100,11 +103,12 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
         .classed('node', true)
         .text( function(d) { return d.id; } )
         .attr('font-size', this.textFontSize + 'px')
-        .attr('x', this.xLimit)
+        .attr('x', this.xSvgLimit)
         .attr('y', function (d) { return d.y; });
 
     const numEstimators = this.numEstimators;
-    const xLimit = this.xLimit;
+    const xSvgLimit = this.xSvgLimit;
+    const xMaxLimit = this.xMaxLimit;
 
     let innerNodes = this.nodes.selectAll('.nodes')
         .data(this.hierClustersTree.slice(numEstimators))
@@ -112,7 +116,7 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
           .append('g')
             .attr('id', function(d, i) { return 'node-' + (i + numEstimators); })
             .classed('node', true)
-            .attr('x', function(d) { return xLimit * (1.0 - +d.dist / 2.0); })
+            .attr('x', function(d) { return xSvgLimit * (1.0 - +d.dist / xMaxLimit); })
             .attr('y', function(d, i) {
                 let childL = d3.select('#node-' + d.left);
                 let childR = d3.select('#node-' + d.right);
@@ -143,6 +147,46 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
         .attr('y1', lastNode.attr('y'))
         .attr('x2', 0)
         .attr('y2', lastNode.attr('y'));
+
+    const legendYPos = this.svgHeight - 4;
+    this.svg.append('g')
+        .classed('legend', true)
+        .classed('cleanable', true)
+        .attr('id', 'hier-clus-legend')
+        .append('line')
+          .classed('legend', true)
+          .attr('stroke', 'black')
+          .attr('stroke-width', '2px')
+          .attr('x1', 0)
+          .attr('x2', this.xSvgLimit)
+          .attr('y1', legendYPos)
+          .attr('y2', legendYPos);
+
+    let legendTicks = [];
+    for (let i = 0; i < this.numLegendTicks; i++) {
+      legendTicks.push(i / this.numLegendTicks);
+    }
+
+    this.svg.select('#hier-clus-legend')
+        .selectAll('.legend')
+          .data(legendTicks)
+          .enter()
+            .append('circle')
+            .attr('cx', function(d) { return xSvgLimit * d; })
+            .attr('cy', function() { return legendYPos; })
+            .attr('r', 2)
+            .attr('color', 'black')
+
+    this.svg.select('#hier-clus-legend')
+        .selectAll('.legend')
+          .data(legendTicks)
+          .enter()
+            .append('text')
+              .text(function (d) { return (xMaxLimit * d).toFixed(2);} )
+              .attr('font-size', '8px')
+              .attr('x', function(d) { return xSvgLimit * d; })
+              .attr('y', function() { return legendYPos + 4; })
+              .attr('text-anchor', 'middle');
   }
 
   destroyHierClus() {
