@@ -461,8 +461,10 @@ def get_hierarchical_cluster(
 
     num_cluster = np.unique(clust_assignment).size
 
+    medoid_inds = np.zeros(num_cluster, dtype=int)
+
     clust_buckets = [
-        np.flatnonzero(clust_assignment == i)
+        {"tree_inds": np.flatnonzero(clust_assignment == i), "medoid_ind": medoid_inds[i]}
         for i in np.arange(1, 1 + num_cluster)
     ]
 

@@ -161,11 +161,13 @@
             <mat-list>
               <mat-list-item>
                 <span class="common-attr-table-rank2"><strong>Cluster</strong></span>
+                <span class="common-attr-table-rank2"><strong>Medoid tree</strong></span>
                 <span class="common-attr-table-left-bar2"><strong>Tree indices</strong></span>
               </mat-list-item>
-              <mat-list-item *ngFor="let treeInds of hierClusters; index as i">
+              <mat-list-item *ngFor="let clusterInfo of hierClusters; index as i">
 	            <span class="common-attr-table-rank2"> {{ i + 1 }}</span>
-	            <span class="common-attr-table-left-bar2"> {{ treeInds }} </span>
+	            <span class="common-attr-table-rank2"> {{ clusterInfo.medoid_ind }} </span>
+	            <span class="common-attr-table-left-bar2"> {{ clusterInfo.tree_inds }} </span>
               </mat-list-item>
             </mat-list>
 	        <app-hier-clus-visual [hierClustersTree]="hierClustersTree"

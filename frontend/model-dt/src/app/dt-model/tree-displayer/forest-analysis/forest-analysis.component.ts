@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
 import { HierClusService } from './hier-clus.service';
 import { Input } from '@angular/core';
-import { HierClus, ClusterNode } from './hier-clus';
+import { HierClus, ClusterNode, ClusterData } from './hier-clus';
 
 @Component({
   selector: 'app-forest-analysis',
@@ -11,7 +11,7 @@ import { HierClus, ClusterNode } from './hier-clus';
 })
 export class ForestAnalysisComponent implements OnInit {
   rankCommonAttrSeq = [];
-  hierClusters = [];
+  hierClusters: ClusterData[] = [];
   leavesOptSeq: number[];
   attrSeqRelFreq: number[] = [];
   totalRelFreq: number = 0.0;
