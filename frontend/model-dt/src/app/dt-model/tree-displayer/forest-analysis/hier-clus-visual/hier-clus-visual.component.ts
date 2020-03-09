@@ -18,6 +18,7 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
   @Input() leavesOptSeq: number[];
   @Input() numEstimators: number;
   @Input() thresholdCut: number;
+  @Input() selectedLinkageType: string;
   private svg: D3Selection;
   private links: D3Selection;
   private nodes: D3Selection;
@@ -74,8 +75,7 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
             .append('circle')
             .attr('cx', function(d) { return xSvgLimit * d; })
             .attr('cy', this.legendYPos)
-            .attr('r', 3)
-            .attr('color', 'black');
+            .attr('r', 3);
 
     let legend = this.svg.select('#hier-clus-legend')
         .selectAll('.legend')
@@ -158,7 +158,6 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     if (!this.hierClustersTree) {
       return;
     }
-
 
     this.svg = d3.select("#hier-clus-svg")
 

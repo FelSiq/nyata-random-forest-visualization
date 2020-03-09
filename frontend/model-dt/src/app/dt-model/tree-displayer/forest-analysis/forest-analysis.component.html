@@ -170,6 +170,7 @@
 	        <app-hier-clus-visual [hierClustersTree]="hierClustersTree"
 		                          [numEstimators]="numEstimators"
 		                          [thresholdCut]="thresholdCut"
+		                  [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
                                   [leavesOptSeq]="leavesOptSeq"></app-hier-clus-visual>
           </ng-container>
           <ng-template #waitingForHierClus>

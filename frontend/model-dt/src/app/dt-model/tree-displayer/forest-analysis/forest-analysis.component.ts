@@ -26,6 +26,7 @@ export class ForestAnalysisComponent implements OnInit {
   includeDecisionFeature: boolean = false;
   hierClustersTree: ClusterNode[] = null;
   selectedLinkageType: string;
+  resultLinkageType: string;
 
   availableLinkages: string[] = [
     'single',
@@ -114,6 +115,7 @@ export class ForestAnalysisComponent implements OnInit {
     this.leavesOptSeq =  null;
     this.calledHierClusService = true;
     this.thresholdCut = 2.0 * +this.propCutSliderValue;
+    this.resultLinkageType =  this.selectedLinkageType;
 
     this.hierClusService.getHierarchicalClustering(this.thresholdCut, this.selectedLinkageType)
       .subscribe((results) => {
@@ -127,6 +129,7 @@ export class ForestAnalysisComponent implements OnInit {
 	      this.numHierClusters = 0;
 	      this.hierClustersTree = null;
           this.leavesOptSeq =  null;
+          this.resultLinkageType =  null;
           this.errorMessage = 'Something went wrong while communicating with the backend.';
           this.calledHierClusService = false;
         });
