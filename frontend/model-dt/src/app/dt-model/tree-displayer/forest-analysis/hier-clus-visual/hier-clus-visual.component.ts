@@ -29,9 +29,11 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
   private xMaxLimit = 2.0;
   private numLegendTicks = 10;
 
-  private readonly textFontSize = 14;
-  private readonly pixelsPerNode = 18;
+  private readonly textFontSize = 18;
   private readonly legendSpace = 64;
+  private readonly clusterStrokeWidth = 3;
+  private pixelsPerNode = 32;
+  private legendYPos: number;
 
   constructor() { }
 
@@ -42,24 +44,69 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     this.buildHierClus();
   }
 
-  buildHierClus() {
-    if (!this.hierClustersTree) {
-      return;
+  buildHierClusLegend() {
+    this.legendYPos = this.svgHeight - 32;
+    const xSvgLimit = this.xSvgLimit;
+    const xMaxLimit = this.xMaxLimit;
+
+    let legendTicks = [];
+    for (let i = 0; i <= this.numLegendTicks; i++) {
+      legendTicks.push(i / this.numLegendTicks);
     }
 
-    this.svg = d3.select("#hier-clus-svg")
+    this.svg.append('g')
+        .classed('legend', true)
+        .classed('cleanable', true)
+        .attr('id', 'hier-clus-legend')
+        .append('line')
+          .classed('legend', true)
+          .attr('stroke', 'black')
+          .attr('stroke-width', '2px')
+          .attr('x1', 0)
+          .attr('x2', this.xSvgLimit)
+          .attr('y1', this.legendYPos)
+          .attr('y2', this.legendYPos);
 
-    this.nodes = this.svg.append('g').classed('cleanable', true);
+    this.svg.select('#hier-clus-legend')
+        .selectAll('.legend')
+          .data(legendTicks)
+          .enter()
+            .append('circle')
+            .attr('cx', function(d) { return xSvgLimit * d; })
+            .attr('cy', this.legendYPos)
+            .attr('r', 3)
+            .attr('color', 'black');
 
-    this.svgWidth = +this.svg.node().getBoundingClientRect().width;
-    this.svgHeight = Math.max(
-        +this.svg.attr('height'),
-        this.pixelsPerNode * this.numEstimators + this.legendSpace);
-    this.svg.attr('height', this.svgHeight);
+    let legend = this.svg.select('#hier-clus-legend')
+        .selectAll('.legend')
+          .data(legendTicks)
+          .enter()
+            .append('g')
+              .classed('legend', true);
 
-    this.xSvgLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 1;
-    let yDiff = (this.svgHeight - this.legendSpace) / this.numEstimators;
+    legend
+        .append('text')
+          .classed('legend', true)
+          .text(function (d) { return (xMaxLimit * (1 - d)).toFixed(2);} )
+          .attr('font-size', '14px')
+          .attr('x', function(d) { return xSvgLimit * d; })
+          .attr('y', this.legendYPos + 16)
+          .attr('text-anchor', 'middle');
 
+    legend
+        .append('line') 
+          .classed('legend', true)
+          .attr('x1', function(d) { return xSvgLimit * d; })
+          .attr('x2', function(d) { return xSvgLimit * d; })
+          .attr('y1', 0)
+          .attr('y2', this.legendYPos)
+          .attr('stroke', 'rgb(230, 230, 230)')
+          .attr('stroke-width', this.clusterStrokeWidth)
+          .style('stroke-dasharray', ('4, 3'));
+
+  }
+
+  buildHierClusThreshold() {
     this.thresholdLine = null;
 
     if (this.thresholdCut !== null && this.thresholdCut !== undefined) {
@@ -74,17 +121,49 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
           .attr('y1', 0)
           .attr('y2', this.svgHeight - this.legendSpace)
           .attr('stroke', 'red')
-          .attr('stroke-width', 2)
+          .attr('stroke-width', this.clusterStrokeWidth)
           .style('stroke-dasharray', ('3, 3'));
 
       this.thresholdLine.append('text')
-          .text(this.thresholdCut.toFixed(3).toString())
+          .text(this.thresholdCut.toFixed(2).toString())
           .attr('font-size', '12px')
           .attr('x', thresholdLinePos)
           .attr('text-anchor', 'middle')
           .attr('y', this.svgHeight - this.legendSpace + 8)
           .style('fill', 'red');
     }
+  }
+
+  buildHierClus() {
+    if (!this.hierClustersTree) {
+      return;
+    }
+
+    if (this.numEstimators > 20) {
+      this.pixelsPerNode = 18;
+
+    } else {
+      this.pixelsPerNode = 32;
+    }
+
+    this.svg = d3.select("#hier-clus-svg")
+
+    this.svgWidth = +this.svg.node().getBoundingClientRect().width;
+    this.svgHeight = Math.max(
+        +this.svg.attr('height'),
+        this.pixelsPerNode * this.numEstimators + this.legendSpace);
+    this.svg.attr('height', this.svgHeight);
+
+    this.xSvgLimit = this.svgWidth - this.numEstimators.toString().length * this.textFontSize - 16;
+    const yDiff = (this.svgHeight - this.legendSpace) / this.numEstimators;
+    const numEstimators = this.numEstimators;
+    const xSvgLimit = this.xSvgLimit;
+    const xMaxLimit = this.xMaxLimit;
+
+    this.buildHierClusLegend();
+    this.buildHierClusThreshold();
+
+    this.nodes = this.svg.append('g').classed('cleanable', true);
 
     let leafData = [];
 
@@ -96,19 +175,15 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     }
 
     let leafNodes = this.nodes.selectAll('.nodes')
-    .data(leafData)
-    .enter()
-      .append('text')
-        .attr('id', function(d) { return 'node-' + d.id; })
-        .classed('node', true)
-        .text( function(d) { return d.id; } )
-        .attr('font-size', this.textFontSize + 'px')
-        .attr('x', this.xSvgLimit)
-        .attr('y', function (d) { return d.y; });
-
-    const numEstimators = this.numEstimators;
-    const xSvgLimit = this.xSvgLimit;
-    const xMaxLimit = this.xMaxLimit;
+        .data(leafData)
+        .enter()
+          .append('text')
+            .attr('id', function(d) { return 'node-' + d.id; })
+            .classed('node', true)
+            .text( function(d) { return d.id; } )
+            .attr('font-size', this.textFontSize + 'px')
+            .attr('x', this.xSvgLimit + 16)
+            .attr('y', function (d) { return d.y; });
 
     let innerNodes = this.nodes.selectAll('.nodes')
         .data(this.hierClustersTree.slice(numEstimators))
@@ -126,7 +201,7 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
               .classed('link', true)
               .attr('stroke', 'black')
               .attr('fill', 'none')
-              .attr('stroke-widht', 2)
+              .attr('stroke-width', this.clusterStrokeWidth)
               .attr('points', function(d) {
                 let parent = d3.select(this.parentNode);
                 let childL = d3.select('#node-' + d.left);
@@ -134,7 +209,7 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
                 return (childL.attr('x') + ',' + childL.attr('y') + ' ' +
                     parent.attr('x') + ',' + childL.attr('y') + ' ' +
                     parent.attr('x') + ',' + childR.attr('y') + ' ' +
-                    childR.attr('x') + ',' + childR.attr('y') + ' ');
+                    childR.attr('x') + ',' + childR.attr('y'));
                   });
 
     const lastNode = d3.select('#node-' + (this.hierClustersTree.length - 1));
@@ -142,51 +217,11 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     this.nodes.append('line')
         .classed('link', true)
         .attr('stroke', 'black')
-        .attr('stroke-width', 1)
+        .attr('stroke-width', this.clusterStrokeWidth)
         .attr('x1', lastNode.attr('x'))
         .attr('y1', lastNode.attr('y'))
         .attr('x2', 0)
         .attr('y2', lastNode.attr('y'));
-
-    const legendYPos = this.svgHeight - 4;
-    this.svg.append('g')
-        .classed('legend', true)
-        .classed('cleanable', true)
-        .attr('id', 'hier-clus-legend')
-        .append('line')
-          .classed('legend', true)
-          .attr('stroke', 'black')
-          .attr('stroke-width', '2px')
-          .attr('x1', 0)
-          .attr('x2', this.xSvgLimit)
-          .attr('y1', legendYPos)
-          .attr('y2', legendYPos);
-
-    let legendTicks = [];
-    for (let i = 0; i < this.numLegendTicks; i++) {
-      legendTicks.push(i / this.numLegendTicks);
-    }
-
-    this.svg.select('#hier-clus-legend')
-        .selectAll('.legend')
-          .data(legendTicks)
-          .enter()
-            .append('circle')
-            .attr('cx', function(d) { return xSvgLimit * d; })
-            .attr('cy', function() { return legendYPos; })
-            .attr('r', 2)
-            .attr('color', 'black')
-
-    this.svg.select('#hier-clus-legend')
-        .selectAll('.legend')
-          .data(legendTicks)
-          .enter()
-            .append('text')
-              .text(function (d) { return (xMaxLimit * d).toFixed(2);} )
-              .attr('font-size', '8px')
-              .attr('x', function(d) { return xSvgLimit * d; })
-              .attr('y', function() { return legendYPos + 4; })
-              .attr('text-anchor', 'middle');
   }
 
   destroyHierClus() {
