@@ -32,7 +32,6 @@ RE_EMPTY_SPACE = re.compile(r"\s+|%20")
 
 class DecisionTree(flask_restful.Resource):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
-
     def __init__(self,
                  model,
                  X: np.ndarray,
@@ -47,13 +46,12 @@ class DecisionTree(flask_restful.Resource):
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
         return flask.jsonify(
-            model_dt.serialize_decision_tree(
-                dt_model=self.model, attr_labels=self.attr_labels))
+            model_dt.serialize_decision_tree(dt_model=self.model,
+                                             attr_labels=self.attr_labels))
 
 
 class PredictDataset(flask_restful.Resource):
     """Class dedicated to give methods for predicting a whole dataset."""
-
     def __init__(self,
                  model,
                  X: np.ndarray,
@@ -67,8 +65,9 @@ class PredictDataset(flask_restful.Resource):
 
         self.reqparse = flask_restful.reqparse.RequestParser()
 
-        self.reqparse.add_argument(
-            "file", type=werkzeug.datastructures.FileStorage, location="files")
+        self.reqparse.add_argument("file",
+                                   type=werkzeug.datastructures.FileStorage,
+                                   location="files")
 
         self.reqparse.add_argument("sep", type=str, location="form")
 
@@ -85,10 +84,9 @@ class PredictDataset(flask_restful.Resource):
         has_header = args["hasHeader"] == 'True'
         has_classes = args["hasClasses"] == 'True'
 
-        data = pd.read_csv(
-            filepath_or_buffer=dataset_file,
-            sep=sep,
-            header="infer" if has_header else None)
+        data = pd.read_csv(filepath_or_buffer=dataset_file,
+                           sep=sep,
+                           header="infer" if has_header else None)
 
         if has_classes:
             X = data.iloc[:, :-1].values
@@ -105,17 +103,15 @@ class PredictDataset(flask_restful.Resource):
         preds = self.model.predict(X)
 
         return flask.jsonify(
-            model_dt.get_metrics(
-                dt_model=self.model,
-                preds=preds,
-                true_labels=y,
-                preds_proba=preds_proba,
-                true_labels_ohe=y_ohe))
+            model_dt.get_metrics(dt_model=self.model,
+                                 preds=preds,
+                                 true_labels=y,
+                                 preds_proba=preds_proba,
+                                 true_labels_ohe=y_ohe))
 
 
 class PredictSingleInstance(flask_restful.Resource):
     """Class dedicated to provide methods for predicting a single instance."""
-
     def __init__(self,
                  model,
                  X: np.ndarray,
@@ -223,32 +219,35 @@ class PredictSingleInstance(flask_restful.Resource):
 
 class MostCommonAttrSeq(flask_restful.Resource):
     """Find the most common sequence of attributes in the forest."""
-
     def __init__(self, model, **kwargs):
         self.model = model
 
-    def get(self, seq_num: int = 10, include_node_decision: t.Union[int, bool] = False):
+    def get(self,
+            seq_num: int = 10,
+            include_node_decision: t.Union[int, bool] = False):
         top_common_seqs = model_dt.top_most_common_attr_seq(
-            self.model, seq_num=seq_num, include_node_decision=include_node_decision > 0)
+            self.model,
+            seq_num=seq_num,
+            include_node_decision=include_node_decision > 0)
 
-        return flask.jsonify(model_dt.json_encoder_type_manager(top_common_seqs))
+        return flask.jsonify(
+            model_dt.json_encoder_type_manager(top_common_seqs))
 
 
 class ForestHierarchicalClustering(flask_restful.Resource):
     """Perform a hierarchical clustering using each tree DNA."""
-
     def __init__(self, model, X: np.ndarray, **kwargs):
         self.model = model
         self.X = X
 
-    def get(self, threshold_cut: t.Union[int, float] = 2.0, linkage: str = "average"):
+    def get(self,
+            threshold_cut: t.Union[int, float] = 2.0,
+            linkage: str = "average"):
         hierarchical_cluster = model_dt.get_hierarchical_cluster(
-            self.model,
-            X=self.X,
-            threshold_cut=threshold_cut,
-            linkage=linkage)
+            self.model, X=self.X, threshold_cut=threshold_cut, linkage=linkage)
 
-        return flask.jsonify(model_dt.json_encoder_type_manager(hierarchical_cluster))
+        return flask.jsonify(
+            model_dt.json_encoder_type_manager(hierarchical_cluster))
 
 
 def create_app():
@@ -267,18 +266,17 @@ def create_app():
         "attr_labels": attr_labels,
     }
 
-    api.add_resource(
-        DecisionTree, "/dt-visualization", resource_class_kwargs=common_kwargs)
+    api.add_resource(DecisionTree,
+                     "/dt-visualization",
+                     resource_class_kwargs=common_kwargs)
 
-    api.add_resource(
-        PredictSingleInstance,
-        "/predict-single-instance/<string:instance>",
-        resource_class_kwargs=common_kwargs)
+    api.add_resource(PredictSingleInstance,
+                     "/predict-single-instance/<string:instance>",
+                     resource_class_kwargs=common_kwargs)
 
-    api.add_resource(
-        PredictDataset,
-        "/predict-dataset",
-        resource_class_kwargs=common_kwargs)
+    api.add_resource(PredictDataset,
+                     "/predict-dataset",
+                     resource_class_kwargs=common_kwargs)
 
     api.add_resource(
         MostCommonAttrSeq,
