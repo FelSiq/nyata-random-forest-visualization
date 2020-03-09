@@ -243,7 +243,12 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
     def get(self,
             threshold_cut: t.Union[int, float] = 2.0,
-            linkage: str = "average"):
+            linkage: str = "average",
+            strategy: str = "dna"):
+        if strategy not in ("dna", "metafeatures"):
+            raise ValueError("'strategy' must be either 'dna' "
+                             "or 'metafeatures.'")
+
         hierarchical_cluster = model_dt.get_hierarchical_cluster(
             self.model, X=self.X, threshold_cut=threshold_cut, linkage=linkage)
 
@@ -286,7 +291,9 @@ def create_app():
 
     api.add_resource(
         ForestHierarchicalClustering,
-        "/forest-hierarchical-clustering/<float:threshold_cut>/<string:linkage>",
+        "/forest-hierarchical-clustering/"
+        "<float:threshold_cut>/<string:linkage>/"
+        "<string:strategy>",
         resource_class_kwargs=common_kwargs)
 
     return app

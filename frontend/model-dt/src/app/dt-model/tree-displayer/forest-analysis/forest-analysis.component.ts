@@ -27,6 +27,7 @@ export class ForestAnalysisComponent implements OnInit {
   hierClustersTree: ClusterNode[] = null;
   selectedLinkageType: string;
   resultLinkageType: string;
+  selectedChVectorType: string = 'dna';
 
   availableLinkages: string[] = [
     'single',
@@ -117,7 +118,9 @@ export class ForestAnalysisComponent implements OnInit {
     this.thresholdCut = 2.0 * +this.propCutSliderValue;
     this.resultLinkageType =  this.selectedLinkageType;
 
-    this.hierClusService.getHierarchicalClustering(this.thresholdCut, this.selectedLinkageType)
+    this.hierClusService.getHierarchicalClustering(this.thresholdCut,
+                                                   this.selectedLinkageType,
+                                                   this.selectedChVectorType)
       .subscribe((results) => {
           this.hierClusters = results['clust_assignment'];
           this.leavesOptSeq = results['optimal_leaves_seq'];

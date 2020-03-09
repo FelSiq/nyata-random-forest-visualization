@@ -108,18 +108,42 @@
       <mat-card>
         <mat-card-content>
           <p>
-            Perform a hierarchical clustering to agglomerate the most common trees.
+            Perform a hierarchical clustering to agglomerate the most common trees. Two distinct strategies can be used
+            to construct the characteristic vector of each tree, used as its representant to perform the clustering.
           </p>
           <p>
-            The clustering is performed using the median linkage and the Cohen's Kappa score as a distance
-            measure between the DNA vectors of every tree. The DNA vector of a tree is the predictions of
-            the tree for every instance.
+            Please choose the strategy adopted to build the characteristic vector for every tree.
           </p>
           <p>
-            The user may choose to upload a dataset to build the DNA vectors, or else a random dataset will
-            be generated using a uniform distribution for every attribute, within the maximum and minimum
-            values for each attribute.
+	        <strong style="margin-right: 16px;">Build tree characteristic vector using:</strong>
+            <mat-form-field class="linkage-selector">
+              <mat-label>Default strategy</mat-label>
+              <mat-select [(value)]="selectedChVectorType">
+                <mat-option value="dna"> DNA vector </mat-option>
+                <mat-option value="metafeatures"> Vector of metafeatures </mat-option>
+              </mat-select>
+            </mat-form-field>
           </p>
+          <ng-container *ngIf="selectedChVectorType === 'dna'; else MetacVectorDescp">
+            <p>
+              With the 'DNA vector' strategy
+              the clustering is performed using the user chosen linkage and a distance based on Cohen's Kappa
+              score (f(x) = 1 - Cohen_Kappa(x)) which measures the discrepancy between each pair of DNA vectors
+              of every tree.
+              <strong>The DNA vector of a tree is the predictions of the tree for every instance.</strong>
+            </p>
+            <p>
+              The data used to generate the tree DNA will be the training data.
+            </p>
+          </ng-container>
+          <ng-template #MetacVectorDescp>
+            <p>
+              With the 'vector of metafeatures' strategy
+              the clustering is performed using the user chosen linkage and the euclidean distance.
+              <strong>The metafeature vector is built using the 'model-based' metafeature group in the
+              <a href="https://github.com/ealcobaca/pymfe" target="_blank">python 'pymfe' package</a>.</strong>
+            </p>
+          </ng-template>
 	  <p *ngIf="numEstimators <= 1; else hierClusInputContainer">
 	    <mat-icon style="vertical-align: middle; margin-right: 8px; font-size: 150%;">error</mat-icon>
 	    <strong style="style=vertical-align: middle;">It is necessary a forest to run this analysis.</strong>
@@ -128,20 +152,22 @@
           <p>
             Please select the linkage type (the default value will be 'average' linkage.)
           </p>
-	    <strong style="margin-right: 16px;">Linkage:</strong>
+          <p>
+	        <strong style="margin-right: 16px;">Linkage:</strong>
             <mat-form-field class="linkage-selector">
-              <mat-label>Linkage type</mat-label>
+              <mat-label>Use default linkage type</mat-label>
               <mat-select [(value)]="selectedLinkageType">
                 <mat-option> default (average) </mat-option>
                 <mat-option *ngFor="let linkage of availableLinkages" [value]="linkage"> {{ linkage }} </mat-option>
               </mat-select>
             </mat-form-field>
+          </p>
 	    <p>
 	      Please select the proportion of similarity of cut the dendrogram distances.
             </p>
 	    <mat-list dense>
-	      <mat-list-item> Proportion = 0.0 means every tree will likely be in a distinct cluster. </mat-list-item> 
-	      <mat-list-item> Proportion = 1.0 means every tree will likely be in the same cluster. </mat-list-item> 
+	      <mat-list-item> Proportion = 0.0 means every tree will likely be in a distinct cluster (unless their caracteristic vector matches perfecly.) </mat-list-item> 
+	      <mat-list-item> Proportion = 1.0 means every tree will likely be in the same cluster (unless their caracteristic vector are completely distinct.) </mat-list-item> 
             </mat-list>
 	    <strong style="mergin-right: 16px;"> Similarity propotion: </strong> {{ propCutSlider.value | number: '1.3-3'}}
 	    <mat-slider #propCutSlider min="0.0" max="1.0" step="0.005" [(value)]="propCutSliderValue" color="primary" style="width: 70%; margin-left: 8px;"></mat-slider>
@@ -173,7 +199,7 @@
 	        <app-hier-clus-visual [hierClustersTree]="hierClustersTree"
 		                          [numEstimators]="numEstimators"
 		                          [thresholdCut]="thresholdCut"
-		                  [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
+		                          [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
                                   [leavesOptSeq]="leavesOptSeq"></app-hier-clus-visual>
           </ng-container>
           <ng-template #waitingForHierClus>
