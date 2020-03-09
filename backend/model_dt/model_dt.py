@@ -1,7 +1,6 @@
 """Module dedicated to the visualization of a Decision Tree."""
 import typing as t
 import inspect
-import re
 import collections
 
 import sklearn.tree
@@ -11,14 +10,13 @@ import sklearn.preprocessing
 import numpy as np
 import scipy.cluster.hierarchy
 
-RE_KEY_NUMBEROF = re.compile(r"\bn \b")
-"""Regular expression for getting 'n ' string, to format JSON keys."""
-RE_KEY_MIN = re.compile(r"\bmin\b")
-"""Regular expression for getting 'min' string, to format JSON keys."""
-RE_KEY_MAX = re.compile(r"\bmax\b")
-"""Regular expression for getting 'max' string, to format JSON keys."""
-RE_KEY_PARAMS = re.compile(r"\bparams\b")
-"""Regular expression for getting 'params' string, to format JSON keys."""
+from . import serialize
+
+try:
+    from . import utils
+
+except ImportError:
+    pass
 
 METRICS_CLASSIFICATION = {
     "accuracy": (sklearn.metrics.accuracy_score, None),
@@ -85,17 +83,6 @@ METRICS_REGRESSION = {
 """Chosen metrics to evaluate regressor models."""
 
 
-def preprocess_key(key: str) -> str:
-    """Transform the sklearn model dict keys into a more user-readable value."""
-    key = key.replace("_", " ")
-    key = RE_KEY_NUMBEROF.sub("number of ", key)
-    key = RE_KEY_MAX.sub("maximum", key)
-    key = RE_KEY_MIN.sub("minimum", key)
-    key = RE_KEY_PARAMS.sub("parameters", key)
-    key = key.replace(" ", "_")
-    return key
-
-
 def get_tree_structure(tree: sklearn.tree._tree.Tree) -> t.Dict[str, t.Any]:
     """Transform the sklearn tree structure into a string object.
 
@@ -106,40 +93,13 @@ def get_tree_structure(tree: sklearn.tree._tree.Tree) -> t.Dict[str, t.Any]:
                                     lambda attr: not inspect.isroutine(attr))
 
     encoded_tree = {
-        preprocess_key(attr_name): json_encoder_type_manager(attr_val)
+        utils.preprocess_key(attr_name):
+        serialize.json_encoder_type_manager(attr_val)
         for attr_name, attr_val in attributes
         if not (attr_name.startswith('__') and attr_name.endswith('__'))
     }
 
     return encoded_tree
-
-
-def json_encoder_type_manager(obj: t.Any) -> t.Any:
-    """Manage non-native python data type to serialize as a JSON."""
-    if isinstance(obj, (sklearn.tree.DecisionTreeClassifier,
-                        sklearn.tree.DecisionTreeRegressor)):
-        return serialize_decision_tree(obj)
-
-    if isinstance(obj, scipy.cluster.hierarchy.ClusterNode):
-        return serialize_cluster_node(obj)
-
-    if isinstance(obj, (np.ndarray, list, tuple)):
-        return list(map(json_encoder_type_manager, obj))
-
-    if isinstance(obj,
-                  (np.uint, np.int, np.int8, np.int16, np.int32, np.int64)):
-        return int(obj)
-
-    if isinstance(obj, sklearn.tree._tree.Tree):
-        return get_tree_structure(obj)
-
-    if isinstance(obj, dict):
-        return {
-            json_encoder_type_manager(key): json_encoder_type_manager(value)
-            for key, value in obj.items()
-        }
-
-    return obj
 
 
 def get_class_freqs(
@@ -178,125 +138,6 @@ def get_class_freqs(
             dt_model.n_estimators)
 
     return ret, margin
-
-
-def serialize_generic_obj(obj: t.Any,
-                          include_description: bool = False
-                          ) -> t.Dict[str, t.Any]:
-    """Serialize a generic object."""
-    if include_description:
-        res = {
-            preprocess_key(str(key)): {
-                "value": json_encoder_type_manager(value),
-                "description": "Description for key {}. TODO.".format(key),
-            }
-            for key, value in obj.__dict__.items()
-        }
-
-    else:
-        res = {
-            preprocess_key(str(key)): json_encoder_type_manager(value)
-            for key, value in obj.__dict__.items()
-        }
-
-    return res
-
-
-def serialize_cluster_node(obj: t.Any) -> t.Dict[str, t.Any]:
-    """Serialize a Cluster Node object."""
-    res = {
-        preprocess_key(str(key)): json_encoder_type_manager(value)
-        for key, value in obj.__dict__.items()
-        if not isinstance(value, scipy.cluster.hierarchy.ClusterNode)
-    }
-
-    try:
-        res["left"] = obj.left.id
-
-    except AttributeError:
-        pass
-
-    try:
-        res["right"] = obj.right.id
-
-    except AttributeError:
-        pass
-
-    return res
-
-
-def serialize_decision_tree(
-    dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
-                      sklearn.ensemble.RandomForestRegressor,
-                      sklearn.tree.DecisionTreeRegressor,
-                      sklearn.tree.DecisionTreeClassifier],
-    attr_labels: t.Optional[t.Sequence[str]] = None,
-) -> t.Dict[str, t.Any]:
-    """Transform the given DT model into a serializable dictionary."""
-    new_model = serialize_generic_obj(dt_model, include_description=True)
-
-    try:
-        if attr_labels is None:
-            attr_num = len(dt_model.feature_importances_)
-            attr_labels = ["Attribute {}".format(i) for i in range(attr_num)]
-
-        indexed_attr_labels = [
-            "{} (index: {})".format(attr, attr_ind)
-            for attr_ind, attr in enumerate(attr_labels)
-        ]
-
-        sorted_ft_imp = sorted(zip(dt_model.feature_importances_,
-                                   indexed_attr_labels),
-                               key=lambda item: item[0],
-                               reverse=True)
-
-        new_model["feature_importances_"] = {
-            "value":
-            json_encoder_type_manager([{
-                "value": item[1],
-                "proportion": item[0]
-            } for item in sorted_ft_imp]),
-            "description":
-            "TODO: this documentation properly."
-        }
-
-    except AttributeError:
-        pass
-
-    if attr_labels:
-        new_model["attr_labels"] = attr_labels
-
-    depth_freqs = {}  # type: t.Dict[int, int]
-
-    try:
-        for tree in dt_model.estimators_:
-            cur_depth = tree.get_depth()
-            depth_freqs.setdefault(cur_depth, 0)
-            depth_freqs[cur_depth] += 1
-
-    except AttributeError:
-        pass
-
-    if depth_freqs:
-        for key in depth_freqs:
-            depth_freqs[key] = depth_freqs[key] / dt_model.n_estimators
-
-        depth_formatted_sorted = list(
-            map(
-                lambda item: {
-                    "value": item[0],
-                    "proportion": item[1],
-                },
-                sorted(depth_freqs.items(),
-                       key=lambda item: item[1],
-                       reverse=True)))
-
-        new_model["depth_frequencies"] = {
-            "value": json_encoder_type_manager(depth_formatted_sorted),
-            "description": "TODO.",
-        }
-
-    return new_model
 
 
 def hot_encoding(labels: np.ndarray) -> np.ndarray:
@@ -469,8 +310,8 @@ def get_hierarchical_cluster(model: t.Union[
 
         if len(clust_inst_inds) > 2:
             medoid_ind = clust_inst_inds[np.argmin(
-                np.sum(sqr_dna_dists[np.meshgrid(clust_inst_inds,
-                                                 clust_inst_inds)],
+                np.sum(sqr_dna_dists[tuple(
+                    np.meshgrid(clust_inst_inds, clust_inst_inds))],
                        axis=0))]
 
         else:
@@ -523,4 +364,4 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
 
 
 if __name__ == "__main__":
-    print(serialize_decision_tree(get_toy_model()))
+    print(serialize.serialize_decision_tree(get_toy_model()))

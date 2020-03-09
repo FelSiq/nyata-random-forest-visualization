@@ -14,6 +14,7 @@ import pandas as pd
 import sklearn.tree
 
 from . import model_dt
+from . import serialize
 
 NULL_VALUES = {
     "null",
@@ -46,7 +47,7 @@ class DecisionTree(flask_restful.Resource):
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
         return flask.jsonify(
-            model_dt.serialize_decision_tree(dt_model=self.model,
+            serialize.serialize_decision_tree(dt_model=self.model,
                                              attr_labels=self.attr_labels))
 
 
@@ -186,7 +187,7 @@ class PredictSingleInstance(flask_restful.Resource):
         classes_by_tree, margin = model_dt.get_class_freqs(
             self.model, inst_proc)
 
-        pred_vals = model_dt.json_encoder_type_manager(
+        pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict((
                 ("prediction_result", {
                     "value": self.model.predict(inst_proc)[0],
@@ -231,7 +232,7 @@ class MostCommonAttrSeq(flask_restful.Resource):
             include_node_decision=include_node_decision > 0)
 
         return flask.jsonify(
-            model_dt.json_encoder_type_manager(top_common_seqs))
+            serialize.json_encoder_type_manager(top_common_seqs))
 
 
 class ForestHierarchicalClustering(flask_restful.Resource):
@@ -247,7 +248,7 @@ class ForestHierarchicalClustering(flask_restful.Resource):
             self.model, X=self.X, threshold_cut=threshold_cut, linkage=linkage)
 
         return flask.jsonify(
-            model_dt.json_encoder_type_manager(hierarchical_cluster))
+            serialize.json_encoder_type_manager(hierarchical_cluster))
 
 
 def create_app():
