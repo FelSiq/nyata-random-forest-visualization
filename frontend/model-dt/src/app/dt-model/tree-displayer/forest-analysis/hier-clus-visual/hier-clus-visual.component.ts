@@ -30,8 +30,8 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
   private numLegendTicks = 10;
 
   private readonly textFontSize = 18;
-  private readonly legendSpace = 64;
-  private readonly clusterStrokeWidth = 3;
+  private readonly legendSpace = 96;
+  private readonly clusterStrokeWidth = 2;
   private pixelsPerNode = 32;
   private legendYPos: number;
 
@@ -45,7 +45,7 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
   }
 
   buildHierClusLegend() {
-    this.legendYPos = this.svgHeight - 32;
+    this.legendYPos = this.svgHeight - 64;
     const xSvgLimit = this.xSvgLimit;
     const xMaxLimit = this.xMaxLimit;
 
@@ -87,8 +87,16 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     legend
         .append('text')
           .classed('legend', true)
+          .text('f(x) = 1 - Cohen_kappa(x)')
+          .attr('font-size', '16px')
+          .attr('x', 1)
+          .attr('y', this.legendYPos + 36);
+
+    legend
+        .append('text')
+          .classed('legend', true)
           .text(function (d) { return (xMaxLimit * (1 - d)).toFixed(2);} )
-          .attr('font-size', '14px')
+          .attr('font-size', '16px')
           .attr('x', function(d) { return xSvgLimit * d; })
           .attr('y', this.legendYPos + 16)
           .attr('text-anchor', 'middle');
@@ -126,10 +134,10 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
 
       this.thresholdLine.append('text')
           .text(this.thresholdCut.toFixed(2).toString())
-          .attr('font-size', '12px')
+          .attr('font-size', '16px')
           .attr('x', thresholdLinePos)
           .attr('text-anchor', 'middle')
-          .attr('y', this.svgHeight - this.legendSpace + 8)
+          .attr('y', this.svgHeight - this.legendSpace + 16)
           .style('fill', 'red');
     }
   }
@@ -161,7 +169,6 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     const xMaxLimit = this.xMaxLimit;
 
     this.buildHierClusLegend();
-    this.buildHierClusThreshold();
 
     this.nodes = this.svg.append('g').classed('cleanable', true);
 
@@ -222,6 +229,8 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
         .attr('y1', lastNode.attr('y'))
         .attr('x2', 0)
         .attr('y2', lastNode.attr('y'));
+
+    this.buildHierClusThreshold();
   }
 
   destroyHierClus() {
