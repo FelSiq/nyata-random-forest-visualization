@@ -9,6 +9,7 @@ import sklearn.metrics
 import sklearn.preprocessing
 import numpy as np
 import scipy.cluster.hierarchy
+import pymfe.mfe
 
 from . import serialize
 
@@ -262,12 +263,10 @@ def top_most_common_attr_seq(
     return sorted_seqs[:seq_num], freqs[:seq_num]
 
 
-def get_hierarchical_cluster(model: t.Union[
-        sklearn.ensemble.RandomForestClassifier,
-        sklearn.ensemble.RandomForestRegressor], X: np.ndarray,
-                             threshold_cut: t.Union[int, float],
-                             linkage: str) -> t.Dict[str, np.ndarray]:
-    """."""
+def calc_dna_dist_mat(model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                                     sklearn.ensemble.RandomForestRegressor],
+                      X: np.ndarray) -> np.ndarray:
+    """Calculate DNA distance matrix between trees."""
     inst_num = X.shape[0]
     dna = np.zeros((model.n_estimators, inst_num), dtype=X.dtype)
 
@@ -281,18 +280,37 @@ def get_hierarchical_cluster(model: t.Union[
     # equal' and 2 being 'totally distinct.'
     dna_dists = 1.0 - scipy.spatial.distance.pdist(
         X=dna, metric=sklearn.metrics.cohen_kappa_score)
-    """
-    From scipy.cluster.hierarchical.linkage notes:
 
-    Methods ‘centroid’, ‘median’ and ‘ward’ are correctly defined only if Euclidean pairwise
-    metric is used. If y is passed as precomputed pairwise distances, then it is a user
-    responsibility to assure that these distances are in fact Euclidean, otherwise the
-    produced result will be incorrect.
-    """
-    dendrogram = scipy.cluster.hierarchy.linkage(dna_dists, method=linkage)
+    return dna_dists
+
+
+def calc_mtf_dist_mat(model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                                     sklearn.ensemble.RandomForestRegressor]) -> np.ndarray:
+    """."""
+    mtf_names = pymfe.mfe.MFE.valid_metafeatures(groups="model-based")
+    summary = ("mean", "sd")
+    mtf_vec = np.zeros((model.n_estimators, len(summary) * len(mtf_names)), dtype=float)
+
+    # TODO: extract.
+    mtf_vec = np.random.random(mtf_vec.shape)
+
+    mtf_min = mtf_vec.min(axis=0)
+    mtf_vec = (mtf_vec - mtf_min) / (mtf_vec.max(axis=0) - mtf_min)
+
+    mtf_dists = scipy.spatial.distance.pdist(
+        X=mtf_vec, metric="euclidean")
+
+    return mtf_dists
+
+
+def get_hierarchical_cluster(dist_mat: np.ndarray,
+                             threshold_cut: t.Union[int, float],
+                             linkage: str) -> t.Dict[str, np.ndarray]:
+    """."""
+    dendrogram = scipy.cluster.hierarchy.linkage(dist_mat, method=linkage)
 
     optimal_leaves_seq = scipy.cluster.hierarchy.leaves_list(
-        scipy.cluster.hierarchy.optimal_leaf_ordering(dendrogram, dna_dists))
+        scipy.cluster.hierarchy.optimal_leaf_ordering(dendrogram, dist_mat))
 
     clust_assignment = scipy.cluster.hierarchy.fcluster(dendrogram,
                                                         t=threshold_cut,
@@ -302,7 +320,7 @@ def get_hierarchical_cluster(model: t.Union[
 
     num_cluster = np.unique(clust_assignment).size
 
-    sqr_dna_dists = scipy.spatial.distance.squareform(dna_dists)
+    sqr_dist_mat = scipy.spatial.distance.squareform(dist_mat)
 
     clust_buckets = []
     for i in np.arange(1, 1 + num_cluster):
@@ -310,7 +328,7 @@ def get_hierarchical_cluster(model: t.Union[
 
         if len(clust_inst_inds) > 2:
             medoid_ind = clust_inst_inds[np.argmin(
-                np.sum(sqr_dna_dists[tuple(
+                np.sum(sqr_dist_mat[tuple(
                     np.meshgrid(clust_inst_inds, clust_inst_inds))],
                        axis=0))]
 

@@ -48,7 +48,7 @@ class DecisionTree(flask_restful.Resource):
         """Serialize and jsonify a sklearn RF/DT model."""
         return flask.jsonify(
             serialize.serialize_decision_tree(dt_model=self.model,
-                                             attr_labels=self.attr_labels))
+                                              attr_labels=self.attr_labels))
 
 
 class PredictDataset(flask_restful.Resource):
@@ -249,8 +249,14 @@ class ForestHierarchicalClustering(flask_restful.Resource):
             raise ValueError("'strategy' must be either 'dna' "
                              "or 'metafeatures.'")
 
+        if strategy == "dna":
+            dist_mat = model_dt.calc_dna_dist_mat(model=self.model, X=self.X)
+
+        else:
+            dist_mat = model_dt.calc_mtf_dist_mat(model=self.model)
+
         hierarchical_cluster = model_dt.get_hierarchical_cluster(
-            self.model, X=self.X, threshold_cut=threshold_cut, linkage=linkage)
+            dist_mat=dist_mat, threshold_cut=threshold_cut, linkage=linkage)
 
         return flask.jsonify(
             serialize.json_encoder_type_manager(hierarchical_cluster))
@@ -289,11 +295,10 @@ def create_app():
         "/most-common-attr-seq/<int:seq_num>/<int:include_node_decision>",
         resource_class_kwargs=common_kwargs)
 
-    api.add_resource(
-        ForestHierarchicalClustering,
-        "/forest-hierarchical-clustering/"
-        "<float:threshold_cut>/<string:linkage>/"
-        "<string:strategy>",
-        resource_class_kwargs=common_kwargs)
+    api.add_resource(ForestHierarchicalClustering,
+                     "/forest-hierarchical-clustering/"
+                     "<float:threshold_cut>/<string:linkage>/"
+                     "<string:strategy>",
+                     resource_class_kwargs=common_kwargs)
 
     return app
