@@ -467,10 +467,14 @@ def get_hierarchical_cluster(model: t.Union[
     for i in np.arange(1, 1 + num_cluster):
         clust_inst_inds = tuple(np.flatnonzero(clust_assignment == i))
 
-        medoid_ind = clust_inst_inds[np.argmin(
-            np.sum(sqr_dna_dists[np.meshgrid(clust_inst_inds,
-                                             clust_inst_inds)],
-                   axis=0))]
+        if len(clust_inst_inds) > 2:
+            medoid_ind = clust_inst_inds[np.argmin(
+                np.sum(sqr_dna_dists[np.meshgrid(clust_inst_inds,
+                                                 clust_inst_inds)],
+                       axis=0))]
+
+        else:
+            medoid_ind = clust_inst_inds[0]
 
         clust_buckets.append({
             "tree_inds": clust_inst_inds,
