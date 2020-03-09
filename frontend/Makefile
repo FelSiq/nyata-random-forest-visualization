@@ -6,3 +6,4 @@ run:
 install:
 	cd ./model-dt
 	npm install
+	npm link @angular/cli
