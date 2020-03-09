@@ -190,7 +190,7 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
         .data(leafData)
         .enter()
           .append('text')
-            .attr('id', function(d) { return 'node-' + d.id; })
+            .attr('id', function(d) { return 'hc-node-' + d.id; })
             .classed('node', true)
             .text( function(d) { return d.id; } )
             .attr('font-size', this.textFontSize + 'px')
@@ -201,12 +201,12 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
         .data(this.hierClustersTree.slice(numEstimators))
         .enter()
           .append('g')
-            .attr('id', function(d, i) { return 'node-' + (i + numEstimators); })
+            .attr('id', function(d, i) { return 'hc-node-' + (i + numEstimators); })
             .classed('node', true)
             .attr('x', function(d) { return xSvgLimit * (1.0 - +d.dist / xMaxLimit); })
             .attr('y', function(d, i) {
-                let childL = d3.select('#node-' + d.left);
-                let childR = d3.select('#node-' + d.right);
+                let childL = d3.select('#hc-node-' + d.left);
+                let childR = d3.select('#hc-node-' + d.right);
                 return 0.5 * (+childL.attr('y') + +childR.attr('y'));
             })
             .append('polyline')
@@ -216,15 +216,15 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
               .attr('stroke-width', this.clusterStrokeWidth)
               .attr('points', function(d) {
                 let parent = d3.select(this.parentNode);
-                let childL = d3.select('#node-' + d.left);
-                let childR = d3.select('#node-' + d.right);
+                let childL = d3.select('#hc-node-' + d.left);
+                let childR = d3.select('#hc-node-' + d.right);
                 return (childL.attr('x') + ',' + childL.attr('y') + ' ' +
                     parent.attr('x') + ',' + childL.attr('y') + ' ' +
                     parent.attr('x') + ',' + childR.attr('y') + ' ' +
                     childR.attr('x') + ',' + childR.attr('y'));
                   });
 
-    const lastNode = d3.select('#node-' + (this.hierClustersTree.length - 1));
+    const lastNode = d3.select('#hc-node-' + (this.hierClustersTree.length - 1));
 
     this.nodes.append('line')
         .classed('link', true)
