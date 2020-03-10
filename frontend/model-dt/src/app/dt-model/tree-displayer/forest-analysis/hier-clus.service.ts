@@ -22,7 +22,7 @@ export class HierClusService {
     }
 
     return this.httpClient
-    .get<Array<any>>(this.urlGetInstance + thresholdCut.toFixed(8).toString() + '/'
+    .post<Array<any>>(this.urlGetInstance + thresholdCut.toFixed(8).toString() + '/'
                      + linkage + '/' + strategy, httpOptions)
       .pipe(
         retry(3),
