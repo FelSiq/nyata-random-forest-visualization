@@ -3,4 +3,7 @@ numpy
 sklearn
 flask-cors
 flask-restful
+flask-session
+flask_socketio
+redis
 pymfe

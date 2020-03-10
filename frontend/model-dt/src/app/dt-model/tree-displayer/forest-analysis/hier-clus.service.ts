@@ -5,7 +5,10 @@ import { catchError, retry } from 'rxjs/operators';
 import { HierClus } from './hier-clus';
 
 const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json',
+    'credentials': 'include',
+  }),
 };
 
 
@@ -13,7 +16,7 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class HierClusService {
-  private urlGetInstance = 'http://127.0.0.1:5000/forest-hierarchical-clustering/';
+  private urlGetInstance = 'http://127.0.0.1:5000/forest-hierarchical-clustering';
 
   constructor(private httpClient: HttpClient) { }
 
