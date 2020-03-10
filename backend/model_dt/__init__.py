@@ -244,10 +244,21 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         self.data = None
         self.dist_mat = None
 
-    def post(self,
-             threshold_cut: t.Union[int, float] = 2.0,
-             linkage: str = "average",
-             strategy: str = "dna"):
+        self.reqparse_post = flask_restful.reqparse.RequestParser()
+        self.reqparse_post.add_argument("threshold_cut", type=float)
+        self.reqparse_post.add_argument("linkage", type=str)
+        self.reqparse_post.add_argument("strategy", type=str)
+
+        self.reqparse_update = flask_restful.reqparse.RequestParser()
+        self.reqparse_update.add_argument("threshold_cut", type=float)
+
+    def post(self):
+        args = self.reqparse_post.parse_args()
+
+        threshold_cut = args.get("threshold_cut", 2.0)
+        linkage = args.get("linkage", "average")
+        strategy = args.get("strategy", "dna")
+
         if strategy not in ("dna", "metafeatures"):
             raise ValueError("'strategy' must be either 'dna' "
                              "or 'metafeatures.'")
@@ -259,21 +270,25 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         else:
             self.dist_mat = model_dt.calc_mtf_dist_mat(model=self.model)
 
-        data = model_dt.get_hierarchical_cluster(dist_mat=self.dist_mat,
-                                                 linkage=linkage)
+        self.data = model_dt.get_hierarchical_cluster(dist_mat=self.dist_mat,
+                                                      linkage=linkage)
 
-        data.update(
-            model_dt.make_hier_clus_cut(dendrogram=data["dendrogram"],
+        self.data.update(
+            model_dt.make_hier_clus_cut(dendrogram=self.data["dendrogram"],
                                         dist_mat=self.dist_mat,
                                         threshold_cut=threshold_cut))
 
-        return flask.jsonify(serialize.json_encoder_type_manager(data))
+        return flask.jsonify(serialize.json_encoder_type_manager(self.data))
 
-    def update(self, threshold_cut: t.Union[int, float] = 2.0):
+    def put(self):
+        args = self.reqparse_update.parse_args()
+
+        threshold_cut = args.get("threshold_cut", 2.0)
+
         if self.data is None:
             raise ValueError("No hierarchical clustering data found.")
 
-        data = model_dt.make_hier_clus_cut(dendrogram=data["dendrogram"],
+        data = model_dt.make_hier_clus_cut(dendrogram=self.data["dendrogram"],
                                            dist_mat=self.dist_mat,
                                            threshold_cut=threshold_cut)
         self.data.update(data)
@@ -318,9 +333,7 @@ def create_app():
         resource_class_kwargs=common_kwargs)
 
     api.add_resource(ForestHierarchicalClustering,
-                     "/forest-hierarchical-clustering/"
-                     "<float:threshold_cut>/<string:linkage>/"
-                     "<string:strategy>",
+                     "/forest-hierarchical-clustering/",
                      resource_class_kwargs=common_kwargs)
 
     return app

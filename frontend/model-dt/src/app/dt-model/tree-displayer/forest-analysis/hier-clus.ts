@@ -16,4 +16,5 @@ export interface HierClus {
   clust_assignment: ClusterData[];
   num_cluster: number;
   dendrogram_tree: ClusterNode[];
+  optimal_leaves_seq: number[];
 }

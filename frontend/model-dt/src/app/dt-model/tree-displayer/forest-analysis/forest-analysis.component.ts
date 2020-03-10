@@ -28,6 +28,7 @@ export class ForestAnalysisComponent implements OnInit {
   selectedLinkageType: string;
   resultLinkageType: string;
   selectedChVectorType: string = 'dna';
+  calledHierClusCutService: boolean = false;
 
   availableLinkages: string[] = [
     'single',
@@ -107,7 +108,11 @@ export class ForestAnalysisComponent implements OnInit {
     this.errorMessage = '';
 
     if (this.numEstimators <= 1) {
-      this.errorMessage = 'The mobel must be a forest.';
+      this.errorMessage = 'The model must be a forest.';
+    }
+
+    if (this.calledHierClusService) {
+      return;
     }
 
     this.hierClusters = null;
@@ -121,20 +126,43 @@ export class ForestAnalysisComponent implements OnInit {
     this.hierClusService.getHierarchicalClustering(this.thresholdCut,
                                                    this.selectedLinkageType,
                                                    this.selectedChVectorType)
-      .subscribe((results) => {
+      .subscribe((results: HierClus) => {
           this.hierClusters = results['clust_assignment'];
           this.leavesOptSeq = results['optimal_leaves_seq'];
           this.numHierClusters = +results['num_cluster'];
-	      this.hierClustersTree = results['dendrogram_tree'];
+	  this.hierClustersTree = results['dendrogram_tree'];
           this.calledHierClusService = false;
         }, error => {
           this.hierClusters = [];
-	      this.numHierClusters = 0;
-	      this.hierClustersTree = null;
+	  this.numHierClusters = 0;
+	  this.hierClustersTree = null;
           this.leavesOptSeq =  null;
           this.resultLinkageType =  null;
           this.errorMessage = 'Something went wrong while communicating with the backend.';
           this.calledHierClusService = false;
+        });
+  }
+
+  cutHierarchicalClustering() {
+    this.errorMessage = '';
+
+    if (!this.hierClusters || this.calledHierClusCutService) {
+      return;
+    }
+
+    this.thresholdCut = 2.0 * +this.propCutSliderValue;
+    this.calledHierClusCutService = true;
+
+    this.hierClusService.cutHierarchicalClustering(this.thresholdCut)
+      .subscribe((results) => {
+          this.hierClusters = results['clust_assignment'];
+          this.numHierClusters = +results['num_cluster'];
+          this.calledHierClusCutService = false;
+        }, error => {
+          this.hierClusters = [];
+	  this.numHierClusters = 0;
+          this.errorMessage = 'Something went wrong while communicating with the backend.';
+          this.calledHierClusCutService = false;
         });
   }
 }
