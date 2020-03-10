@@ -38,6 +38,7 @@
     "ng-katex": "^2.0.3",
     "ngx-clipboard": "^12.3.1",
     "rxjs": "^6.5.4",
+    "rxjs-compat": "^6.5.4",
     "tslib": "^1.11.1",
     "zone": "^0.3.4",
     "zone.js": "~0.10.2"

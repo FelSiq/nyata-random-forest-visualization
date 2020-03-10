@@ -1,5 +1,7 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { Input } from '@angular/core';
+import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
 
 import * as d3 from 'd3-selection';
 import * as d3Transform from 'd3-transform';
@@ -13,7 +15,7 @@ type D3Selection = d3.Selection<SVGElement | any, {}, HTMLElement, any>;
   templateUrl: './hier-clus-visual.component.html',
   styleUrls: ['./hier-clus-visual.component.css']
 })
-export class HierClusVisualComponent implements OnInit, AfterViewInit {
+export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() hierClustersTree: ClusterNode[];
   @Input() leavesOptSeq: number[];
   @Input() numEstimators: number;
@@ -36,13 +38,21 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
   private pixelsPerNode = 32;
   private legendYPos: number;
 
+  private eventsSubscription: Subscription;
+  @Input() events: Observable<void>;
+
   constructor() { }
 
   ngOnInit(): void {
+    this.eventsSubscription = this.events.subscribe(() => this.buildHierClusThreshold());
   }
 
   ngAfterViewInit(): void {
     this.buildHierClus();
+  }
+
+  ngOnDestroy() {
+    this.eventsSubscription.unsubscribe();
   }
 
   buildHierClusLegend() {
@@ -54,6 +64,8 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     for (let i = 0; i <= this.numLegendTicks; i++) {
       legendTicks.push(i / this.numLegendTicks);
     }
+
+    this.svg.selectAll('.legend').remove();
 
     this.svg.append('g')
         .classed('legend', true)
@@ -118,12 +130,15 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
     this.thresholdLine = null;
 
     if (this.thresholdCut !== null && this.thresholdCut !== undefined) {
-    const thresholdLinePos = (1.0 - this.thresholdCut / this.xMaxLimit) * this.xSvgLimit;
+      this.svg.selectAll('.threshold').remove();
+
+      const thresholdLinePos = (1.0 - this.thresholdCut / this.xMaxLimit) * this.xSvgLimit;
   
       this.thresholdLine = this.svg.append('g');
 
       this.thresholdLine.append('line')
           .classed('cleanable', true)
+          .classed('threshold', true)
           .attr('x1', thresholdLinePos)
           .attr('x2', thresholdLinePos)
           .attr('y1', 0)
@@ -133,6 +148,8 @@ export class HierClusVisualComponent implements OnInit, AfterViewInit {
           .style('stroke-dasharray', ('3, 3'));
 
       this.thresholdLine.append('text')
+          .classed('cleanable', true)
+          .classed('threshold', true)
           .text(this.thresholdCut.toFixed(2).toString())
           .attr('font-size', '16px')
           .attr('x', thresholdLinePos)

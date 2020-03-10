@@ -3,6 +3,7 @@ import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
 import { HierClusService } from './hier-clus.service';
 import { Input } from '@angular/core';
 import { HierClus, ClusterNode, ClusterData } from './hier-clus';
+import { Subject } from 'rxjs/Subject';
 
 @Component({
   selector: 'app-forest-analysis',
@@ -29,6 +30,7 @@ export class ForestAnalysisComponent implements OnInit {
   resultLinkageType: string;
   selectedChVectorType: string = 'dna';
   calledHierClusCutService: boolean = false;
+  childUpdateThreshold: Subject<void> = new Subject<void>();
 
   availableLinkages: string[] = [
     'single',
@@ -41,6 +43,10 @@ export class ForestAnalysisComponent implements OnInit {
               public hierClusService: HierClusService) { }
 
   ngOnInit(): void {
+  }
+
+  emitEventToChild() {
+    this.childUpdateThreshold.next();
   }
 
   getMostCommonAttrSeq(numAttr: number, includeDecision: boolean) {
@@ -158,6 +164,7 @@ export class ForestAnalysisComponent implements OnInit {
           this.hierClusters = results['clust_assignment'];
           this.numHierClusters = +results['num_cluster'];
           this.calledHierClusCutService = false;
+          this.emitEventToChild();
         }, error => {
           this.hierClusters = [];
 	  this.numHierClusters = 0;

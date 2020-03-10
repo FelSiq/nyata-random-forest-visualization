@@ -207,7 +207,8 @@
                                 [numEstimators]="numEstimators"
                                 [thresholdCut]="thresholdCut"
                                 [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
-                                [leavesOptSeq]="leavesOptSeq"></app-hier-clus-visual>
+                                [leavesOptSeq]="leavesOptSeq"
+                                [events]="childUpdateThreshold.asObservable()"></app-hier-clus-visual>
           </ng-container>
           <ng-template #waitingForHierClus>
             <mat-spinner style="margin:0 auto;"></mat-spinner>
