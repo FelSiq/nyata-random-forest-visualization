@@ -203,12 +203,14 @@
               <span class="common-attr-table-left-bar2"> {{ clusterInfo.tree_inds }} </span>
               </mat-list-item>
             </mat-list>
-          <app-hier-clus-visual [hierClustersTree]="hierClustersTree"
-                                [numEstimators]="numEstimators"
-                                [thresholdCut]="thresholdCut"
-                                [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
-                                [leavesOptSeq]="leavesOptSeq"
-                                [events]="childUpdateThreshold.asObservable()"></app-hier-clus-visual>
+            <app-hier-clus-visual [hierClustersTree]="hierClustersTree"
+                                  [numEstimators]="numEstimators"
+                                  [thresholdCut]="thresholdCut"
+                                  [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
+                                  [leavesOptSeq]="leavesOptSeq"
+                                  [events]="childUpdateThreshold.asObservable()"></app-hier-clus-visual>
+            <app-iterable-displayer [data]="clustSumDists" banList="[]">
+            </app-iterable-displayer>
           </ng-container>
           <ng-template #waitingForHierClus>
             <mat-spinner style="margin:0 auto;"></mat-spinner>

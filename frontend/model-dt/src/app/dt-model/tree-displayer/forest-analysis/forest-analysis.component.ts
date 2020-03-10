@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
 import { HierClusService } from './hier-clus.service';
 import { Input } from '@angular/core';
-import { HierClus, ClusterNode, ClusterData } from './hier-clus';
+import { HierClus, ClusterNode, ClusterData, KeyValuePair } from './hier-clus';
 import { Subject } from 'rxjs/Subject';
 
 @Component({
@@ -20,7 +20,7 @@ export class ForestAnalysisComponent implements OnInit {
   calledCommonAttrSeqService: boolean = false;
   calledHierClusService = false;
   @Input() numEstimators: number = -1;
-  propCutSliderValue: number = 0.5;
+  propCutSliderValue: number = 0.0;
   @Input() attrLabels: string[] = [];
   numHierClusters: number = 0;
   thresholdCut: number;
@@ -31,6 +31,7 @@ export class ForestAnalysisComponent implements OnInit {
   selectedChVectorType: string = 'dna';
   calledHierClusCutService: boolean = false;
   childUpdateThreshold: Subject<void> = new Subject<void>();
+  clustSumDists: KeyValuePair[];
 
   availableLinkages: string[] = [
     'single',
@@ -126,8 +127,10 @@ export class ForestAnalysisComponent implements OnInit {
     this.hierClustersTree = null;
     this.leavesOptSeq =  null;
     this.calledHierClusService = true;
-    this.thresholdCut = 2.0 * +this.propCutSliderValue;
+    this.thresholdCut = (
+        this.selectedChVectorType === 'dna' ? 2.0 : 1.0) * +this.propCutSliderValue;
     this.resultLinkageType =  this.selectedLinkageType;
+    this.clustSumDists = null;
 
     this.hierClusService.getHierarchicalClustering(this.thresholdCut,
                                                    this.selectedLinkageType,
@@ -136,7 +139,8 @@ export class ForestAnalysisComponent implements OnInit {
           this.hierClusters = results['clust_assignment'];
           this.leavesOptSeq = results['optimal_leaves_seq'];
           this.numHierClusters = +results['num_cluster'];
-	  this.hierClustersTree = results['dendrogram_tree'];
+          this.hierClustersTree = results['dendrogram_tree'];
+          this.clustSumDists = results['clust_sum_dists'];
           this.calledHierClusService = false;
         }, error => {
           this.hierClusters = [];
@@ -156,14 +160,18 @@ export class ForestAnalysisComponent implements OnInit {
       return;
     }
 
-    this.thresholdCut = 2.0 * +this.propCutSliderValue;
+    this.thresholdCut = (
+        this.selectedChVectorType === 'dna' ? 2.0 : 1.0) * +this.propCutSliderValue;
     this.calledHierClusCutService = true;
+    this.clustSumDists = null;
 
     this.hierClusService.cutHierarchicalClustering(this.thresholdCut)
       .subscribe((results) => {
           this.hierClusters = results['clust_assignment'];
           this.numHierClusters = +results['num_cluster'];
           this.calledHierClusCutService = false;
+          this.clustSumDists = results['clust_sum_dists'];
+          console.log(this.clustSumDists);
           this.emitEventToChild();
         }, error => {
           this.hierClusters = [];

@@ -318,26 +318,50 @@ def make_hier_clus_cut(
     sqr_dist_mat = scipy.spatial.distance.squareform(dist_mat)
 
     clust_buckets = []
+    clust_sum_dists = np.zeros((3, clust_assignment.size), dtype=float)
+
     for i in np.arange(1, 1 + num_cluster):
         clust_inst_inds = tuple(np.flatnonzero(clust_assignment == i))
 
-        if len(clust_inst_inds) > 2:
-            medoid_ind = clust_inst_inds[np.argmin(
-                np.sum(sqr_dist_mat[tuple(
-                    np.meshgrid(clust_inst_inds, clust_inst_inds))],
-                       axis=0))]
+        cluster_dists_sum = np.sum(sqr_dist_mat[tuple(
+            np.meshgrid(clust_inst_inds, clust_inst_inds))],
+                                   axis=0)
 
-        else:
-            medoid_ind = clust_inst_inds[0]
+        clust_sum_dists[0, clust_inst_inds] = cluster_dists_sum
+        clust_sum_dists[1,
+                        clust_inst_inds] = (cluster_dists_sum /
+                                            (1e-6 + np.sum(cluster_dists_sum)))
+
+        medoid_ind = clust_inst_inds[np.argmin(cluster_dists_sum)]
 
         clust_buckets.append({
             "tree_inds": clust_inst_inds,
             "medoid_ind": medoid_ind,
         })
 
+    clust_sum_dists[2, :] = np.arange(clust_assignment.size)
+
+    formatted_clust_sum_dists = {
+        utils.preprocess_key("sum_of_within_cluster_distances"):
+        serialize.json_encoder_type_manager({
+            "value": [{
+                "value": "{} ({:.2f})".format(int(key), val),
+                "proportion": prop,
+            } for val, prop, key in sorted(zip(*clust_sum_dists),
+                                           key=lambda item: item[1])],
+            "description":
+            "Sum of within cluster distances for each instance. The medoid "
+            "tree have, by definition, the minimal sum of inner cluster distances "
+            "in its cluster. The format of this list is: "
+            "[Tree Index] ([Total sum of distances]): [Inner cluster proportion "
+            "of the distance sum]",
+        })
+    }
+
     return {
         "clust_assignment": clust_buckets,
         "num_cluster": num_cluster,
+        "clust_sum_dists": formatted_clust_sum_dists,
     }
 
 
