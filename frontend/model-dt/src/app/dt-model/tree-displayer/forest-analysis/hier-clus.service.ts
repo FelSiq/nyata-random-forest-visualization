@@ -5,6 +5,7 @@ import { catchError, retry } from 'rxjs/operators';
 import { HierClus } from './hier-clus';
 
 const httpOptions = {
+  withCredentials: true,
   headers: new HttpHeaders({
     'Content-Type': 'application/json',
     'credentials': 'include',

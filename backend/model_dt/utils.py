@@ -1,7 +1,6 @@
 """Generic utility functions."""
 import re
 
-
 RE_KEY_NUMBEROF = re.compile(r"\bn \b")
 """Regular expression for getting 'n ' string, to format JSON keys."""
 RE_KEY_MIN = re.compile(r"\bmin\b")

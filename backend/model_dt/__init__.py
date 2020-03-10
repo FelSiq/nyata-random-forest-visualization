@@ -35,7 +35,6 @@ RE_EMPTY_SPACE = re.compile(r"\s+|%20")
 """Regular expression for empty spaces to preprocess given instances."""
 
 
-
 class DecisionTree(flask_restful.Resource):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
     def __init__(self,
@@ -272,17 +271,19 @@ class ForestHierarchicalClustering(flask_restful.Resource):
             dist_mat = model_dt.calc_mtf_dist_mat(model=self.model)
 
         hier_clus_data = model_dt.get_hierarchical_cluster(dist_mat=dist_mat,
-                                                 linkage=linkage)
+                                                           linkage=linkage)
 
         hier_clus_data.update(
-            model_dt.make_hier_clus_cut(dendrogram=hier_clus_data.get("dendrogram"),
-                                        dist_mat=dist_mat,
-                                        threshold_cut=threshold_cut))
+            model_dt.make_hier_clus_cut(
+                dendrogram=hier_clus_data.get("dendrogram"),
+                dist_mat=dist_mat,
+                threshold_cut=threshold_cut))
 
         flask.session["hier_clus_data"] = hier_clus_data
         flask.session["dist_mat"] = dist_mat
 
-        response = flask.jsonify(serialize.json_encoder_type_manager(hier_clus_data))
+        response = flask.jsonify(
+            serialize.json_encoder_type_manager(hier_clus_data))
 
         response.headers.add("Access-Control-Allow-Methods",
                              "GET, POST, OPTIONS, PUT, PATCH, DELETE")
@@ -301,14 +302,17 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         dist_mat = flask.session.get("dist_mat")
 
         if hier_clus_data is None:
-            raise ValueError("No hierarchical clustering hier_clus_data found.")
+            raise ValueError(
+                "No hierarchical clustering hier_clus_data found.")
 
-        hier_clus_data = model_dt.make_hier_clus_cut(dendrogram=hier_clus_data.get("dendrogram"),
-                                           dist_mat=dist_mat,
-                                           threshold_cut=threshold_cut)
+        hier_clus_data = model_dt.make_hier_clus_cut(
+            dendrogram=hier_clus_data.get("dendrogram"),
+            dist_mat=dist_mat,
+            threshold_cut=threshold_cut)
         flask.session["hier_clus_data"].update(hier_clus_data)
 
-        return flask.jsonify(serialize.json_encoder_type_manager(hier_clus_data))
+        return flask.jsonify(
+            serialize.json_encoder_type_manager(hier_clus_data))
 
     def delete(self):
         if flask.session.get("data"):
@@ -322,12 +326,14 @@ class Config:
     FLASK_APP = os.environ.get("FLASK_APP")
     FLASK_DEBUG = os.environ.get("FLASK_DEBUG")
     SESSION_TYPE = os.environ.get("SESSION_TYPE", "redis")
-    SESSION_REDIS = redis.from_url(os.environ.get("SESSION_REDIS", "redis://127.0.0.1:6379"))
+    SESSION_REDIS = redis.from_url(
+        os.environ.get("SESSION_REDIS", "redis://127.0.0.1:6379"))
     SESSION_USE_SIGNER = os.environ.get("SESSION_USE_SIGNER", False)
     SECRET_KEY = os.environ.get("SECRET_KEY")
 
 
 sess = flask_session.Session()
+
 
 def create_app():
     """DT visualization application factory."""
