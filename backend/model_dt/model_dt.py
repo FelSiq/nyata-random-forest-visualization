@@ -284,12 +284,15 @@ def calc_dna_dist_mat(model: t.Union[sklearn.ensemble.RandomForestClassifier,
     return dna_dists
 
 
-def calc_mtf_dist_mat(model: t.Union[sklearn.ensemble.RandomForestClassifier,
-                                     sklearn.ensemble.RandomForestRegressor]) -> np.ndarray:
+def calc_mtf_dist_mat(
+    model: t.Union[sklearn.ensemble.RandomForestClassifier,
+                   sklearn.ensemble.RandomForestRegressor]
+) -> np.ndarray:
     """."""
     mtf_names = pymfe.mfe.MFE.valid_metafeatures(groups="model-based")
     summary = ("mean", "sd")
-    mtf_vec = np.zeros((model.n_estimators, len(summary) * len(mtf_names)), dtype=float)
+    mtf_vec = np.zeros((model.n_estimators, len(summary) * len(mtf_names)),
+                       dtype=float)
 
     # TODO: extract.
     mtf_vec = np.random.random(mtf_vec.shape)
@@ -297,26 +300,18 @@ def calc_mtf_dist_mat(model: t.Union[sklearn.ensemble.RandomForestClassifier,
     mtf_min = mtf_vec.min(axis=0)
     mtf_vec = (mtf_vec - mtf_min) / (mtf_vec.max(axis=0) - mtf_min)
 
-    mtf_dists = scipy.spatial.distance.pdist(
-        X=mtf_vec, metric="euclidean")
+    mtf_dists = scipy.spatial.distance.pdist(X=mtf_vec, metric="euclidean")
 
     return mtf_dists
 
 
-def get_hierarchical_cluster(dist_mat: np.ndarray,
-                             threshold_cut: t.Union[int, float],
-                             linkage: str) -> t.Dict[str, np.ndarray]:
-    """."""
-    dendrogram = scipy.cluster.hierarchy.linkage(dist_mat, method=linkage)
-
-    optimal_leaves_seq = scipy.cluster.hierarchy.leaves_list(
-        scipy.cluster.hierarchy.optimal_leaf_ordering(dendrogram, dist_mat))
-
+def make_hier_clus_cut(
+        dendrogram: np.ndarray, dist_mat: np.ndarray,
+        threshold_cut: t.Union[int, float]) -> t.Dict[str, t.Any]:
+    """Make a cut in a given tree dendrogram."""
     clust_assignment = scipy.cluster.hierarchy.fcluster(dendrogram,
                                                         t=threshold_cut,
                                                         criterion="distance")
-
-    _, dendrogram_tree = scipy.cluster.hierarchy.to_tree(dendrogram, rd=True)
 
     num_cluster = np.unique(clust_assignment).size
 
@@ -341,10 +336,26 @@ def get_hierarchical_cluster(dist_mat: np.ndarray,
         })
 
     return {
-        "dendrogram": dendrogram,
-        "dendrogram_tree": dendrogram_tree,
         "clust_assignment": clust_buckets,
         "num_cluster": num_cluster,
+    }
+
+
+def get_hierarchical_cluster(dist_mat: np.ndarray,
+                             linkage: str) -> t.Dict[str, np.ndarray]:
+    """Build a hierarchical cluster dendrogram."""
+    dendrogram = scipy.cluster.hierarchy.linkage(dist_mat, method=linkage)
+
+    dendrogram = scipy.cluster.hierarchy.optimal_leaf_ordering(
+        dendrogram, dist_mat)
+
+    optimal_leaves_seq = scipy.cluster.hierarchy.leaves_list(dendrogram)
+
+    _, dendrogram_tree = scipy.cluster.hierarchy.to_tree(dendrogram, rd=True)
+
+    return {
+        "dendrogram": dendrogram,
+        "dendrogram_tree": dendrogram_tree,
         "optimal_leaves_seq": optimal_leaves_seq,
     }
 

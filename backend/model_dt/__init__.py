@@ -241,25 +241,47 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         self.model = model
         self.X = X
 
-    def get(self,
-            threshold_cut: t.Union[int, float] = 2.0,
-            linkage: str = "average",
-            strategy: str = "dna"):
+        self.data = None
+        self.dist_mat = None
+
+    def post(self,
+             threshold_cut: t.Union[int, float] = 2.0,
+             linkage: str = "average",
+             strategy: str = "dna"):
         if strategy not in ("dna", "metafeatures"):
             raise ValueError("'strategy' must be either 'dna' "
                              "or 'metafeatures.'")
 
         if strategy == "dna":
-            dist_mat = model_dt.calc_dna_dist_mat(model=self.model, X=self.X)
+            self.dist_mat = model_dt.calc_dna_dist_mat(model=self.model,
+                                                       X=self.X)
 
         else:
-            dist_mat = model_dt.calc_mtf_dist_mat(model=self.model)
+            self.dist_mat = model_dt.calc_mtf_dist_mat(model=self.model)
 
-        hierarchical_cluster = model_dt.get_hierarchical_cluster(
-            dist_mat=dist_mat, threshold_cut=threshold_cut, linkage=linkage)
+        data = model_dt.get_hierarchical_cluster(dist_mat=self.dist_mat,
+                                                 linkage=linkage)
 
-        return flask.jsonify(
-            serialize.json_encoder_type_manager(hierarchical_cluster))
+        data.update(
+            model_dt.make_hier_clus_cut(dendrogram=data["dendrogram"],
+                                        dist_mat=self.dist_mat,
+                                        threshold_cut=threshold_cut))
+
+        return flask.jsonify(serialize.json_encoder_type_manager(data))
+
+    def update(self, threshold_cut: t.Union[int, float] = 2.0):
+        if self.data is None:
+            raise ValueError("No hierarchical clustering data found.")
+
+        data = model_dt.make_hier_clus_cut(dendrogram=data["dendrogram"],
+                                           dist_mat=self.dist_mat,
+                                           threshold_cut=threshold_cut)
+        self.data.update(data)
+
+        return flask.jsonify(serialize.json_encoder_type_manager(data))
+
+    def delete(self):
+        self.data = None
 
 
 def create_app():
