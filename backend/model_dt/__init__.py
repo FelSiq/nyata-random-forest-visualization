@@ -271,18 +271,18 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         else:
             dist_mat = model_dt.calc_mtf_dist_mat(model=self.model)
 
-        data = model_dt.get_hierarchical_cluster(dist_mat=dist_mat,
+        hier_clus_data = model_dt.get_hierarchical_cluster(dist_mat=dist_mat,
                                                  linkage=linkage)
 
-        data.update(
-            model_dt.make_hier_clus_cut(dendrogram=data.get("dendrogram"),
+        hier_clus_data.update(
+            model_dt.make_hier_clus_cut(dendrogram=hier_clus_data.get("dendrogram"),
                                         dist_mat=dist_mat,
                                         threshold_cut=threshold_cut))
 
-        flask.session["data"] = data
+        flask.session["hier_clus_data"] = hier_clus_data
         flask.session["dist_mat"] = dist_mat
 
-        response = flask.jsonify(serialize.json_encoder_type_manager(data))
+        response = flask.jsonify(serialize.json_encoder_type_manager(hier_clus_data))
 
         response.headers.add("Access-Control-Allow-Methods",
                              "GET, POST, OPTIONS, PUT, PATCH, DELETE")
@@ -297,18 +297,18 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
         threshold_cut = args.get("threshold_cut", 2.0)
 
-        data = flask.session.get("data")
+        hier_clus_data = flask.session.get("hier_clus_data")
         dist_mat = flask.session.get("dist_mat")
 
-        if data is None:
-            raise ValueError("No hierarchical clustering data found.")
+        if hier_clus_data is None:
+            raise ValueError("No hierarchical clustering hier_clus_data found.")
 
-        data = model_dt.make_hier_clus_cut(dendrogram=data.get("dendrogram"),
+        hier_clus_data = model_dt.make_hier_clus_cut(dendrogram=hier_clus_data.get("dendrogram"),
                                            dist_mat=dist_mat,
                                            threshold_cut=threshold_cut)
-        flask.session["data"].update(data)
+        flask.session["hier_clus_data"].update(hier_clus_data)
 
-        return flask.jsonify(serialize.json_encoder_type_manager(data))
+        return flask.jsonify(serialize.json_encoder_type_manager(hier_clus_data))
 
     def delete(self):
         if flask.session.get("data"):
@@ -318,162 +318,20 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
 class Config:
     """Set Flask configuration vars from .env file."""
-
-    # General Config
-    SECRET_KEY = os.environ.get("SECRET_KEY")
-    FLASK_APP = os.environ.get("FLASK_APP")
     FLASK_ENV = os.environ.get("FLASK_ENV")
+    FLASK_APP = os.environ.get("FLASK_APP")
     FLASK_DEBUG = os.environ.get("FLASK_DEBUG")
-
-    # Flask-Session
-    SESSION_TYPE = os.environ.get("SESSION_TYPE")
-    SESSION_REDIS = redis.from_url(os.environ.get("SESSION_REDIS"))
-
-
-class SessionInterface(flask.sessions.SessionInterface):
-    def _generate_sid(self):
-        return str(uuid.uuid4())
-
-    def _get_signer(self, app):
-        if not app.secret_key:
-            return None
-        return itsdangerous.Signer(app.secret_key,
-                                   salt='flask-session',
-                                   key_derivation='hmac')
-
-
-class ServerSideSession(werkzeug.datastructures.CallbackDict, flask.sessions.SessionMixin):
-    """Baseclass for server-side based sessions."""
-
-    def __init__(self, initial=None, sid=None, permanent=None):
-        def on_update(self):
-            self.modified = True
-        CallbackDict.__init__(self, initial, on_update)
-        self.sid = sid
-        if permanent:
-            self.permanent = permanent
-            self.modified = False
-
-
-class RedisSession(ServerSideSession):
-    pass
-
-
-class RedisSessionInterface(SessionInterface):
-    """Uses the Redis key-value store as a session backend.
-    .. versionadded:: 0.2
-        The `use_signer` parameter was added.
-    :param redis: A ``redis.Redis`` instance.
-    :param key_prefix: A prefix that is added to all Redis store keys.
-    :param use_signer: Whether to sign the session id cookie or not.
-    :param permanent: Whether to use permanent session or not.
-    """
-
-    serializer = pickle
-    session_class = RedisSession
-
-    def __init__(self, redis_, key_prefix, use_signer=False, permanent=True):
-        if redis_ is None:
-            redis_ = redis.Redis()
-        self.redis = redis_
-        self.key_prefix = key_prefix
-        self.use_signer = use_signer
-        self.permanent = permanent
-
-    def open_session(self, app, request):
-        sid = request.cookies.get(app.session_cookie_name)
-        if not sid:
-            sid = self._generate_sid()
-            return self.session_class(sid=sid, permanent=self.permanent)
-        if self.use_signer:
-            signer = self._get_signer(app)
-            if signer is None:
-                return None
-            try:
-                sid_as_bytes = signer.unsign(sid)
-                sid = sid_as_bytes.decode()
-            except BadSignature:
-                sid = self._generate_sid()
-                return self.session_class(sid=sid, permanent=self.permanent)
-
-        if not PY2 and not isinstance(sid, text_type):
-            sid = sid.decode('utf-8', 'strict')
-        val = self.redis.get(self.key_prefix + sid)
-        if val is not None:
-            try:
-                data = self.serializer.loads(val)
-                return self.session_class(data, sid=sid)
-            except:
-                return self.session_class(sid=sid, permanent=self.permanent)
-        return self.session_class(sid=sid, permanent=self.permanent)
-
-    def save_session(self, app, session, response):
-        domain = self.get_cookie_domain(app)
-        path = self.get_cookie_path(app)
-        if not session:
-            if session.modified:
-                self.redis.delete(self.key_prefix + session.sid)
-                response.delete_cookie(app.session_cookie_name,
-                                       domain=domain,
-                                       path=path)
-            return
-
-        # Modification case.  There are upsides and downsides to
-        # emitting a set-cookie header each request.  The behavior
-        # is controlled by the :meth:`should_set_cookie` method
-        # which performs a quick check to figure out if the cookie
-        # should be set or not.  This is controlled by the
-        # SESSION_REFRESH_EACH_REQUEST config flag as well as
-        # the permanent flag on the session itself.
-        # if not self.should_set_cookie(app, session):
-        #    return
-
-        httponly = self.get_cookie_httponly(app)
-        secure = self.get_cookie_secure(app)
-        expires = self.get_expiration_time(app, session)
-        val = self.serializer.dumps(dict(session))
-        self.redis.setex(name=self.key_prefix + session.sid,
-                         value=val,
-                         time=total_seconds(app.permanent_session_lifetime))
-        if self.use_signer:
-            session_id = self._get_signer(app).sign(want_bytes(session.sid))
-        else:
-            session_id = session.sid
-        response.set_cookie(app.session_cookie_name,
-                            session_id,
-                            expires=expires,
-                            httponly=httponly,
-                            domain=domain,
-                            path=path,
-                            secure=secure)
+    SESSION_TYPE = os.environ.get("SESSION_TYPE", "redis")
+    SECRET_KEY = os.environ.get("SECRET_KEY")
 
 
 sess = flask_session.Session()
-
 
 def create_app():
     """DT visualization application factory."""
     app = flask.Flask(__name__, instance_relative_config=False)
 
     app.config.from_object(Config)
-
-    config = app.config.copy()
-    config.setdefault('SESSION_TYPE', 'null')
-    config.setdefault('SESSION_PERMANENT', True)
-    config.setdefault('SESSION_USE_SIGNER', False)
-    config.setdefault('SESSION_KEY_PREFIX', 'session:')
-    config.setdefault('SESSION_REDIS', None)
-    config.setdefault('SESSION_MEMCACHED', None)
-    config.setdefault('SESSION_FILE_DIR',
-                      os.path.join(os.getcwd(), 'flask_session'))
-    config.setdefault('SESSION_FILE_THRESHOLD', 500)
-    config.setdefault('SESSION_FILE_MODE', 384)
-
-    session_interface = RedisSessionInterface(
-        config['SESSION_REDIS'], config['SESSION_KEY_PREFIX'],
-        config['SESSION_USE_SIGNER'], config['SESSION_PERMANENT'])
-
-    app.session_interface = session_interface
 
     flask_cors.CORS(app, supports_credentials=True)
     api = flask_restful.Api(app)
