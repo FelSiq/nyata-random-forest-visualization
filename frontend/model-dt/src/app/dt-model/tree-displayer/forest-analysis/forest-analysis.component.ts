@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
 import { HierClusService } from './hier-clus.service';
-import { Input } from '@angular/core';
+import { Input, Output, EventEmitter } from '@angular/core';
 import { HierClus, ClusterNode, ClusterData, KeyValuePair } from './hier-clus';
 import { Subject } from 'rxjs/Subject';
 
@@ -32,6 +32,7 @@ export class ForestAnalysisComponent implements OnInit {
   calledHierClusCutService: boolean = false;
   childUpdateThreshold: Subject<void> = new Subject<void>();
   clustSumDists: KeyValuePair[];
+  @Output() peekMedoidTree = new EventEmitter<number>();
 
   availableLinkages: string[] = [
     'single',
@@ -44,6 +45,10 @@ export class ForestAnalysisComponent implements OnInit {
               public hierClusService: HierClusService) { }
 
   ngOnInit(): void {
+  }
+
+  emitEventToParent(treeId: string | number) {
+    this.peekMedoidTree.emit(+treeId);
   }
 
   emitEventToChild() {

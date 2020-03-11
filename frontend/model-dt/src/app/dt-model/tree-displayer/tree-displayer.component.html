@@ -4,7 +4,8 @@
     <app-tree-d3-model
       [treeNodes]="treeModel.tree_ ? [treeModel] : (treeModel.estimators_ ? treeModel.estimators_.value : [])"
       [singleInstAttrs]="singleInstAttrs"
-      [decisionPath]="predictResults && predictResults.decision_path ? predictResults.decision_path.value : null">
+      [decisionPath]="predictResults && predictResults.decision_path ? predictResults.decision_path.value : null"
+      [(chosenTree)]="chosenTree">
     </app-tree-d3-model>
   </mat-drawer-content>
 
@@ -45,7 +46,8 @@
         <ng-template matTabContent>
             <app-forest-analysis
 	        [numEstimators]="treeModel.tree_ ? 1 : (treeModel.estimators_ ? treeModel.estimators_.value.length : 0)"
-	        [attrLabels]="treeModel.attr_labels ? treeModel.attr_labels : null">
+	        [attrLabels]="treeModel.attr_labels ? treeModel.attr_labels : null"
+		(peekMedoidTree)="updateChosenTree($event)">
 	    </app-forest-analysis>
         </ng-template>
       </mat-tab>

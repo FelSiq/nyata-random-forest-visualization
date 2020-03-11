@@ -43,3 +43,10 @@
 .linkage-selector {
   width: 80%;
 }
+
+.medoid-tree-icon {
+  cursor: pointer;
+  font-size: 125%;
+  margin-top: 4px;
+  vertical-align: middle;
+}

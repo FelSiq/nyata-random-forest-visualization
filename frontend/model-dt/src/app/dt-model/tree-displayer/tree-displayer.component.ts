@@ -27,6 +27,9 @@ export class TreeDisplayerComponent implements OnInit {
   ngOnInit() {
   }
 
+  updateChosenTree(treeId: string | number) {
+  }
+
   updatePredictionResults(value: SingleInstRestEmitterInterface): void {
     if (value) {
       this.predictResults = { ...value['predictResults'] };
