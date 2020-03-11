@@ -6,6 +6,7 @@ import { catchError, retry } from 'rxjs/operators';
 import { PredictResults } from '../predict-results';
 
 const httpOptions = {
+  withCredentials: true,
   headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
 };
 

@@ -26,34 +26,24 @@ class DecisionTree(flask_restful.Resource):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
     def __init__(self,
                  model,
-                 X: np.ndarray,
-                 y: np.ndarray,
-                 attr_labels: t.Optional[t.Sequence[str]] = None):
+                 attr_labels: t.Optional[t.Sequence[str]] = None,
+                 **kwargs):
         """."""
-        self.model = model
-        self.X = X
-        self.y = y
-        self.attr_labels = attr_labels
+        flask.session["model"] = model
+        flask.session["attr_labels"] = attr_labels
 
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
         return flask.jsonify(
-            serialize.serialize_decision_tree(dt_model=self.model,
-                                              attr_labels=self.attr_labels))
+            serialize.serialize_decision_tree(dt_model=flask.session["model"],
+                                              attr_labels=flask.session["attr_labels"]))
 
 
 class PredictDataset(flask_restful.Resource):
     """Class dedicated to give methods for predicting a whole dataset."""
-    def __init__(self,
-                 model,
-                 X: np.ndarray,
-                 y: np.ndarray,
-                 attr_labels: t.Optional[t.Sequence[str]] = None):
+    def __init__(self, model, **kwargs):
         """."""
-        self.model = model
-        self.X = X
-        self.y = y
-        self.attr_labels = attr_labels
+        flask.session["model"] = model
 
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("file",
@@ -65,6 +55,8 @@ class PredictDataset(flask_restful.Resource):
 
     def post(self):
         """Make predictions and give metrics for the user-given dataset."""
+        model = flask.session["model"]
+
         args = self.reqparse.parse_args()
 
         dataset_file = args["file"]
@@ -88,10 +80,10 @@ class PredictDataset(flask_restful.Resource):
             y_ohe = None
             preds_proba = None
 
-        preds = self.model.predict(X)
+        preds = model.predict(X)
 
         return flask.jsonify(
-            model_dt.get_metrics(dt_model=self.model,
+            model_dt.get_metrics(dt_model=model,
                                  preds=preds,
                                  true_labels=y,
                                  preds_proba=preds_proba,
@@ -100,16 +92,12 @@ class PredictDataset(flask_restful.Resource):
 
 class PredictSingleInstance(flask_restful.Resource):
     """Class dedicated to provide methods for predicting a single instance."""
+
     def __init__(self,
                  model,
-                 X: np.ndarray,
-                 y: np.ndarray,
-                 attr_labels: t.Optional[t.Sequence[str]] = None):
+                 **kwargs):
         """."""
-        self.model = model
-        self.X = X
-        self.y = y
-        self.attr_labels = attr_labels
+        flask.session["model"] = model
 
     @staticmethod
     def _preprocess_instance(instance: str,
@@ -139,12 +127,14 @@ class PredictSingleInstance(flask_restful.Resource):
     def _decision_path(self,
                        inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
         """Get the decision path of the instace for every tree in the model."""
-        if isinstance(self.model, (sklearn.tree.DecisionTreeClassifier,
+        model = flask.session["model"]
+
+        if isinstance(model, (sklearn.tree.DecisionTreeClassifier,
                                    sklearn.tree.DecisionTreeRegressor)):
-            nodes = [self.model.decision_path(inst_proc).indices]
+            nodes = [model.decision_path(inst_proc).indices]
 
         else:
-            dec_path, indices = self.model.decision_path(inst_proc)
+            dec_path, indices = model.decision_path(inst_proc)
 
             nodes = []
             base_index = 0
@@ -165,6 +155,8 @@ class PredictSingleInstance(flask_restful.Resource):
         inst_proc = PredictSingleInstance._preprocess_instance(instance)
         err_code = []
 
+        model = flask.session["model"]
+
         if inst_proc is None:
             err_code.append("ERROR_MISSING_VAL")
 
@@ -173,13 +165,13 @@ class PredictSingleInstance(flask_restful.Resource):
                 PredictSingleInstance._handle_errors(err_code))
 
         classes_by_tree, margin = model_dt.get_class_freqs(
-            self.model, inst_proc)
+            model, inst_proc)
 
         pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict((
                 ("prediction_result",
                  descriptions.add_desc(
-                     value=self.model.predict(inst_proc)[0],
+                     value=model.predict(inst_proc)[0],
                      from_id="prediction_result",
                  )),
                 ("classes_by_tree",
@@ -196,7 +188,7 @@ class PredictSingleInstance(flask_restful.Resource):
                     "value": self._decision_path(inst_proc),
                 }),
                 ("leaf_id", {
-                    "value": self.model.apply(inst_proc)[0],
+                    "value": model.apply(inst_proc)[0],
                 }),
             )))
 
@@ -205,14 +197,17 @@ class PredictSingleInstance(flask_restful.Resource):
 
 class MostCommonAttrSeq(flask_restful.Resource):
     """Find the most common sequence of attributes in the forest."""
+
     def __init__(self, model, **kwargs):
-        self.model = model
+        flask.session["model"] = model
 
     def get(self,
             seq_num: int = 10,
             include_node_decision: t.Union[int, bool] = False):
+        model = flask.session["model"]
+
         top_common_seqs = model_dt.top_most_common_attr_seq(
-            self.model,
+            model,
             seq_num=seq_num,
             include_node_decision=include_node_decision > 0)
 
@@ -222,9 +217,10 @@ class MostCommonAttrSeq(flask_restful.Resource):
 
 class ForestHierarchicalClustering(flask_restful.Resource):
     """Perform a hierarchical clustering using each tree DNA."""
+
     def __init__(self, model, X: np.ndarray, **kwargs):
-        self.model = model
-        self.X = X
+        flask.session["model"] = model
+        flask.session["X"] = X
 
         self.reqparse_post = flask_restful.reqparse.RequestParser()
         self.reqparse_post.add_argument("threshold_cut", type=float)
@@ -235,6 +231,9 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         self.reqparse_update.add_argument("threshold_cut", type=float)
 
     def post(self):
+        model = flask.session["model"]
+        X = flask.session["X"]
+
         args = self.reqparse_post.parse_args()
 
         threshold_cut = args.get("threshold_cut", 2.0)
@@ -246,10 +245,10 @@ class ForestHierarchicalClustering(flask_restful.Resource):
                 "'strategy' must be either 'dna' or 'metafeatures.'")
 
         if strategy == "dna":
-            dist_mat = model_dt.calc_dna_dist_mat(model=self.model, X=self.X)
+            dist_mat = model_dt.calc_dna_dist_mat(model=model, X=X)
 
         else:
-            dist_mat = model_dt.calc_mtf_dist_mat(model=self.model)
+            dist_mat = model_dt.calc_mtf_dist_mat(model=model)
 
         hier_clus_data = model_dt.get_hierarchical_cluster(dist_mat=dist_mat,
                                                            linkage=linkage)
@@ -298,8 +297,8 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
     def delete(self):
         if flask.session.get("data"):
-            print("Successfully deleted session data.")
             flask.session.pop("data")
+            print("Successfully deleted session hierarchical cluster data.")
 
 
 class Config:
@@ -333,7 +332,7 @@ def create_app():
         "X": X,
         "y": y,
         "attr_labels": attr_labels,
-    }
+    }  # type: t.Dict[str, t.Any]
 
     api.add_resource(DecisionTree,
                      "/dt-visualization",

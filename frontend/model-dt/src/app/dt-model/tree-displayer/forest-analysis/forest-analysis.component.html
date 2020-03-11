@@ -118,7 +118,7 @@
           <strong style="margin-right: 16px;">Build tree characteristic vector using:</strong>
             <mat-form-field class="linkage-selector">
               <mat-label>Default strategy</mat-label>
-              <mat-select [(value)]="selectedChVectorType">
+              <mat-select [(value)]="selectedChVectorType" (selectionChange)="(hierClusters && hierClusters.length) ? getHierarchicalClustering(+propCutSliderValue) : false">
                 <mat-option value="dna"> DNA vector </mat-option>
                 <mat-option value="metafeatures"> Vector of metafeatures </mat-option>
               </mat-select>
@@ -156,7 +156,7 @@
           <strong style="margin-right: 16px;">Linkage:</strong>
             <mat-form-field class="linkage-selector">
               <mat-label>Use default linkage type</mat-label>
-              <mat-select [(value)]="selectedLinkageType">
+              <mat-select [(value)]="selectedLinkageType" (selectionChange)="(hierClusters && hierClusters.length) ? getHierarchicalClustering(+propCutSliderValue) : false">
                 <mat-option> default (average) </mat-option>
                 <mat-option *ngFor="let linkage of availableLinkages" [value]="linkage"> {{ linkage }} </mat-option>
               </mat-select>

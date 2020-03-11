@@ -5,7 +5,8 @@ import { catchError, retry } from 'rxjs/operators';
 import { HierClus } from './hier-clus';
 
 const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  withCredentials: true,
+  headers: new HttpHeaders({ 'Content-Type': 'application/json', 'credentials': 'include' }),
 };
 
 @Injectable({
