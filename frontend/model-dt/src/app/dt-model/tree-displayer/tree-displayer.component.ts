@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { Subject } from 'rxjs-compat';
 
 import { DTInterface } from '../../dt-interface';
 import { PredictResults } from './predict-results';
@@ -14,6 +15,7 @@ export class TreeDisplayerComponent implements OnInit {
   predictResults: PredictResults;
   singleInstAttrs: Array<string | number>;
   attrNames: string[];
+  updateTreeSignalSubject: Subject<number | string> = new Subject<number | string>();
 
   readonly bannedModelAttrs: string[] = [
     'estimators_',
@@ -28,6 +30,7 @@ export class TreeDisplayerComponent implements OnInit {
   }
 
   updateChosenTree(treeId: string | number) {
+    this.updateTreeSignalSubject.next(treeId);
   }
 
   updatePredictionResults(value: SingleInstRestEmitterInterface): void {

@@ -1,4 +1,5 @@
-import { Component, OnInit, AfterViewInit, Input, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, Input, ElementRef } from '@angular/core';
+import { Observable, Subscription } from 'rxjs-compat';
 
 import * as d3 from 'd3-selection';
 import * as d3Zoom from 'd3-zoom';
@@ -48,6 +49,8 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
   }
 
   chosenTree: string | number;
+  @Input() updateTreeSignal: Observable<string | number>;
+  private updateTreeSignalSubscription: Subscription;
 
   readonly zoomMin: number = 1;
   readonly zoomMax: number = 4;
@@ -139,10 +142,21 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.chosenTree = '0';
+    this.updateTreeSignalSubscription = this.updateTreeSignal.subscribe(
+      (treeId: string | number) => this.updateTreeId(treeId));
+  }
+
+  updateTreeId(treeId: number | string) {
+    this.chosenTree = treeId + '';
+    this.changesHandler();
   }
 
   ngAfterViewInit() {
     this.changesHandler();
+  }
+
+  ngOnDestroy() {
+    this.updateTreeSignalSubscription.unsubscribe();
   }
 
   private changesHandler(): void {

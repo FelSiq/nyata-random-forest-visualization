@@ -5,7 +5,7 @@
       [treeNodes]="treeModel.tree_ ? [treeModel] : (treeModel.estimators_ ? treeModel.estimators_.value : [])"
       [singleInstAttrs]="singleInstAttrs"
       [decisionPath]="predictResults && predictResults.decision_path ? predictResults.decision_path.value : null"
-      [(chosenTree)]="chosenTree">
+      [updateTreeSignal]="updateTreeSignalSubject.asObservable()">
     </app-tree-d3-model>
   </mat-drawer-content>
 
