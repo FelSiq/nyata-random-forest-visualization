@@ -173,7 +173,7 @@
       <mat-select [(ngModel)]="chosenTree" (ngModelChange)="changesHandler()">
         <mat-option *ngFor="let tree of treeNodes; index as i;"
                 value="{{ i }}">
-                {{ i + 1 }} (node count: {{ tree.tree_.value.node_count }}, depth: {{ tree.tree_.value.maximum_depth }})
+                {{ i }} (node count: {{ tree.tree_.value.node_count }}, depth: {{ tree.tree_.value.maximum_depth }})
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -230,7 +230,7 @@
     <div *ngIf="treeNodes && (chosenTree || chosenTree === 0)">
       <mat-card>
         <mat-card-title>
-          Current tree (index: {{ +chosenTree + 1 }}) characteristics
+          Current tree (index: {{ +chosenTree }}) characteristics
         </mat-card-title>
         <mat-card-content>
           <mat-list>
