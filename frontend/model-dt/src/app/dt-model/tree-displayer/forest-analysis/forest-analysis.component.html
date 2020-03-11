@@ -191,6 +191,12 @@
         <mat-list-item> Number of distinct clusters due to chosen threshold: {{ numHierClusters }} </mat-list-item>
         </mat-list>
           <ng-container *ngIf="hierClusters && hierClusters.length && hierClustersTree && hierClustersTree.length; else waitingForHierClus">
+            <app-hier-clus-visual [hierClustersTree]="hierClustersTree"
+                                  [numEstimators]="numEstimators"
+                                  [thresholdCut]="thresholdCut"
+                                  [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
+                                  [leavesOptSeq]="leavesOptSeq"
+                                  [events]="childUpdateThreshold.asObservable()"></app-hier-clus-visual>
             <mat-list>
               <mat-list-item>
                 <span class="common-attr-table-rank2"><strong>Cluster</strong></span>
@@ -203,12 +209,6 @@
               <span class="common-attr-table-left-bar2"> {{ clusterInfo.tree_inds }} </span>
               </mat-list-item>
             </mat-list>
-            <app-hier-clus-visual [hierClustersTree]="hierClustersTree"
-                                  [numEstimators]="numEstimators"
-                                  [thresholdCut]="thresholdCut"
-                                  [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
-                                  [leavesOptSeq]="leavesOptSeq"
-                                  [events]="childUpdateThreshold.asObservable()"></app-hier-clus-visual>
             <app-iterable-displayer [data]="clustSumDists" banList="[]">
             </app-iterable-displayer>
           </ng-container>

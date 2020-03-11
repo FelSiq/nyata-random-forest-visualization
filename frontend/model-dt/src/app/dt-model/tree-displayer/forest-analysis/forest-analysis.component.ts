@@ -171,7 +171,6 @@ export class ForestAnalysisComponent implements OnInit {
           this.numHierClusters = +results['num_cluster'];
           this.calledHierClusCutService = false;
           this.clustSumDists = results['clust_sum_dists'];
-          console.log(this.clustSumDists);
           this.emitEventToChild();
         }, error => {
           this.hierClusters = [];
