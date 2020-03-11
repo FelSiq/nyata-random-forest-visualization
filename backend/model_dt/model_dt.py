@@ -12,6 +12,7 @@ import scipy.cluster.hierarchy
 import pymfe.mfe
 
 from . import serialize
+from . import descriptions
 
 try:
     from . import utils
@@ -122,14 +123,14 @@ def get_class_freqs(
                                   key=lambda item: item[1],
                                   reverse=True)
 
-    ret = collections.OrderedDict((key, {
-        "value": {
-            "value": value,
-            "proportion": value / dt_model.n_estimators,
-        },
-        "description":
-        "Number of trees in the forest that predicted class '{}'.".format(key),
-    }) for key, value in sorted_class_by_tree)
+    ret = collections.OrderedDict((
+        key,
+        descriptions.add_desc(
+            value=descriptions.add_proportion(value, value /
+                                              dt_model.n_estimators),
+            desc="Number of trees in the forest that predicted class '{}'.".
+            format(key)),
+    ) for key, value in sorted_class_by_tree)
 
     margin = None  # type: t.Optional[str]
 
@@ -194,10 +195,10 @@ def get_metrics(
 
     if chosen_metrics:
         return {
-            metric_name: {
-                "value": safe_call_func(*metric_pack, true_labels, preds),
-                "description": "Todo.",
-            }
+            metric_name:
+            descriptions.add_desc(value=safe_call_func(*metric_pack,
+                                                       true_labels, preds),
+                                  desc="TODO.")
             for metric_name, metric_pack in chosen_metrics.items()
         }
 
@@ -343,19 +344,17 @@ def make_hier_clus_cut(
 
     formatted_clust_sum_dists = {
         utils.preprocess_key("sum_of_within_cluster_distances"):
-        serialize.json_encoder_type_manager({
-            "value": [{
-                "value": "{} ({:.2f})".format(int(key), val),
-                "proportion": prop,
-            } for val, prop, key in sorted(zip(*clust_sum_dists),
-                                           key=lambda item: item[1])],
-            "description":
-            "Sum of within cluster distances for each instance. The medoid "
-            "tree have, by definition, the minimal sum of inner cluster distances "
-            "in its cluster. The format of this list is: "
-            "[Tree Index] ([Total sum of distances]): [Inner cluster proportion "
-            "of the distance sum]",
-        })
+        serialize.json_encoder_type_manager(
+            descriptions.add_desc(
+                value=[
+                    descriptions.add_proportion(
+                        value="{} ({:.2f})".format(int(key), val),
+                        prop=prop,
+                    ) for val, prop, key in sorted(zip(*clust_sum_dists),
+                                                   key=lambda item: item[1])
+                ],
+                from_id="within_cluster_dists",
+            ))
     }
 
     return {
