@@ -1,6 +1,20 @@
 """Generic utility functions."""
 import re
 
+NULL_VALUES = {
+    "null",
+    "nan",
+    "na",
+    "none",
+    "noone",
+    "",
+    "nil",
+}
+"""Values in the instances to be interpreted as missing values."""
+
+RE_EMPTY_SPACE = re.compile(r"\s+|%20")
+"""Regular expression for empty spaces to preprocess given instances."""
+
 RE_KEY_NUMBEROF = re.compile(r"\bn \b")
 """Regular expression for getting 'n ' string, to format JSON keys."""
 RE_KEY_MIN = re.compile(r"\bmin\b")

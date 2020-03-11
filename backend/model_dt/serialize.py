@@ -7,6 +7,7 @@ import numpy as np
 import scipy.cluster.hierarchy
 
 from . import utils
+from . import descriptions
 
 try:
     from . import model_dt
@@ -49,10 +50,10 @@ def serialize_generic_obj(obj: t.Any,
     """Serialize a generic object."""
     if include_description:
         res = {
-            utils.preprocess_key(str(key)): {
-                "value": json_encoder_type_manager(value),
-                "description": "Description for key {}. TODO.".format(key),
-            }
+            utils.preprocess_key(str(key)): descriptions.add_desc(
+                value=json_encoder_type_manager(value),
+                desc="Description for key {}. TODO.".format(key),
+            )
             for key, value in obj.__dict__.items()
         }
 
@@ -113,15 +114,15 @@ def serialize_decision_tree(
                                key=lambda item: item[0],
                                reverse=True)
 
-        new_model["feature_importances_"] = {
-            "value":
-            json_encoder_type_manager([{
-                "value": item[1],
-                "proportion": item[0]
-            } for item in sorted_ft_imp]),
-            "description":
-            "TODO: this documentation properly."
-        }
+        new_model["feature_importances_"] = descriptions.add_desc(
+            value=json_encoder_type_manager([
+                descriptions.add_proportion(
+                    value=item[1],
+                    prop=item[0],
+                ) for item in sorted_ft_imp
+            ]),
+            from_id="feature_importances",
+        )
 
     except AttributeError:
         pass
@@ -146,17 +147,17 @@ def serialize_decision_tree(
 
         depth_formatted_sorted = list(
             map(
-                lambda item: {
-                    "value": item[0],
-                    "proportion": item[1],
-                },
+                lambda item: descriptions.add_proportion(
+                    value=item[0],
+                    prop=item[1],
+                ),
                 sorted(depth_freqs.items(),
                        key=lambda item: item[1],
                        reverse=True)))
 
-        new_model["depth_frequencies"] = {
-            "value": json_encoder_type_manager(depth_formatted_sorted),
-            "description": "TODO.",
-        }
+        new_model["depth_frequencies"] = descriptions.add_desc(
+            value=json_encoder_type_manager(depth_formatted_sorted),
+            from_id="depth_frequencies",
+        )
 
     return new_model

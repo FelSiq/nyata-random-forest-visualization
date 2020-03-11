@@ -17,22 +17,9 @@ import pandas as pd
 import sklearn.tree
 import redis
 
+from . import utils
 from . import model_dt
 from . import serialize
-
-NULL_VALUES = {
-    "null",
-    "nan",
-    "na",
-    "none",
-    "noone",
-    "",
-    "nil",
-}
-"""Values in the instances to be interpreted as missing values."""
-
-RE_EMPTY_SPACE = re.compile(r"\s+|%20")
-"""Regular expression for empty spaces to preprocess given instances."""
 
 
 class DecisionTree(flask_restful.Resource):
@@ -69,15 +56,11 @@ class PredictDataset(flask_restful.Resource):
         self.attr_labels = attr_labels
 
         self.reqparse = flask_restful.reqparse.RequestParser()
-
         self.reqparse.add_argument("file",
                                    type=werkzeug.datastructures.FileStorage,
                                    location="files")
-
         self.reqparse.add_argument("sep", type=str, location="form")
-
         self.reqparse.add_argument("hasHeader", type=str, location="form")
-
         self.reqparse.add_argument("hasClasses", type=str, location="form")
 
     def post(self):
@@ -132,9 +115,10 @@ class PredictSingleInstance(flask_restful.Resource):
     def _preprocess_instance(instance: str,
                              sep: str = ",") -> t.Optional[np.ndarray]:
         """Preprocess the user-given single instance."""
-        preproc_inst = np.array(RE_EMPTY_SPACE.sub("", instance).split(sep))
+        preproc_inst = np.array(
+            utils.RE_EMPTY_SPACE.sub("", instance).split(sep))
 
-        if not set(map(str.lower, preproc_inst)).isdisjoint(NULL_VALUES):
+        if not set(map(str.lower, preproc_inst)).isdisjoint(utils.NULL_VALUES):
             return None
 
         return preproc_inst.astype(np.float32).reshape(1, -1)
@@ -193,24 +177,21 @@ class PredictSingleInstance(flask_restful.Resource):
 
         pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict((
-                ("prediction_result", {
-                    "value": self.model.predict(inst_proc)[0],
-                    "description": "Final value predicted by the model.",
-                }),
-                ("classes_by_tree", {
-                    "value":
-                    classes_by_tree,
-                    "description":
-                    "Frequency of every class "
-                    "for every tree in the model.",
-                }),
-                ("margin", {
-                    "value":
-                    margin,
-                    "description":
-                    "Margin is the instance highest class probability "
-                    "minus second highest class probability.",
-                }),
+                ("prediction_result",
+                 descriptions.add_desc(
+                     value=self.model.predict(inst_proc)[0],
+                     from_id="prediction_result",
+                 )),
+                ("classes_by_tree",
+                 descriptions.add_desc(
+                     value=classes_by_tree,
+                     from_id="classes_by_tree",
+                 )),
+                ("margin",
+                 descriptions.add_desc(
+                     value=margin,
+                     from_id="pred_margin",
+                 )),
                 ("decision_path", {
                     "value": self._decision_path(inst_proc),
                 }),
@@ -284,12 +265,13 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
-
+        """
         response.headers.add("Access-Control-Allow-Methods",
                              "GET, POST, OPTIONS, PUT, PATCH, DELETE")
         response.headers.add(
             "Access-Control-Allow-Headers",
             "Origin, X-Requested-With, Content-Type, Accept, x-auth")
+        """
 
         return response
 

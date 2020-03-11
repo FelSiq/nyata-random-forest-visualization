@@ -1,6 +1,6 @@
 flask
 numpy
-sklearn
+scikit-learn
 flask-cors
 flask-restful
 flask-session
