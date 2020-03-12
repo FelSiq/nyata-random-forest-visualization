@@ -8,7 +8,7 @@ import { DTInterface } from '../dt-interface';
   templateUrl: './dt-model.component.html',
   styleUrls: ['./dt-model.component.css'],
 })
-export class DtModelComponent implements OnInit {
+export class DtModelComponent implements OnInit, OnDestroy {
     treeModel: DTInterface;
 
   constructor(private modelService: GetModelService) { 
