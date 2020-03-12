@@ -35,23 +35,16 @@ class DecisionTree(_BaseResourceClass):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
     def __init__(self, **kwargs):
         """."""
-        pass
+        flask.session["model"] = kwargs.get("model")
+        flask.session["attr_labels"] = kwargs.get("attr_labels")
+        flask.session.modified = True
 
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
-        dt_model, X, y, attr_labels = model_dt.get_toy_model()
-
-        flask.session["model"] = dt_model
-        flask.session["X"] = X
-        flask.session["y"] = y
-        flask.session["attr_labels"] = attr_labels
-
         res = flask.jsonify(
             serialize.serialize_decision_tree(
                 dt_model=flask.session["model"],
                 attr_labels=flask.session["attr_labels"]))
-
-        flask.session.modified = True
 
         return res
 
@@ -60,6 +53,9 @@ class PredictDataset(_BaseResourceClass):
     """Class dedicated to give methods for predicting a whole dataset."""
     def __init__(self, **kwargs):
         """."""
+        flask.session["model"] = kwargs.get("model")
+        flask.session.modified = True
+
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("file",
                                    type=werkzeug.datastructures.FileStorage,
@@ -111,6 +107,9 @@ class PredictSingleInstance(_BaseResourceClass):
     """Class dedicated to provide methods for predicting a single instance."""
     def __init__(self, **kwargs):
         """."""
+        flask.session["model"] = kwargs.get("model")
+        flask.session.modified = True
+
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("instance", type=str)
 
@@ -217,6 +216,9 @@ class PredictSingleInstance(_BaseResourceClass):
 class MostCommonAttrSeq(_BaseResourceClass):
     """Find the most common sequence of attributes in the forest."""
     def __init__(self, **kwargs):
+        flask.session["model"] = kwargs.get("model")
+        flask.session.modified = True
+
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("seq_num", type=int)
         self.reqparse.add_argument("include_node_decision", type=str)
@@ -242,6 +244,10 @@ class MostCommonAttrSeq(_BaseResourceClass):
 class ForestHierarchicalClustering(_BaseResourceClass):
     """Perform a hierarchical clustering using each tree DNA."""
     def __init__(self, **kwargs):
+        flask.session["model"] = kwargs.get("model")
+        flask.session["X"] = kwargs.get("X")
+        flask.session.modified = True
+
         self.reqparse_post = flask_restful.reqparse.RequestParser()
         self.reqparse_post.add_argument("threshold_cut", type=float)
         self.reqparse_post.add_argument("linkage", type=str)
@@ -339,7 +345,14 @@ def create_app():
     flask_cors.CORS(app, supports_credentials=True)
     api = flask_restful.Api(app)
 
-    common_kwargs = {}  # type: t.Dict[str, t.Any]
+    model, X, y, attr_labels = model_dt.get_toy_model()
+
+    common_kwargs = {
+        "model": model,
+        "X": X,
+        "y": y,
+        "attr_labels": attr_labels,
+    }  # type: t.Dict[str, t.Any]
 
     api.add_resource(DecisionTree,
                      "/dt-visualization",
@@ -363,15 +376,12 @@ def create_app():
 
     sess.init_app(app)
 
-    with app.app_content():
-
     @app.before_first_request
     def before_first_request_func():
         """
         This function will run once before the first request to this instance of the application.
         You may want to use this function to create any databases/tables required for your app.
         """
-
         print("This function will run once ")
 
     @app.before_request
