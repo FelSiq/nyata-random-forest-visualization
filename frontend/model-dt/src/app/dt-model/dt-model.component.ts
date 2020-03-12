@@ -1,4 +1,4 @@
-import { Component, OnInit, } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { GetModelService } from '../get-model.service';
 import { DTInterface } from '../dt-interface';
@@ -16,6 +16,10 @@ export class DtModelComponent implements OnInit {
 
   ngOnInit() {
     this.getDTModel();
+  }
+
+  ngOnDestroy() {
+    this.modelService.destroy();
   }
 
   getDTModel(): void {

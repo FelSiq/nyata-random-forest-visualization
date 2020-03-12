@@ -6,6 +6,7 @@ import { catchError, retry } from 'rxjs/operators';
 import { DTInterface } from './dt-interface';
 
 const httpOptions = {
+  withCredentials: true,
   headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
 };
 
@@ -13,16 +14,20 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class GetModelService {
-  private urlGetModel = 'http://127.0.0.1:5000/dt-visualization';
+  private urlResource = 'http://127.0.0.1:5000/dt-visualization';
 
-  constructor(private http: HttpClient) { }
+  constructor(private httpClient: HttpClient) { }
 
   getDTModel(): Observable<DTInterface> {
-    return this.http.get<DTInterface>(this.urlGetModel, { responseType: 'json' })
+    return this.httpClient.get<DTInterface>(this.urlResource, httpOptions)
       .pipe(
         retry(3),
       	catchError(this.handleError)
       );
+  }
+
+  destroy() {
+    this.httpClient.delete(this.urlResource).subscribe();
   }
 
   private handleError(error: HttpErrorResponse) {

@@ -7,7 +7,7 @@ import { PredictResults } from '../predict-results';
 
 const httpOptions = {
   withCredentials: true,
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  // headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
 };
 
 @Injectable({
@@ -22,16 +22,14 @@ export class DatasetUploadService {
            sep: string,
            hasHeader: boolean,
            hasClasses: boolean): Observable<PredictResults> {
-    const endpoint = this.urlResource;
-
     const formData: FormData = new FormData();
     formData.append('file', fileToUpload);
     formData.append('sep', sep);
-    formData.append('hasHeader', hasHeader ? 'True' : 'False');
-    formData.append('hasClasses', hasClasses ? 'True' : 'False');
+    formData.append('hasHeader', hasHeader ? '1' : '0');
+    formData.append('hasClasses', hasClasses ? '1' : '0');
 
     return this.httpClient
-      .post(endpoint, formData)
+      .post(this.urlResource, formData, httpOptions)
       .pipe(
         catchError((e) => this.handleError(e))
       );
