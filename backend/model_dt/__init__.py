@@ -3,7 +3,6 @@
 import typing as t
 import re
 import collections
-import os
 import pickle
 
 import flask
@@ -15,11 +14,11 @@ import werkzeug
 import numpy as np
 import pandas as pd
 import sklearn.tree
-import redis
 
 from . import utils
 from . import model_dt
 from . import serialize
+from . import config
 
 
 class _BaseResourceClass(flask_restful.Resource):
@@ -34,31 +33,33 @@ class _BaseResourceClass(flask_restful.Resource):
 
 class DecisionTree(_BaseResourceClass):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
-    def __init__(self,
-                 model,
-                 attr_labels: t.Optional[t.Sequence[str]] = None,
-                 **kwargs):
+    def __init__(self, **kwargs):
         """."""
-        flask.session["model"] = model
-        flask.session["attr_labels"] = attr_labels
-        flask.session.modified = True
+        pass
 
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
+        dt_model, X, y, attr_labels = model_dt.get_toy_model()
+
+        flask.session["model"] = dt_model
+        flask.session["X"] = X
+        flask.session["y"] = y
+        flask.session["attr_labels"] = attr_labels
+
         res = flask.jsonify(
             serialize.serialize_decision_tree(
                 dt_model=flask.session["model"],
                 attr_labels=flask.session["attr_labels"]))
+
+        flask.session.modified = True
 
         return res
 
 
 class PredictDataset(_BaseResourceClass):
     """Class dedicated to give methods for predicting a whole dataset."""
-    def __init__(self, model, **kwargs):
+    def __init__(self, **kwargs):
         """."""
-        flask.session["model"] = model
-
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("file",
                                    type=werkzeug.datastructures.FileStorage,
@@ -66,8 +67,6 @@ class PredictDataset(_BaseResourceClass):
         self.reqparse.add_argument("sep", type=str, location="form")
         self.reqparse.add_argument("hasHeader", type=str, location="form")
         self.reqparse.add_argument("hasClasses", type=str, location="form")
-
-        flask.session.modified = True
 
     def post(self):
         """Make predictions and give metrics for the user-given dataset."""
@@ -110,14 +109,10 @@ class PredictDataset(_BaseResourceClass):
 
 class PredictSingleInstance(_BaseResourceClass):
     """Class dedicated to provide methods for predicting a single instance."""
-    def __init__(self, model, **kwargs):
+    def __init__(self, **kwargs):
         """."""
-        flask.session["model"] = model
-
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("instance", type=str)
-
-        flask.session.modified = True
 
     @staticmethod
     def _preprocess_instance(instance: str,
@@ -221,14 +216,10 @@ class PredictSingleInstance(_BaseResourceClass):
 
 class MostCommonAttrSeq(_BaseResourceClass):
     """Find the most common sequence of attributes in the forest."""
-    def __init__(self, model, **kwargs):
-        flask.session["model"] = model
-
+    def __init__(self, **kwargs):
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("seq_num", type=int)
         self.reqparse.add_argument("include_node_decision", type=str)
-
-        flask.session.modified = True
 
     def post(self):
         model = flask.session.get("model")
@@ -250,10 +241,7 @@ class MostCommonAttrSeq(_BaseResourceClass):
 
 class ForestHierarchicalClustering(_BaseResourceClass):
     """Perform a hierarchical clustering using each tree DNA."""
-    def __init__(self, model, X: np.ndarray, **kwargs):
-        flask.session["model"] = model
-        flask.session["X"] = X
-
+    def __init__(self, **kwargs):
         self.reqparse_post = flask_restful.reqparse.RequestParser()
         self.reqparse_post.add_argument("threshold_cut", type=float)
         self.reqparse_post.add_argument("linkage", type=str)
@@ -261,8 +249,6 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         self.reqparse_update = flask_restful.reqparse.RequestParser()
         self.reqparse_update.add_argument("threshold_cut", type=float)
-
-        flask.session.modified = True
 
     def post(self):
         model = flask.session.get("model")
@@ -341,22 +327,6 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         return response
 
 
-class Config:
-    """Set Flask configuration vars from .env file."""
-    FLASK_ENV = os.environ.get("FLASK_ENV")
-    FLASK_APP = os.environ.get("FLASK_APP")
-    FLASK_DEBUG = os.environ.get("FLASK_DEBUG")
-    SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "rfvisual")
-    SESSION_TYPE = os.environ.get("SESSION_TYPE", "redis")
-    SESSION_REDIS = redis.from_url(
-        os.environ.get("SESSION_REDIS", "redis://127.0.0.1:6379"))
-    SESSION_USE_SIGNER = os.environ.get("SESSION_USE_SIGNER", False)
-    SECRET_KEY = os.environ.get("SECRET_KEY")
-    SESSION_COOKIE_SECURE = bool(int(os.environ.get("SESSION_COOKIE_SECURE", False)))
-    SESSION_PERMANENT = bool(int(os.environ.get("SESSION_PERMANENT", False)))
-    PERMANENT_SESSION_LIFETIME = int(os.environ.get("PERMANENT_SESSION_LIFETIME", 60 * 60 * 2))
-
-
 sess = flask_session.Session()
 
 
@@ -364,19 +334,12 @@ def create_app():
     """DT visualization application factory."""
     app = flask.Flask(__name__, instance_relative_config=False)
 
-    app.config.from_object(Config)
+    app.config.from_object(config.Config)
 
     flask_cors.CORS(app, supports_credentials=True)
     api = flask_restful.Api(app)
 
-    dt_model, X, y, attr_labels = model_dt.get_toy_model()
-
-    common_kwargs = {
-        "model": dt_model,
-        "X": X,
-        "y": y,
-        "attr_labels": attr_labels,
-    }  # type: t.Dict[str, t.Any]
+    common_kwargs = {}  # type: t.Dict[str, t.Any]
 
     api.add_resource(DecisionTree,
                      "/dt-visualization",
@@ -400,13 +363,15 @@ def create_app():
 
     sess.init_app(app)
 
+    with app.app_content():
+
     @app.before_first_request
     def before_first_request_func():
         """
         This function will run once before the first request to this instance of the application.
         You may want to use this function to create any databases/tables required for your app.
         """
-    
+
         print("This function will run once ")
 
     @app.before_request
