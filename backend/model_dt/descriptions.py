@@ -97,6 +97,7 @@ def add_desc(value: t.Any,
         if from_obj_doc is not None:
             from_id = build_class_arg_key(obj=from_obj_doc) + from_id
 
+        print("Added desc - from_id =", from_id)
         desc = DESCRIPTIONS.get(from_id, None)
 
     return dictionarize(value=value,

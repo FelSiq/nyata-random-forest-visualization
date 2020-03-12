@@ -343,6 +343,10 @@ class Config:
         os.environ.get("SESSION_REDIS", "redis://127.0.0.1:6379"))
     SESSION_USE_SIGNER = os.environ.get("SESSION_USE_SIGNER", False)
     SECRET_KEY = os.environ.get("SECRET_KEY")
+    SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME")
+    SESSION_COOKIE_SECURE = bool(int(os.environ.get("SESSION_COOKIE_SECURE", False)))
+    SESSION_PERMANENT = bool(int(os.environ.get("SESSION_PERMANENT", True)))
+    PERMANENT_SESSION_LIFETIME = int(os.environ.get("PERMANENT_SESSION_LIFETIME", 60 * 60 * 2))
 
 
 sess = flask_session.Session()
@@ -387,5 +391,18 @@ def create_app():
                      resource_class_kwargs=common_kwargs)
 
     sess.init_app(app)
+
+    @app.before_first_request
+    def before_first_request_func():
+        """
+        This function will run once before the first request to this instance of the application.
+        You may want to use this function to create any databases/tables required for your app.
+        """
+    
+        print("This function will run once ")
+
+    @app.before_request
+    def regenerate_session():
+        pass
 
     return app
