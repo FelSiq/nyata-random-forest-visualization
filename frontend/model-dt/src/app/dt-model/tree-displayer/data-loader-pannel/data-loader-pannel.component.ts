@@ -68,6 +68,8 @@ export class DataLoaderPannelComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.cleanPredictResults();
+    this.predictor.destroy();
+    this.fileUploadService.destroy();
   }
 
   private showCopiedSnackBar(): void {

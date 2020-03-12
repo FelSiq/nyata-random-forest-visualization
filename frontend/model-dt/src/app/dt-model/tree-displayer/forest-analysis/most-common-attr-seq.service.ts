@@ -32,7 +32,7 @@ export class MostCommonAttrSeqService {
       );
   }
 
-  destroyMostCommonAttrSeq() { 
+  destroy() { 
     this.httpClient.delete(this.urlResource).subscribe(); 
   } 
 

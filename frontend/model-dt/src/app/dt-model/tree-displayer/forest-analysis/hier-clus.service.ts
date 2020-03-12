@@ -40,7 +40,7 @@ export class HierClusService {
         );
   }
 
-  destroyHierarchicalClustering() {
+  destroy() {
     this.httpClient.delete(this.urlResource).subscribe();
   }
 

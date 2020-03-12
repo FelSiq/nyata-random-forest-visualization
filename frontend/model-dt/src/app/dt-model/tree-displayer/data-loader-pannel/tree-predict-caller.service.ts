@@ -33,6 +33,10 @@ export class TreePredictCallerService {
       );
   }
 
+  destroy() {
+    this.httpClient.delete(this.urlResource).subscribe();
+  }
+
   private handleError(error: HttpErrorResponse) {
     return throwError(
       `Something went wrong while predicting a single instance.

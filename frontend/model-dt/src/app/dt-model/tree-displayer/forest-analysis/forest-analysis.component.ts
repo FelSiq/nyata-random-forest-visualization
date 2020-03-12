@@ -53,7 +53,8 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.hierClusService.destroyHierarchicalClustering();
+    this.mostCommonAttrSeqService.destroy();
+    this.hierClusService.destroy();
   }
 
   emitEventToParent(treeId: string | number) {

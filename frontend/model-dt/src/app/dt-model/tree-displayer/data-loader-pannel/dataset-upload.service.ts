@@ -37,6 +37,10 @@ export class DatasetUploadService {
       );
   }
 
+  destroy() { 
+    this.httpClient.delete(this.urlResource).subscribe();
+  }
+
   private handleError(error: HttpErrorResponse) {
     return throwError(
       `Something went wrong while predicting a whole test dataset.
