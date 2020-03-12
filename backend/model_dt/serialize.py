@@ -160,4 +160,15 @@ def serialize_decision_tree(
             from_id="depth_frequencies",
         )
 
+    if isinstance(dt_model, (sklearn.tree.DecisionTreeClassifier,
+                             sklearn.ensemble.RandomForestClassifier)):
+        new_model["model_type"] = "classifier"
+
+    elif isinstance(dt_model, (sklearn.tree.DecisionTreeRegressor,
+                               sklearn.ensemble.RandomForestRegressor)):
+        new_model["model_type"] = "regressor"
+
+    else:
+        new_model["model_type"] = "unknown"
+
     return new_model

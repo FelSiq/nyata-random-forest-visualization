@@ -35,8 +35,9 @@ class DecisionTree(flask_restful.Resource):
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
         return flask.jsonify(
-            serialize.serialize_decision_tree(dt_model=flask.session["model"],
-                                              attr_labels=flask.session["attr_labels"]))
+            serialize.serialize_decision_tree(
+                dt_model=flask.session["model"],
+                attr_labels=flask.session["attr_labels"]))
 
 
 class PredictDataset(flask_restful.Resource):
@@ -92,10 +93,7 @@ class PredictDataset(flask_restful.Resource):
 
 class PredictSingleInstance(flask_restful.Resource):
     """Class dedicated to provide methods for predicting a single instance."""
-
-    def __init__(self,
-                 model,
-                 **kwargs):
+    def __init__(self, model, **kwargs):
         """."""
         flask.session["model"] = model
 
@@ -130,7 +128,7 @@ class PredictSingleInstance(flask_restful.Resource):
         model = flask.session["model"]
 
         if isinstance(model, (sklearn.tree.DecisionTreeClassifier,
-                                   sklearn.tree.DecisionTreeRegressor)):
+                              sklearn.tree.DecisionTreeRegressor)):
             nodes = [model.decision_path(inst_proc).indices]
 
         else:
@@ -164,8 +162,7 @@ class PredictSingleInstance(flask_restful.Resource):
             return flask.jsonify(
                 PredictSingleInstance._handle_errors(err_code))
 
-        classes_by_tree, margin = model_dt.get_class_freqs(
-            model, inst_proc)
+        classes_by_tree, margin = model_dt.get_class_freqs(model, inst_proc)
 
         pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict((
@@ -197,7 +194,6 @@ class PredictSingleInstance(flask_restful.Resource):
 
 class MostCommonAttrSeq(flask_restful.Resource):
     """Find the most common sequence of attributes in the forest."""
-
     def __init__(self, model, **kwargs):
         flask.session["model"] = model
 
@@ -217,7 +213,6 @@ class MostCommonAttrSeq(flask_restful.Resource):
 
 class ForestHierarchicalClustering(flask_restful.Resource):
     """Perform a hierarchical clustering using each tree DNA."""
-
     def __init__(self, model, X: np.ndarray, **kwargs):
         flask.session["model"] = model
         flask.session["X"] = X
@@ -236,7 +231,7 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
         args = self.reqparse_post.parse_args()
 
-        threshold_cut = args.get("threshold_cut", 2.0)
+        threshold_cut = args.get("threshold_cut", 0.5)
         linkage = args.get("linkage", "average")
         strategy = args.get("strategy", "dna")
 
@@ -245,10 +240,12 @@ class ForestHierarchicalClustering(flask_restful.Resource):
                 "'strategy' must be either 'dna' or 'metafeatures.'")
 
         if strategy == "dna":
-            dist_mat = model_dt.calc_dna_dist_mat(model=model, X=X)
+            dist_mat, dist_formula, max_dist = model_dt.calc_dna_dist_mat(
+                model=model, X=X)
 
         else:
-            dist_mat = model_dt.calc_mtf_dist_mat(model=model)
+            dist_mat, dist_formula, max_dist = model_dt.calc_mtf_dist_mat(
+                model=model)
 
         hier_clus_data = model_dt.get_hierarchical_cluster(dist_mat=dist_mat,
                                                            linkage=linkage)
@@ -257,10 +254,18 @@ class ForestHierarchicalClustering(flask_restful.Resource):
             model_dt.make_hier_clus_cut(
                 dendrogram=hier_clus_data.get("dendrogram"),
                 dist_mat=dist_mat,
-                threshold_cut=threshold_cut))
+                threshold_cut=max_dist * threshold_cut))
+
+        hier_clus_data.update({
+            "hier_clus_distance":
+            "f(x) = {}".format(dist_formula),
+            "max_limit":
+            max_dist,
+        })
 
         flask.session["hier_clus_data"] = hier_clus_data
         flask.session["dist_mat"] = dist_mat
+        flask.session["max_dist"] = max_dist
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
@@ -277,10 +282,11 @@ class ForestHierarchicalClustering(flask_restful.Resource):
     def put(self):
         args = self.reqparse_update.parse_args()
 
-        threshold_cut = args.get("threshold_cut", 2.0)
+        threshold_cut = args.get("threshold_cut", 0.5)
 
         hier_clus_data = flask.session.get("hier_clus_data")
         dist_mat = flask.session.get("dist_mat")
+        max_dist = flask.session.get("max_dist")
 
         if hier_clus_data is None:
             raise ValueError(
@@ -289,16 +295,29 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         hier_clus_data = model_dt.make_hier_clus_cut(
             dendrogram=hier_clus_data.get("dendrogram"),
             dist_mat=dist_mat,
-            threshold_cut=threshold_cut)
+            threshold_cut=max_dist * threshold_cut)
+
         flask.session["hier_clus_data"].update(hier_clus_data)
 
         return flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
 
     def delete(self):
-        if flask.session.get("data"):
-            flask.session.pop("data")
+        if flask.session.get("hier_clus_data"):
+            flask.session.pop("hier_clus_data")
             print("Successfully deleted session hierarchical cluster data.")
+
+        if flask.session.get("dist_mat"):
+            flask.session.pop("dist_mat")
+            print(
+                "Successfully deleted session hierarchical cluster distance matrix."
+            )
+
+        if flask.session.get("max_dist"):
+            flask.session.pop("max_dist")
+            print(
+                "Successfully deleted session hierarchical cluster distance matrix."
+            )
 
 
 class Config:

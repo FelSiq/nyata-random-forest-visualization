@@ -266,7 +266,7 @@ def top_most_common_attr_seq(
 
 def calc_dna_dist_mat(model: t.Union[sklearn.ensemble.RandomForestClassifier,
                                      sklearn.ensemble.RandomForestRegressor],
-                      X: np.ndarray) -> np.ndarray:
+                      X: np.ndarray) -> t.Tuple[np.ndarray, str, float]:
     """Calculate DNA distance matrix between trees."""
     inst_num = X.shape[0]
     dna = np.zeros((model.n_estimators, inst_num), dtype=X.dtype)
@@ -274,21 +274,35 @@ def calc_dna_dist_mat(model: t.Union[sklearn.ensemble.RandomForestClassifier,
     for tree_ind, tree in enumerate(model.estimators_):
         dna[tree_ind, :] = tree.predict(X)
 
-    # Shift Cohen's Kappa to prevent negative values, and also transform
-    # it to a distance measure (i.e., the higher is the correlation, the
-    # smaller will be the dna_dists value.)
-    # Note: this distance measure is in [0, 2], with 0 being 'totally
-    # equal' and 2 being 'totally distinct.'
-    dna_dists = 1.0 - scipy.spatial.distance.pdist(
-        X=dna, metric=sklearn.metrics.cohen_kappa_score)
+    if isinstance(model, sklearn.ensemble.RandomForestClassifier):
+        # Shift Cohen's Kappa to prevent negative values, and also transform
+        # it to a distance measure (i.e., the higher is the correlation, the
+        # smaller will be the dna_dists value.)
+        # Note: this distance measure is in [0, 2], with 0 being 'totally
+        # equal' and 2 being 'totally distinct.'
+        dna_dists = 1.0 - scipy.spatial.distance.pdist(
+            X=dna, metric=sklearn.metrics.cohen_kappa_score)
 
-    return dna_dists
+        dist_formula = "1 - Cohen_kappa(x)"
+        max_limit = 2.0
+
+    else:
+        dna_min = dna.min(axis=0)
+
+        dna = (dna - dna_min) / (1e-6 + dna.max(axis=0) - dna_min)
+
+        dna_dists = scipy.spatial.distance.pdist(X=dna, metric="euclidean")
+
+        dist_formula = "Euclidean_dist(x)"
+        max_limit = inst_num**0.5
+
+    return dna_dists, dist_formula, max_limit
 
 
 def calc_mtf_dist_mat(
     model: t.Union[sklearn.ensemble.RandomForestClassifier,
                    sklearn.ensemble.RandomForestRegressor]
-) -> np.ndarray:
+) -> t.Tuple[np.ndarray, str, float]:
     """."""
     mtf_names = pymfe.mfe.MFE.valid_metafeatures(groups="model-based")
     summary = ("mean", "sd")
@@ -303,7 +317,9 @@ def calc_mtf_dist_mat(
 
     mtf_dists = scipy.spatial.distance.pdist(X=mtf_vec, metric="euclidean")
 
-    return mtf_dists
+    max_limit = mtf_vec.shape[1]**0.5
+
+    return mtf_dists, "Euclidean_dist(x)", max_limit
 
 
 def make_hier_clus_cut(
@@ -402,8 +418,8 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
     if forest:
         args = {
             "n_estimators": 10,
-            "min_samples_split": 35,
-            "min_samples_leaf": 20,
+            "min_samples_split": 2,
+            "min_samples_leaf": 1,
         }
     else:
         args = {}
