@@ -23,4 +23,6 @@ export interface HierClus {
   dendrogram_tree: ClusterNode[];
   optimal_leaves_seq: number[];
   clust_sum_dists: KeyValuePair[];
+  hier_clus_distance: string;
+  max_limit: number;
 }

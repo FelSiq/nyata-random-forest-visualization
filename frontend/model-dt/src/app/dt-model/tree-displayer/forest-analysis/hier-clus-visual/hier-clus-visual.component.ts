@@ -21,6 +21,9 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
   @Input() numEstimators: number;
   @Input() thresholdCut: number;
   @Input() selectedLinkageType: string;
+  @Input() hierClusDistFormula: string;
+  @Input() xMaxLimit: number;
+
   private svg: D3Selection;
   private links: D3Selection;
   private nodes: D3Selection;
@@ -29,7 +32,6 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
   private svgWidth: number;
   private xSvgLimit: number;
 
-  private xMaxLimit = 2.0;
   private numLegendTicks = 10;
 
   private readonly textFontSize = 18;
@@ -99,7 +101,7 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
     legend
         .append('text')
           .classed('legend', true)
-          .text('f(x) = 1 - Cohen_kappa(x)')
+          .text(this.hierClusDistFormula)
           .attr('font-size', '16px')
           .attr('x', 1)
           .attr('y', this.legendYPos + 36);
@@ -132,7 +134,7 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
     if (this.thresholdCut !== null && this.thresholdCut !== undefined) {
       this.svg.selectAll('.threshold').remove();
 
-      const thresholdLinePos = (1.0 - this.thresholdCut / this.xMaxLimit) * this.xSvgLimit;
+      const thresholdLinePos = (1.0 - this.thresholdCut) * this.xSvgLimit;
   
       this.thresholdLine = this.svg.append('g');
 

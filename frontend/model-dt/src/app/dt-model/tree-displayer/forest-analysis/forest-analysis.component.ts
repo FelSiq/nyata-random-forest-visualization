@@ -11,6 +11,12 @@ import { Subject } from 'rxjs/Subject';
   styleUrls: ['./forest-analysis.component.css']
 })
 export class ForestAnalysisComponent implements OnInit {
+  @Input() numEstimators: number = -1;
+  @Input() modelType: string;
+  @Input() attrLabels: string[] = [];
+
+  @Output() peekMedoidTree = new EventEmitter<number>();
+
   rankCommonAttrSeq = [];
   hierClusters: ClusterData[] = [];
   leavesOptSeq: number[];
@@ -19,9 +25,7 @@ export class ForestAnalysisComponent implements OnInit {
   errorMessage: string = '';
   calledCommonAttrSeqService: boolean = false;
   calledHierClusService = false;
-  @Input() numEstimators: number = -1;
   propCutSliderValue: number = 0.0;
-  @Input() attrLabels: string[] = [];
   numHierClusters: number = 0;
   thresholdCut: number;
   includeDecisionFeature: boolean = false;
@@ -32,7 +36,8 @@ export class ForestAnalysisComponent implements OnInit {
   calledHierClusCutService: boolean = false;
   childUpdateThreshold: Subject<void> = new Subject<void>();
   clustSumDists: KeyValuePair[];
-  @Output() peekMedoidTree = new EventEmitter<number>();
+  hierClusDistFormula: string;
+  xMaxLimit: number;
 
   availableLinkages: string[] = [
     'single',
@@ -132,8 +137,7 @@ export class ForestAnalysisComponent implements OnInit {
     this.hierClustersTree = null;
     this.leavesOptSeq =  null;
     this.calledHierClusService = true;
-    this.thresholdCut = (
-        this.selectedChVectorType === 'dna' ? 2.0 : 1.0) * +this.propCutSliderValue;
+    this.thresholdCut = +this.propCutSliderValue;
     this.resultLinkageType =  this.selectedLinkageType;
     this.clustSumDists = null;
 
@@ -143,9 +147,11 @@ export class ForestAnalysisComponent implements OnInit {
       .subscribe((results: HierClus) => {
           this.hierClusters = results['clust_assignment'];
           this.leavesOptSeq = results['optimal_leaves_seq'];
+	  this.hierClusDistFormula = results['hier_clus_distance'];
           this.numHierClusters = +results['num_cluster'];
           this.hierClustersTree = results['dendrogram_tree'];
           this.clustSumDists = results['clust_sum_dists'];
+	  this.xMaxLimit = +results['max_limit'];
           this.calledHierClusService = false;
         }, error => {
           this.hierClusters = [];
@@ -153,6 +159,7 @@ export class ForestAnalysisComponent implements OnInit {
 	  this.hierClustersTree = null;
           this.leavesOptSeq =  null;
           this.resultLinkageType =  null;
+	  this.xMaxLimit = -1;
           this.errorMessage = 'Something went wrong while communicating with the backend.';
           this.calledHierClusService = false;
         });
@@ -165,8 +172,7 @@ export class ForestAnalysisComponent implements OnInit {
       return;
     }
 
-    this.thresholdCut = (
-        this.selectedChVectorType === 'dna' ? 2.0 : 1.0) * +this.propCutSliderValue;
+    this.thresholdCut = +this.propCutSliderValue;
     this.calledHierClusCutService = true;
     this.clustSumDists = null;
 

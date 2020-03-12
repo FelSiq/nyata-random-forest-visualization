@@ -196,7 +196,9 @@
                                   [thresholdCut]="thresholdCut"
                                   [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
                                   [leavesOptSeq]="leavesOptSeq"
-                                  [events]="childUpdateThreshold.asObservable()"></app-hier-clus-visual>
+                                  [events]="childUpdateThreshold.asObservable()"
+				  [hierClusDistFormula]="hierClusDistFormula"
+				  [xMaxLimit]="xMaxLimit"></app-hier-clus-visual>
             <mat-list>
               <mat-list-item>
                 <span class="common-attr-table-rank2"><strong>Cluster</strong></span>

@@ -47,7 +47,8 @@
             <app-forest-analysis
 	        [numEstimators]="treeModel.tree_ ? 1 : (treeModel.estimators_ ? treeModel.estimators_.value.length : 0)"
 	        [attrLabels]="treeModel.attr_labels ? treeModel.attr_labels : null"
-		(peekMedoidTree)="updateChosenTree($event)">
+		(peekMedoidTree)="updateChosenTree($event)"
+		[modelType]="treeModel.model_type">
 	    </app-forest-analysis>
         </ng-template>
       </mat-tab>
