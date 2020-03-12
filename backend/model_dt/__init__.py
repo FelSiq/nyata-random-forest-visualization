@@ -24,11 +24,8 @@ from . import config
 class _BaseResourceClass(flask_restful.Resource):
     """Base class for DT/RF visualization resources."""
     def delete(self, verbose: bool = True):
-        flask.session.clear()
-        flask.session.modified = True
-
         if verbose:
-            print("Successfully cleared flask session for", self.__class__)
+            print("Nothing to clean for", self.__class__)
 
 
 class DecisionTree(_BaseResourceClass):
@@ -49,6 +46,13 @@ class DecisionTree(_BaseResourceClass):
                 attr_labels=flask.session["attr_labels"]))
 
         return res
+
+    def delete(self, verbose: bool = True):
+        flask.session.clear()
+        flask.session.modified = True
+
+        if verbose:
+            print("Successfully cleared flask session for", self.__class__)
 
 
 class PredictDataset(_BaseResourceClass):
@@ -291,6 +295,14 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         flask.session.modified = True
 
         return response
+
+    def delete(self, verbose: bool = True):
+        flask.session.pop("hier_clus_data", None)
+        flask.session.pop("dist_mat", None)
+        flask.session.pop("max_dist", None)
+
+        if verbose:
+            print("Deleted session data for", self.__class__)
 
     def put(self):
         args = self.reqparse_update.parse_args()
