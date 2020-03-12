@@ -14,7 +14,7 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class DatasetUploadService {
-  private urlPostInstance = 'http://127.0.0.1:5000/predict-dataset';
+  private urlResource = 'http://127.0.0.1:5000/predict-dataset';
 
   constructor(public httpClient: HttpClient) { }
 
@@ -22,7 +22,7 @@ export class DatasetUploadService {
            sep: string,
            hasHeader: boolean,
            hasClasses: boolean): Observable<PredictResults> {
-    const endpoint = this.urlPostInstance;
+    const endpoint = this.urlResource;
 
     const formData: FormData = new FormData();
     formData.append('file', fileToUpload);

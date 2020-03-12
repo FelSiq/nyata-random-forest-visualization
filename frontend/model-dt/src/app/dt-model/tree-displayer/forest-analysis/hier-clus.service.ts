@@ -17,7 +17,7 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class HierClusService {
-  private urlGetInstance = 'http://127.0.0.1:5000/forest-hierarchical-clustering';
+  private urlResource = 'http://127.0.0.1:5000/forest-hierarchical-clustering';
 
   constructor(private httpClient: HttpClient) { }
 
@@ -33,7 +33,7 @@ export class HierClusService {
     }
 
     return this.httpClient
-      .post<HierClus>(this.urlGetInstance, args, httpOptions)
+      .post<HierClus>(this.urlResource, args, httpOptions)
         .pipe(
           retry(3),
           catchError(this.handleErrorGet)
@@ -41,7 +41,7 @@ export class HierClusService {
   }
 
   destroyHierarchicalClustering() {
-    this.httpClient.delete(this.urlGetInstance).subscribe();
+    this.httpClient.delete(this.urlResource).subscribe();
   }
 
   cutHierarchicalClustering(thresholdCut: number) {
@@ -50,7 +50,7 @@ export class HierClusService {
     }
 
     return this.httpClient
-      .put<Array<any>>(this.urlGetInstance, args, httpOptions)
+      .put<Array<any>>(this.urlResource, args, httpOptions)
         .pipe(
           retry(3),
           catchError(this.handleErrorCut)

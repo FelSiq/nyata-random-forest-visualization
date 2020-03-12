@@ -13,18 +13,28 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class MostCommonAttrSeqService {
-  private urlPostInstance = 'http://127.0.0.1:5000/most-common-attr-seq/';
+  private urlResource = 'http://127.0.0.1:5000/most-common-attr-seq';
 
   constructor(private httpClient: HttpClient) { }
 
   getMostCommonAttrSeq(attrNum: number, includeDecision: boolean): Observable<HierClus> {
+
+    const args = {
+      'seq_num': attrNum.toString(),
+      'include_node_decision': includeDecision ? '1' : '0',
+    }
+
     return this.httpClient
-    .get<HierClus>(this.urlPostInstance + attrNum.toString() + '/' + (includeDecision ? '1' : '0'), httpOptions)
+    .post<HierClus>(this.urlResource, args, httpOptions)
       .pipe(
         retry(3),
         catchError(this.handleError)
       );
   }
+
+  destroyMostCommonAttrSeq() { 
+    this.httpClient.delete(this.urlResource).subscribe(); 
+  } 
 
   private handleError(error: HttpErrorResponse) {
     return throwError(
