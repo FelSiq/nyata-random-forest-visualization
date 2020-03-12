@@ -61,8 +61,8 @@ class PredictDataset(_BaseResourceClass):
                                    type=werkzeug.datastructures.FileStorage,
                                    location="files")
         self.reqparse.add_argument("sep", type=str, location="form")
-        self.reqparse.add_argument("hasHeader", type=str, location="form")
-        self.reqparse.add_argument("hasClasses", type=str, location="form")
+        self.reqparse.add_argument("hasHeader", type=int, location="form")
+        self.reqparse.add_argument("hasClasses", type=int, location="form")
 
     def post(self):
         """Make predictions and give metrics for the user-given dataset."""
@@ -72,8 +72,8 @@ class PredictDataset(_BaseResourceClass):
 
         dataset_file = args["file"]
         sep = args["sep"]
-        has_header = args["hasHeader"] == 'True'
-        has_classes = args["hasClasses"] == 'True'
+        has_header = bool(args["hasHeader"])
+        has_classes = bool(args["hasClasses"])
 
         data = pd.read_csv(filepath_or_buffer=dataset_file,
                            sep=sep,
@@ -221,14 +221,14 @@ class MostCommonAttrSeq(_BaseResourceClass):
 
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("seq_num", type=int)
-        self.reqparse.add_argument("include_node_decision", type=str)
+        self.reqparse.add_argument("include_node_decision", type=int)
 
     def post(self):
         model = flask.session.get("model")
 
         args = self.reqparse.parse_args()
         seq_num = args["seq_num"]
-        include_node_decision = args["include_node_decision"] != "0"
+        include_node_decision = bool(args["include_node_decision"])
 
         top_common_seqs = model_dt.top_most_common_attr_seq(
             model,
