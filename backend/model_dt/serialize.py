@@ -52,7 +52,8 @@ def serialize_generic_obj(obj: t.Any,
         res = {
             utils.preprocess_key(str(key)): descriptions.add_desc(
                 value=json_encoder_type_manager(value),
-                desc="Description for key {}. TODO.".format(key),
+                from_id=key,
+                from_obj_doc=obj,
             )
             for key, value in obj.__dict__.items()
         }

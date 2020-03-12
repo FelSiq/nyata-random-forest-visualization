@@ -5,14 +5,24 @@ import re
 import sklearn.tree
 import sklearn.ensemble
 
+_cached_class_docs = set()
+
 
 def build_class_arg_key(obj, prefix: str = "class_") -> str:
     """Build a standard description key for a given object attribute."""
     return prefix + str(type(obj))
 
 
-def get_class_doc(model, prefix: str = "class_") -> t.Dict[str, str]:
+def get_class_doc(model,
+                  prefix: str = "class_",
+                  check_cache: bool = True,
+                  verbose: bool = False) -> t.Dict[str, str]:
     """Get documentation of given class instantiation arguments and attributes."""
+    global _cached_class_docs
+
+    if check_cache and type(model) in _cached_class_docs:
+        return {}
+
     preproc = re.sub("\n\n|--+", "__@", model.__doc__)
     preproc = re.sub("([^\s]) : ([^\n]+)", r"\1 : (Type: \2)", preproc)
     preproc = re.sub("\s+", " ", preproc)
@@ -29,8 +39,13 @@ def get_class_doc(model, prefix: str = "class_") -> t.Dict[str, str]:
             param, desc = piece.split(" : ")
             res[full_prefix + param] = desc
 
+            if verbose:
+                print("Updated doc. w/ key = ", full_prefix + param)
+
         except ValueError:
             pass
+
+    _cached_class_docs.add(type(model))
 
     return res
 
@@ -53,10 +68,10 @@ DESCRIPTIONS = {
     "pred_margin":
     "Margin is the instance highest class probability "
     "minus second highest class probability.",
-    **get_class_doc(sklearn.ensemble.RandomForestClassifier),
-    **get_class_doc(sklearn.ensemble.RandomForestRegressor),
-    **get_class_doc(sklearn.tree.DecisionTreeClassifier),
-    **get_class_doc(sklearn.tree.DecisionTreeRegressor),
+    **get_class_doc(sklearn.ensemble.RandomForestClassifier()),
+    **get_class_doc(sklearn.ensemble.RandomForestRegressor()),
+    **get_class_doc(sklearn.tree.DecisionTreeClassifier()),
+    **get_class_doc(sklearn.tree.DecisionTreeRegressor()),
 }  # t.Dict[t.Any, str]
 
 
