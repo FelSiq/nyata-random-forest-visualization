@@ -36,6 +36,8 @@ class DecisionTree(_BaseResourceClass):
     def __init__(self, **kwargs):
         """."""
         flask.session["model"] = kwargs.get("model")
+        flask.session["X"] = kwargs.get("X")
+        flask.session["y"] = kwargs.get("y")
         flask.session["attr_labels"] = kwargs.get("attr_labels")
         flask.session.modified = True
 
@@ -53,9 +55,6 @@ class PredictDataset(_BaseResourceClass):
     """Class dedicated to give methods for predicting a whole dataset."""
     def __init__(self, **kwargs):
         """."""
-        flask.session["model"] = kwargs.get("model")
-        flask.session.modified = True
-
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("file",
                                    type=werkzeug.datastructures.FileStorage,
@@ -107,9 +106,6 @@ class PredictSingleInstance(_BaseResourceClass):
     """Class dedicated to provide methods for predicting a single instance."""
     def __init__(self, **kwargs):
         """."""
-        flask.session["model"] = kwargs.get("model")
-        flask.session.modified = True
-
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("instance", type=str)
 
@@ -138,8 +134,7 @@ class PredictSingleInstance(_BaseResourceClass):
 
         return err_msg
 
-    def _decision_path(self,
-                       model,
+    def _decision_path(self, model,
                        inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
         """Get the decision path of the instace for every tree in the model."""
         if isinstance(model, (sklearn.tree.DecisionTreeClassifier,
@@ -207,7 +202,6 @@ class PredictSingleInstance(_BaseResourceClass):
                 }),
             )))
 
-
         res = flask.jsonify(pred_vals)
 
         return res
@@ -216,9 +210,6 @@ class PredictSingleInstance(_BaseResourceClass):
 class MostCommonAttrSeq(_BaseResourceClass):
     """Find the most common sequence of attributes in the forest."""
     def __init__(self, **kwargs):
-        flask.session["model"] = kwargs.get("model")
-        flask.session.modified = True
-
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("seq_num", type=int)
         self.reqparse.add_argument("include_node_decision", type=int)
@@ -244,10 +235,6 @@ class MostCommonAttrSeq(_BaseResourceClass):
 class ForestHierarchicalClustering(_BaseResourceClass):
     """Perform a hierarchical clustering using each tree DNA."""
     def __init__(self, **kwargs):
-        flask.session["model"] = kwargs.get("model")
-        flask.session["X"] = kwargs.get("X")
-        flask.session.modified = True
-
         self.reqparse_post = flask_restful.reqparse.RequestParser()
         self.reqparse_post.add_argument("threshold_cut", type=float)
         self.reqparse_post.add_argument("linkage", type=str)
@@ -358,31 +345,20 @@ def create_app():
                      "/dt-visualization",
                      resource_class_kwargs=common_kwargs)
 
-    api.add_resource(PredictSingleInstance,
-                     "/predict-single-instance",
-                     resource_class_kwargs=common_kwargs)
+    api.add_resource(PredictSingleInstance, "/predict-single-instance")
 
-    api.add_resource(PredictDataset,
-                     "/predict-dataset",
-                     resource_class_kwargs=common_kwargs)
+    api.add_resource(PredictDataset, "/predict-dataset")
 
-    api.add_resource(MostCommonAttrSeq,
-                     "/most-common-attr-seq",
-                     resource_class_kwargs=common_kwargs)
+    api.add_resource(MostCommonAttrSeq, "/most-common-attr-seq")
 
     api.add_resource(ForestHierarchicalClustering,
-                     "/forest-hierarchical-clustering",
-                     resource_class_kwargs=common_kwargs)
+                     "/forest-hierarchical-clustering")
 
     sess.init_app(app)
 
     @app.before_first_request
     def before_first_request_func():
-        """
-        This function will run once before the first request to this instance of the application.
-        You may want to use this function to create any databases/tables required for your app.
-        """
-        print("This function will run once ")
+        pass
 
     @app.before_request
     def regenerate_session():
