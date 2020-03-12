@@ -269,6 +269,7 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
+
         """
         response.headers.add("Access-Control-Allow-Methods",
                              "GET, POST, OPTIONS, PUT, PATCH, DELETE")
@@ -299,25 +300,22 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
         flask.session["hier_clus_data"].update(hier_clus_data)
 
-        return flask.jsonify(
+        response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
 
+        """
+        response.headers.add("Access-Control-Allow-Methods",
+                             "GET, POST, OPTIONS, PUT, PATCH, DELETE")
+        response.headers.add(
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, x-auth")
+        """
+
+        return response
+
     def delete(self):
-        if flask.session.get("hier_clus_data"):
-            flask.session.pop("hier_clus_data")
-            print("Successfully deleted session hierarchical cluster data.")
-
-        if flask.session.get("dist_mat"):
-            flask.session.pop("dist_mat")
-            print(
-                "Successfully deleted session hierarchical cluster distance matrix."
-            )
-
-        if flask.session.get("max_dist"):
-            flask.session.pop("max_dist")
-            print(
-                "Successfully deleted session hierarchical cluster distance matrix."
-            )
+        flask.session.clear()
+        print("Successfully deleted session hierarchical cluster data.")
 
 
 class Config:

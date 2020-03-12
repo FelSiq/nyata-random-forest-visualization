@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MostCommonAttrSeqService } from './most-common-attr-seq.service';
 import { HierClusService } from './hier-clus.service';
 import { Input, Output, EventEmitter } from '@angular/core';
@@ -10,7 +10,7 @@ import { Subject } from 'rxjs/Subject';
   templateUrl: './forest-analysis.component.html',
   styleUrls: ['./forest-analysis.component.css']
 })
-export class ForestAnalysisComponent implements OnInit {
+export class ForestAnalysisComponent implements OnInit, OnDestroy {
   @Input() numEstimators: number = -1;
   @Input() modelType: string;
   @Input() attrLabels: string[] = [];
@@ -50,6 +50,10 @@ export class ForestAnalysisComponent implements OnInit {
               public hierClusService: HierClusService) { }
 
   ngOnInit(): void {
+  }
+
+  ngOnDestroy(): void {
+    this.hierClusService.destroyHierarchicalClustering();
   }
 
   emitEventToParent(treeId: string | number) {

@@ -152,7 +152,7 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
       this.thresholdLine.append('text')
           .classed('cleanable', true)
           .classed('threshold', true)
-          .text(this.thresholdCut.toFixed(2).toString())
+          .text((this.xMaxLimit * this.thresholdCut).toFixed(2).toString())
           .attr('font-size', '16px')
           .attr('x', thresholdLinePos)
           .attr('text-anchor', 'middle')

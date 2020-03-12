@@ -32,14 +32,16 @@ export class HierClusService {
       'strategy': strategy,
     }
 
-    this.httpClient.delete(this.urlGetInstance).subscribe();
-
     return this.httpClient
       .post<HierClus>(this.urlGetInstance, args, httpOptions)
         .pipe(
           retry(3),
           catchError(this.handleErrorGet)
         );
+  }
+
+  destroyHierarchicalClustering() {
+    this.httpClient.delete(this.urlGetInstance).subscribe();
   }
 
   cutHierarchicalClustering(thresholdCut: number) {
