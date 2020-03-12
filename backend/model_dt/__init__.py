@@ -22,7 +22,16 @@ from . import model_dt
 from . import serialize
 
 
-class DecisionTree(flask_restful.Resource):
+class _BaseResourceClass(flask_restful.Resource):
+    """Base class for DT/RF visualization resources."""
+    def delete(self, verbose: bool = True):
+        flask.session.clear()
+
+        if verbose:
+            print("Successfully cleared flask session for", self.__class__)
+
+
+class DecisionTree(_BaseResourceClass):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
     def __init__(self,
                  model,
@@ -40,7 +49,7 @@ class DecisionTree(flask_restful.Resource):
                 attr_labels=flask.session["attr_labels"]))
 
 
-class PredictDataset(flask_restful.Resource):
+class PredictDataset(_BaseResourceClass):
     """Class dedicated to give methods for predicting a whole dataset."""
     def __init__(self, model, **kwargs):
         """."""
@@ -91,11 +100,14 @@ class PredictDataset(flask_restful.Resource):
                                  true_labels_ohe=y_ohe))
 
 
-class PredictSingleInstance(flask_restful.Resource):
+class PredictSingleInstance(_BaseResourceClass):
     """Class dedicated to provide methods for predicting a single instance."""
     def __init__(self, model, **kwargs):
         """."""
         flask.session["model"] = model
+
+        self.reqparse = flask_restful.reqparse.RequestParser()
+        self.reqparse.add_argument("instance", type=str)
 
     @staticmethod
     def _preprocess_instance(instance: str,
@@ -148,12 +160,15 @@ class PredictSingleInstance(flask_restful.Resource):
 
         return nodes
 
-    def get(self, instance: str):
+    def post(self):
         """Predict single instance and provide information."""
-        inst_proc = PredictSingleInstance._preprocess_instance(instance)
-        err_code = []
+        args = self.reqparse.parse_args()
+        instance = args["instance"]
 
         model = flask.session["model"]
+
+        inst_proc = PredictSingleInstance._preprocess_instance(instance)
+        err_code = []
 
         if inst_proc is None:
             err_code.append("ERROR_MISSING_VAL")
@@ -192,26 +207,32 @@ class PredictSingleInstance(flask_restful.Resource):
         return flask.jsonify(pred_vals)
 
 
-class MostCommonAttrSeq(flask_restful.Resource):
+class MostCommonAttrSeq(_BaseResourceClass):
     """Find the most common sequence of attributes in the forest."""
     def __init__(self, model, **kwargs):
         flask.session["model"] = model
 
-    def get(self,
-            seq_num: int = 10,
-            include_node_decision: t.Union[int, bool] = False):
+        self.reqparse = flask_restful.reqparse.RequestParser()
+        self.reqparse.add_argument("seq_num", type=int)
+        self.reqparse.add_argument("include_node_decision", type=str)
+
+    def post(self):
         model = flask.session["model"]
+
+        args = self.reqparse.parse_args()
+        seq_num = args["seq_num"]
+        include_node_decision = args["include_node_decision"] != "0"
 
         top_common_seqs = model_dt.top_most_common_attr_seq(
             model,
             seq_num=seq_num,
-            include_node_decision=include_node_decision > 0)
+            include_node_decision=include_node_decision)
 
         return flask.jsonify(
             serialize.json_encoder_type_manager(top_common_seqs))
 
 
-class ForestHierarchicalClustering(flask_restful.Resource):
+class ForestHierarchicalClustering(_BaseResourceClass):
     """Perform a hierarchical clustering using each tree DNA."""
     def __init__(self, model, X: np.ndarray, **kwargs):
         flask.session["model"] = model
@@ -269,7 +290,6 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
-
         """
         response.headers.add("Access-Control-Allow-Methods",
                              "GET, POST, OPTIONS, PUT, PATCH, DELETE")
@@ -302,7 +322,6 @@ class ForestHierarchicalClustering(flask_restful.Resource):
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
-
         """
         response.headers.add("Access-Control-Allow-Methods",
                              "GET, POST, OPTIONS, PUT, PATCH, DELETE")
@@ -312,10 +331,6 @@ class ForestHierarchicalClustering(flask_restful.Resource):
         """
 
         return response
-
-    def delete(self):
-        flask.session.clear()
-        print("Successfully deleted session hierarchical cluster data.")
 
 
 class Config:
@@ -356,17 +371,16 @@ def create_app():
                      resource_class_kwargs=common_kwargs)
 
     api.add_resource(PredictSingleInstance,
-                     "/predict-single-instance/<string:instance>",
+                     "/predict-single-instance",
                      resource_class_kwargs=common_kwargs)
 
     api.add_resource(PredictDataset,
                      "/predict-dataset",
                      resource_class_kwargs=common_kwargs)
 
-    api.add_resource(
-        MostCommonAttrSeq,
-        "/most-common-attr-seq/<int:seq_num>/<int:include_node_decision>",
-        resource_class_kwargs=common_kwargs)
+    api.add_resource(MostCommonAttrSeq,
+                     "/most-common-attr-seq",
+                     resource_class_kwargs=common_kwargs)
 
     api.add_resource(ForestHierarchicalClustering,
                      "/forest-hierarchical-clustering",
