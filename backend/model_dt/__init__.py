@@ -26,6 +26,7 @@ class _BaseResourceClass(flask_restful.Resource):
     """Base class for DT/RF visualization resources."""
     def delete(self, verbose: bool = True):
         flask.session.clear()
+        flask.session.modified = True
 
         if verbose:
             print("Successfully cleared flask session for", self.__class__)
@@ -40,13 +41,16 @@ class DecisionTree(_BaseResourceClass):
         """."""
         flask.session["model"] = model
         flask.session["attr_labels"] = attr_labels
+        flask.session.modified = True
 
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
-        return flask.jsonify(
+        res = flask.jsonify(
             serialize.serialize_decision_tree(
                 dt_model=flask.session["model"],
                 attr_labels=flask.session["attr_labels"]))
+
+        return res
 
 
 class PredictDataset(_BaseResourceClass):
@@ -63,9 +67,11 @@ class PredictDataset(_BaseResourceClass):
         self.reqparse.add_argument("hasHeader", type=str, location="form")
         self.reqparse.add_argument("hasClasses", type=str, location="form")
 
+        flask.session.modified = True
+
     def post(self):
         """Make predictions and give metrics for the user-given dataset."""
-        model = flask.session["model"]
+        model = flask.session.get("model")
 
         args = self.reqparse.parse_args()
 
@@ -92,12 +98,14 @@ class PredictDataset(_BaseResourceClass):
 
         preds = model.predict(X)
 
-        return flask.jsonify(
+        res = flask.jsonify(
             model_dt.get_metrics(dt_model=model,
                                  preds=preds,
                                  true_labels=y,
                                  preds_proba=preds_proba,
                                  true_labels_ohe=y_ohe))
+
+        return res
 
 
 class PredictSingleInstance(_BaseResourceClass):
@@ -108,6 +116,8 @@ class PredictSingleInstance(_BaseResourceClass):
 
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("instance", type=str)
+
+        flask.session.modified = True
 
     @staticmethod
     def _preprocess_instance(instance: str,
@@ -135,10 +145,9 @@ class PredictSingleInstance(_BaseResourceClass):
         return err_msg
 
     def _decision_path(self,
+                       model,
                        inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
         """Get the decision path of the instace for every tree in the model."""
-        model = flask.session["model"]
-
         if isinstance(model, (sklearn.tree.DecisionTreeClassifier,
                               sklearn.tree.DecisionTreeRegressor)):
             nodes = [model.decision_path(inst_proc).indices]
@@ -165,7 +174,7 @@ class PredictSingleInstance(_BaseResourceClass):
         args = self.reqparse.parse_args()
         instance = args["instance"]
 
-        model = flask.session["model"]
+        model = flask.session.get("model")
 
         inst_proc = PredictSingleInstance._preprocess_instance(instance)
         err_code = []
@@ -197,14 +206,17 @@ class PredictSingleInstance(_BaseResourceClass):
                      from_id="pred_margin",
                  )),
                 ("decision_path", {
-                    "value": self._decision_path(inst_proc),
+                    "value": self._decision_path(model, inst_proc),
                 }),
                 ("leaf_id", {
                     "value": model.apply(inst_proc)[0],
                 }),
             )))
 
-        return flask.jsonify(pred_vals)
+
+        res = flask.jsonify(pred_vals)
+
+        return res
 
 
 class MostCommonAttrSeq(_BaseResourceClass):
@@ -216,8 +228,10 @@ class MostCommonAttrSeq(_BaseResourceClass):
         self.reqparse.add_argument("seq_num", type=int)
         self.reqparse.add_argument("include_node_decision", type=str)
 
+        flask.session.modified = True
+
     def post(self):
-        model = flask.session["model"]
+        model = flask.session.get("model")
 
         args = self.reqparse.parse_args()
         seq_num = args["seq_num"]
@@ -228,8 +242,10 @@ class MostCommonAttrSeq(_BaseResourceClass):
             seq_num=seq_num,
             include_node_decision=include_node_decision)
 
-        return flask.jsonify(
+        res = flask.jsonify(
             serialize.json_encoder_type_manager(top_common_seqs))
+
+        return res
 
 
 class ForestHierarchicalClustering(_BaseResourceClass):
@@ -246,9 +262,11 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         self.reqparse_update = flask_restful.reqparse.RequestParser()
         self.reqparse_update.add_argument("threshold_cut", type=float)
 
+        flask.session.modified = True
+
     def post(self):
-        model = flask.session["model"]
-        X = flask.session["X"]
+        model = flask.session.get("model")
+        X = flask.session.get("X")
 
         args = self.reqparse_post.parse_args()
 
@@ -290,13 +308,8 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
-        """
-        response.headers.add("Access-Control-Allow-Methods",
-                             "GET, POST, OPTIONS, PUT, PATCH, DELETE")
-        response.headers.add(
-            "Access-Control-Allow-Headers",
-            "Origin, X-Requested-With, Content-Type, Accept, x-auth")
-        """
+
+        flask.session.modified = True
 
         return response
 
@@ -322,13 +335,8 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
-        """
-        response.headers.add("Access-Control-Allow-Methods",
-                             "GET, POST, OPTIONS, PUT, PATCH, DELETE")
-        response.headers.add(
-            "Access-Control-Allow-Headers",
-            "Origin, X-Requested-With, Content-Type, Accept, x-auth")
-        """
+
+        flask.session.modified = True
 
         return response
 
@@ -338,13 +346,14 @@ class Config:
     FLASK_ENV = os.environ.get("FLASK_ENV")
     FLASK_APP = os.environ.get("FLASK_APP")
     FLASK_DEBUG = os.environ.get("FLASK_DEBUG")
+    SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "rfvisual")
     SESSION_TYPE = os.environ.get("SESSION_TYPE", "redis")
     SESSION_REDIS = redis.from_url(
         os.environ.get("SESSION_REDIS", "redis://127.0.0.1:6379"))
     SESSION_USE_SIGNER = os.environ.get("SESSION_USE_SIGNER", False)
     SECRET_KEY = os.environ.get("SECRET_KEY")
     SESSION_COOKIE_SECURE = bool(int(os.environ.get("SESSION_COOKIE_SECURE", False)))
-    SESSION_PERMANENT = bool(int(os.environ.get("SESSION_PERMANENT", True)))
+    SESSION_PERMANENT = bool(int(os.environ.get("SESSION_PERMANENT", False)))
     PERMANENT_SESSION_LIFETIME = int(os.environ.get("PERMANENT_SESSION_LIFETIME", 60 * 60 * 2))
 
 
