@@ -23,7 +23,12 @@ export class DtModelComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:beforeunload')
-  doSomething() {
+  cleanBackendDataBeforeUnload() {
+    this.modelService.destroy();
+  }
+
+  @HostListener('window:unload')
+  cleanBackendDataUnload() {
     this.modelService.destroy();
   }
 
