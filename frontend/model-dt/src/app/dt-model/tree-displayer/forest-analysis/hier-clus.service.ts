@@ -41,7 +41,7 @@ export class HierClusService {
   }
 
   destroy() {
-    this.httpClient.delete(this.urlResource).subscribe();
+    this.httpClient.delete(this.urlResource, httpOptions).subscribe();
   }
 
   cutHierarchicalClustering(thresholdCut: number) {

@@ -27,7 +27,7 @@ export class GetModelService {
   }
 
   destroy() {
-    this.httpClient.delete(this.urlResource).subscribe();
+    this.httpClient.delete(this.urlResource, httpOptions).subscribe();
   }
 
   private handleError(error: HttpErrorResponse) {
