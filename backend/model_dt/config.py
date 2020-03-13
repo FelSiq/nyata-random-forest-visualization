@@ -8,7 +8,8 @@ class Config:
     FLASK_ENV = os.environ.get("FLASK_ENV")
     FLASK_APP = os.environ.get("FLASK_APP")
     FLASK_DEBUG = os.environ.get("FLASK_DEBUG")
-    SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "rfvisual")
+    SESSION_COOKIE_NAME = os.environ.get("SESSION_COOKIE_NAME", "rf_visual_session")
+    SESSION_KEY_PREFIX = os.environ.get("SESSION_KEY_PREFIX", "rf_visual_session:")
     SESSION_TYPE = os.environ.get("SESSION_TYPE", "redis")
     SESSION_REDIS = redis.from_url(
         os.environ.get("SESSION_REDIS", "redis://127.0.0.1:6379"))

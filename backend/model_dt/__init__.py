@@ -33,16 +33,21 @@ class _BaseResourceClass(flask_restful.Resource):
 
 class DecisionTree(_BaseResourceClass):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
+
     def __init__(self, **kwargs):
-        """."""
-        flask.session["model"] = kwargs.get("model")
-        flask.session["X"] = kwargs.get("X")
-        flask.session["y"] = kwargs.get("y")
-        flask.session["attr_labels"] = kwargs.get("attr_labels")
-        flask.session.modified = True
+        pass
 
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
+        model, X, y, attr_labels = model_dt.get_toy_model()
+
+        flask.session["model"] = model
+        flask.session["X"] = X
+        flask.session["y"] = y
+        flask.session["attr_labels"] = attr_labels
+
+        flask.session.modified = True
+
         res = flask.jsonify(
             serialize.serialize_decision_tree(
                 dt_model=flask.session["model"],
@@ -57,13 +62,16 @@ class DecisionTree(_BaseResourceClass):
             print("Successfully cleared flask session for", self.__class__)
 
         r = redis.StrictRedis(host='localhost', port=6379, db=0)
+
         for key in r.scan_iter("session:*"):
             # r.delete(key)
             print(">>>", key)
 
         flask.session.modified = True
 
-        return 'Success', 200, {'Content-Type': 'text/plain'}
+        res = flask.make_response(('Success', 200, {'Content-Type': 'text/plain'}))
+
+        return res
 
 
 class PredictDataset(_BaseResourceClass):
@@ -347,48 +355,19 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         return response
 
 
-sess = flask_session.Session()
-
-
 def create_app():
     """DT visualization application factory."""
     app = flask.Flask(__name__, instance_relative_config=False)
-
     app.config.from_object(config.Config)
-
     flask_cors.CORS(app, supports_credentials=True)
     api = flask_restful.Api(app)
+    flask_session.Session(app)
 
-    model, X, y, attr_labels = model_dt.get_toy_model()
-
-    common_kwargs = {
-        "model": model,
-        "X": X,
-        "y": y,
-        "attr_labels": attr_labels,
-    }  # type: t.Dict[str, t.Any]
-
-    api.add_resource(DecisionTree,
-                     "/dt-visualization",
-                     resource_class_kwargs=common_kwargs)
-
+    api.add_resource(DecisionTree, "/dt-visualization")
     api.add_resource(PredictSingleInstance, "/predict-single-instance")
-
     api.add_resource(PredictDataset, "/predict-dataset")
-
     api.add_resource(MostCommonAttrSeq, "/most-common-attr-seq")
-
     api.add_resource(ForestHierarchicalClustering,
                      "/forest-hierarchical-clustering")
-
-    sess.init_app(app)
-
-    @app.before_first_request
-    def before_first_request_func():
-        pass
-
-    @app.before_request
-    def regenerate_session():
-        pass
 
     return app
