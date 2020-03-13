@@ -24,6 +24,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { KatexModule } from 'ng-katex';
 
 import { ClipboardModule } from 'ngx-clipboard';
 import { D3Service } from 'd3-ng2-service';
@@ -59,6 +60,7 @@ import { HierClusVisualComponent } from './dt-model/tree-displayer/forest-analys
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
+    KatexModule,
     MatRadioModule,
     MatFormFieldModule,
     MatInputModule,

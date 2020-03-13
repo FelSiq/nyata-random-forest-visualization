@@ -65,6 +65,13 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
     this.childUpdateThreshold.next();
   }
 
+  formatEqFormula(equation: string): string {
+    if (!equation) {
+      return 'Unknown';
+    }
+    return equation.replace('_', '\\_');
+  }
+
   getMostCommonAttrSeq(numAttr: number, includeDecision: boolean) {
   this.errorMessage = '';
 

@@ -128,9 +128,9 @@
             <p>
               With the 'DNA vector' strategy
               the clustering is performed using the user chosen linkage and a distance based on Cohen's Kappa
-              score (f(x) = 1 - Cohen_Kappa(x)), if the model is a Classifier, which measures the discrepancy
-	      between each pair of DNA vectors of every tree, or simply the euclidean distance of the normalized
-	      DNA vectors, if the model is a Regressor.
+	      score (<ng-katex equation="f(x) = 1 - Cohen\_kappa(x)"></ng-katex>), if the model is a Classifier,
+	      which measures the discrepancy between each pair of DNA vectors of every tree, or simply the euclidean
+	      distance of the normalized DNA vectors, if the model is a Regressor.
               <strong>The DNA vector of a tree is the predictions of the tree for every instance.</strong>
             </p>
             <p>
@@ -188,7 +188,7 @@
       </mat-card-header>
       <mat-card-content>
         <mat-list dense>
-        <mat-list-item> Chosen threshold (for distance 'f(x) = 1 - Cohen_kappa(x)'): {{ thresholdCut }} </mat-list-item>
+		<mat-list-item> Chosen threshold (for distance <span style="margin-left: 8px;"><ng-katex [equation]="formatEqFormula(hierClusDistFormula)"></ng-katex></span>): {{ thresholdCut }} </mat-list-item>
         <mat-list-item> Number of distinct clusters due to chosen threshold: {{ numHierClusters }} </mat-list-item>
         </mat-list>
           <ng-container *ngIf="hierClusters && hierClusters.length && hierClustersTree && hierClustersTree.length; else waitingForHierClus">
