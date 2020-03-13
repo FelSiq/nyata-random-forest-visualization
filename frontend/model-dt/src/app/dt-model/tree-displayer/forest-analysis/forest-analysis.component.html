@@ -97,7 +97,7 @@
 
   <mat-expansion-panel>
     <mat-expansion-panel-header
-          matTooltip="">
+          matTooltip="Perform a hierarchical cluster for all forest trees, and agglomerate similar trees based on some criteria.">
       <mat-panel-title>
         <mat-icon class="panel-option-icon">account_tree</mat-icon>
         Forest hierarchical clustering
@@ -128,8 +128,9 @@
             <p>
               With the 'DNA vector' strategy
               the clustering is performed using the user chosen linkage and a distance based on Cohen's Kappa
-              score (f(x) = 1 - Cohen_Kappa(x)) which measures the discrepancy between each pair of DNA vectors
-              of every tree.
+              score (f(x) = 1 - Cohen_Kappa(x)), if the model is a Classifier, which measures the discrepancy
+	      between each pair of DNA vectors of every tree, or simply the euclidean distance of the normalized
+	      DNA vectors, if the model is a Regressor.
               <strong>The DNA vector of a tree is the predictions of the tree for every instance.</strong>
             </p>
             <p>
@@ -163,13 +164,13 @@
             </mat-form-field>
           </p>
       <p>
-        Please select the proportion of similarity of cut the dendrogram distances.
+        Please select the proportion (based on the the maximal possible distance of each cluster) of dissimilarity (distance) of cut the dendrogram distances between clusters.
             </p>
       <mat-list dense>
-        <mat-list-item> Proportion = 0.0 means every tree will likely be in a distinct cluster (unless their caracteristic vector matches perfecly.) </mat-list-item> 
-        <mat-list-item> Proportion = 1.0 means every tree will likely be in the same cluster (unless their caracteristic vector are completely distinct.) </mat-list-item> 
+        <mat-list-item> Proportion of dissimilarity = 0.0 means every tree will likely be in a distinct cluster (unless their caracteristic vector matches perfecly.) </mat-list-item> 
+        <mat-list-item> Proportion of dissimilarity = 1.0 means every tree will likely be in the same cluster (unless their caracteristic vector are completely distinct.) </mat-list-item> 
             </mat-list>
-      <strong style="mergin-right: 16px;"> Similarity propotion: </strong> {{ propCutSlider.value | number: '1.3-3'}}
+      <strong style="mergin-right: 16px;"> Dissimilarity proportion to cut: </strong> {{ propCutSlider.value | number: '1.3-3'}}
       <mat-slider #propCutSlider
 	          min="0.0"
 		  max="1.0"

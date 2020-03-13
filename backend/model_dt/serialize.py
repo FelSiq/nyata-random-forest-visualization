@@ -122,7 +122,8 @@ def serialize_decision_tree(
                     prop=item[0],
                 ) for item in sorted_ft_imp
             ]),
-            from_id="feature_importances",
+            from_id="feature_importances_",
+            from_obj_doc=dt_model,
         )
 
     except AttributeError:

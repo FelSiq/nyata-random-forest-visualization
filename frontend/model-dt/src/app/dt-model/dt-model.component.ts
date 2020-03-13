@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 
 import { GetModelService } from '../get-model.service';
 import { DTInterface } from '../dt-interface';
@@ -19,6 +19,11 @@ export class DtModelComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.modelService.destroy();
+  }
+
+  @HostListener('window:beforeunload')
+  doSomething() {
     this.modelService.destroy();
   }
 

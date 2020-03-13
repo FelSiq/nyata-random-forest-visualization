@@ -19,7 +19,7 @@ export class TreeDisplayerComponent implements OnInit {
 
   readonly bannedModelAttrs: string[] = [
     'estimators_',
-    'base_estimator_',
+    'base_estimator',
     'tree_',
     'verbose',
   ];

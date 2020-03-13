@@ -58,13 +58,13 @@ DESCRIPTIONS = {
     "[Tree Index] ([Total sum of distances]): [Inner cluster proportion "
     "of the distance sum]",
     "depth_frequencies":
-    "...",
-    "feature_importances":
-    "...",
+    "Relative frequency of each tree depth in the forest model.",
     "prediction_result":
-    "...",
+    "Final output of the forest model for the given test data. It is the "
+    "mode value for all forest tree outputs for classification tasks, or the "
+    "average value for all forest tree outputs for regression tasks.",
     "classes_by_tree":
-    "...",
+    "Frequency of each class based on all forest tree votes.",
     "pred_margin":
     "Margin is the instance highest class probability "
     "minus second highest class probability.",

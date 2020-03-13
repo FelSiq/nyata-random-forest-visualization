@@ -14,6 +14,7 @@ import werkzeug
 import numpy as np
 import pandas as pd
 import sklearn.tree
+import redis
 
 from . import utils
 from . import model_dt
@@ -26,6 +27,8 @@ class _BaseResourceClass(flask_restful.Resource):
     def delete(self, verbose: bool = True):
         if verbose:
             print("Nothing to clean for", self.__class__)
+
+        return '', 204
 
 
 class DecisionTree(_BaseResourceClass):
@@ -49,10 +52,18 @@ class DecisionTree(_BaseResourceClass):
 
     def delete(self, verbose: bool = True):
         flask.session.clear()
-        flask.session.modified = True
 
         if verbose:
             print("Successfully cleared flask session for", self.__class__)
+
+        r = redis.StrictRedis(host='localhost', port=6379, db=0)
+        for key in r.scan_iter("session:*"):
+            # r.delete(key)
+            print(">>>", key)
+
+        flask.session.modified = True
+
+        return 'Success', 200, {'Content-Type': 'text/plain'}
 
 
 class PredictDataset(_BaseResourceClass):
@@ -303,6 +314,10 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         if verbose:
             print("Deleted session data for", self.__class__)
+
+        flask.session.modified = True
+
+        return 'Success', 200, {'Content-Type': 'text/plain'}
 
     def put(self):
         args = self.reqparse_update.parse_args()
