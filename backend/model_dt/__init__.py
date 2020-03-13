@@ -325,7 +325,9 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         flask.session.modified = True
 
-        return 'Success', 200, {'Content-Type': 'text/plain'}
+        res = flask.make_response(('Success', 200, {'Content-Type': 'text/plain'}))
+
+        return res
 
     def put(self):
         args = self.reqparse_update.parse_args()
