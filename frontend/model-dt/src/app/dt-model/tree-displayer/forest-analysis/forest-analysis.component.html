@@ -198,8 +198,9 @@
                                   [selectedLinkageType]="resultLinkageType ? resultLinkageType : 'average'"
                                   [leavesOptSeq]="leavesOptSeq"
                                   [events]="childUpdateThreshold.asObservable()"
-				  [hierClusDistFormula]="hierClusDistFormula"
-				  [xMaxLimit]="xMaxLimit"></app-hier-clus-visual>
+				                  [hierClusDistFormula]="hierClusDistFormula"
+				                  [xMaxLimit]="xMaxLimit"
+                                  (peekTree)="emitEventToParent($event)"></app-hier-clus-visual>
             <mat-list>
               <mat-list-item>
                 <span class="common-attr-table-rank2"><strong>Cluster</strong></span>

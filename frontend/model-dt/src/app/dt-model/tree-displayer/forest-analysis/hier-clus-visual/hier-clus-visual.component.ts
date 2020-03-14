@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
-import { Input } from '@angular/core';
+import { Input, Output, EventEmitter } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 
@@ -23,6 +23,8 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
   @Input() selectedLinkageType: string;
   @Input() hierClusDistFormula: string;
   @Input() xMaxLimit: number;
+
+  @Output() peekTree = new EventEmitter<number>();
 
   private svg: D3Selection;
   private links: D3Selection;
@@ -55,6 +57,10 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
 
   ngOnDestroy() {
     this.eventsSubscription.unsubscribe();
+  }
+
+  emitEventToParent(treeId: string | number) {
+    this.peekTree.emit(+treeId);
   }
 
   buildHierClusLegend() {
@@ -205,6 +211,8 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
       });
     }
 
+    const obj = this;
+
     let leafNodes = this.nodes.selectAll('.nodes')
         .data(leafData)
         .enter()
@@ -214,7 +222,9 @@ export class HierClusVisualComponent implements OnInit, OnDestroy, AfterViewInit
             .text( function(d) { return d.id; } )
             .attr('font-size', this.textFontSize + 'px')
             .attr('x', this.xSvgLimit + 16)
-            .attr('y', function (d) { return d.y; });
+            .attr('y', function (d) { return d.y; })
+            .on('click', function(d) { obj.emitEventToParent(d.id); })
+            .on('mouseover', function() { d3.select(this).style('cursor', 'pointer'); });
 
     let innerNodes = this.nodes.selectAll('.nodes')
         .data(this.hierClustersTree.slice(numEstimators))
