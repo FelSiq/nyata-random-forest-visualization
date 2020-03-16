@@ -12,3 +12,10 @@ run:
 install:
 	pip install -Ur model_dt/requirements.txt
 	sudo apt-get install redis-server
+
+install-arch:
+	pip install -Ur model_dt/requirements.txt
+	yay -S redis
+	systemctl start redis.service
+	systemctl enable redis.service
+
