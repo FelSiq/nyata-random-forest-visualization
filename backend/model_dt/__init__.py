@@ -14,7 +14,6 @@ import werkzeug
 import numpy as np
 import pandas as pd
 import sklearn.tree
-import redis
 
 from . import utils
 from . import model_dt
@@ -63,12 +62,6 @@ class DecisionTree(_BaseResourceClass):
 
         if verbose:
             print("Successfully cleared flask session for", self.__class__)
-
-        r = redis.StrictRedis(host='localhost', port=6379, db=0)
-
-        for key in r.scan_iter("session:*"):
-            # r.delete(key)
-            print(">>>", key)
 
         flask.session.modified = True
 
