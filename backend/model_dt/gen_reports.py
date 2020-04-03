@@ -35,7 +35,8 @@ def report_most_common_seq(
 def report_hier_clus(hier_clus_data: t.Dict[str, np.ndarray],
                      threshold_cut: float) -> None:
     """TODO."""
-    filepath = os.path.join(REPORT_PATH, "hier_clus.csv")
+    num_clust = len(hier_clus_data["clust_assignment"])
+    filepath = os.path.join(REPORT_PATH, "hier_clus_{}.csv".format(num_clust))
 
     with open(filepath, "w") as f:
         f.write("# Threshold used as cut: {:.8f}\n".format(threshold_cut))

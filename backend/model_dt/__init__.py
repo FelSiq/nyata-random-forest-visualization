@@ -40,8 +40,8 @@ class DecisionTree(_BaseResourceClass):
 
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
-        model, X, y, attr_labels = get_model.get_toy_model()
-        # model, X, y, attr_labels = get_model.get_custom_model()
+        # model, X, y, attr_labels = get_model.get_toy_model()
+        model, X, y, attr_labels = get_model.get_custom_model()
 
         flask.session["model"] = model
         flask.session["X"] = X
