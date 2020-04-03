@@ -1,5 +1,6 @@
 .large-icon {
   transform: scale(0.9);
+  margin-right: 8px;
 }
 
 .small-icon {
