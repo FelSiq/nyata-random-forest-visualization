@@ -21,8 +21,13 @@ def report_most_common_seq(
         top_common_seqs: t.Sequence[t.Tuple[float, float]],
         include_node_decision: bool) -> None:
     """TODO."""
-    filename = (
-        "most_common_" + ("rules" if include_node_decision else "attr_seq") + ".csv")
+    num_seqs = len(top_common_seqs[0])
+
+    filename = "_".join([
+        "most_common",
+        "rules" if include_node_decision else "attr_seq",
+        "{}.csv".format(num_seqs),
+    ])
 
     filepath = os.path.join(REPORT_PATH, filename)
 

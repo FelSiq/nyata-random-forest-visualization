@@ -336,7 +336,7 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         return res
 
-    def put(self):
+    def put(self, gen_report: bool = False):
         args = self.reqparse_update.parse_args()
 
         threshold_cut = args.get("threshold_cut", 0.5)
@@ -355,6 +355,11 @@ class ForestHierarchicalClustering(_BaseResourceClass):
             threshold_cut=max_dist * threshold_cut)
 
         flask.session["hier_clus_data"].update(hier_clus_data)
+
+        if gen_report:
+            gen_reports.report_hier_clus(
+                hier_clus_data=hier_clus_data,
+                threshold_cut=max_dist * threshold_cut)
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
