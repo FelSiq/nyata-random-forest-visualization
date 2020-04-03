@@ -20,6 +20,8 @@ from . import utils
 from . import model_dt
 from . import serialize
 from . import config
+from . import get_model
+from . import gen_reports
 
 
 class _BaseResourceClass(flask_restful.Resource):
@@ -39,7 +41,8 @@ class DecisionTree(_BaseResourceClass):
 
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
-        model, X, y, attr_labels = model_dt.get_toy_model()
+        model, X, y, attr_labels = get_model.get_toy_model()
+        # model, X, y, attr_labels = get_model.get_custom_model()
 
         flask.session["model"] = model
         flask.session["X"] = X
@@ -237,7 +240,7 @@ class MostCommonAttrSeq(_BaseResourceClass):
         self.reqparse.add_argument("seq_num", type=int)
         self.reqparse.add_argument("include_node_decision", type=int)
 
-    def post(self):
+    def post(self, gen_report: bool = True):
         model = flask.session.get("model")
 
         args = self.reqparse.parse_args()
@@ -248,6 +251,11 @@ class MostCommonAttrSeq(_BaseResourceClass):
             model,
             seq_num=seq_num,
             include_node_decision=include_node_decision)
+
+        if gen_report:
+            gen_reports.report_most_common_seq(
+                top_common_seqs=top_common_seqs,
+                include_node_decision=include_node_decision)
 
         res = flask.jsonify(
             serialize.json_encoder_type_manager(top_common_seqs))
@@ -266,7 +274,7 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         self.reqparse_update = flask_restful.reqparse.RequestParser()
         self.reqparse_update.add_argument("threshold_cut", type=float)
 
-    def post(self):
+    def post(self, gen_report: bool = True):
         model = flask.session.get("model")
         X = flask.session.get("X")
 
@@ -288,6 +296,7 @@ class ForestHierarchicalClustering(_BaseResourceClass):
             dist_mat, dist_formula, max_dist = model_dt.calc_mtf_dist_mat(
                 model=model)
 
+        dist_mat[np.isnan(dist_mat)] = 0.0
         hier_clus_data = model_dt.get_hierarchical_cluster(dist_mat=dist_mat,
                                                            linkage=linkage)
 
@@ -307,6 +316,11 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         flask.session["hier_clus_data"] = hier_clus_data
         flask.session["dist_mat"] = dist_mat
         flask.session["max_dist"] = max_dist
+
+        if gen_report:
+            gen_reports.report_hier_clus(
+                hier_clus_data=hier_clus_data,
+                threshold_cut=max_dist * threshold_cut)
 
         response = flask.jsonify(
             serialize.json_encoder_type_manager(hier_clus_data))
