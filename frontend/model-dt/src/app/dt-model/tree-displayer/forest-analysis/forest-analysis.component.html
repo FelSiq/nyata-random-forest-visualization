@@ -214,7 +214,7 @@
                   remove_red_eye
                 </mat-icon>
               </span>
-              <span class="common-attr-table-left-bar2"> {{ clusterInfo.tree_inds }} </span>
+              <span class="common-attr-table-left-bar2"> {{ clusterInfo.tree_inds | slice : 0 : 15 }} {{ clusterInfo.tree_inds.length > 15 ? "(" + (clusterInfo.tree_inds.length - 15) + "+)" : ""}} </span>
               </mat-list-item>
             </mat-list>
             <app-iterable-displayer [data]="clustSumDists" banList="[]">
