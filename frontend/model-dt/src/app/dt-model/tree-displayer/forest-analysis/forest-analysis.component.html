@@ -15,7 +15,7 @@
             Generate the most frequent feature sequences from all possible paths (from each tree root to every tree leaf) in the forest model.
           </p>
           <p>
-            <strong>Each path is weighted by the number of training instances that pass through it.</strong>
+            Each path is weighted by the number of training instances that pass through it.
           </p>
           <p>
             Please select the number of sequences to show after analysis:
@@ -139,8 +139,8 @@
               the clustering is performed using the user chosen linkage and a distance based on Cohen's Kappa
 	      score (<ng-katex equation="f(x) = 1 - Cohen\_kappa(x)"></ng-katex>), if the model is a Classifier,
 	      which measures the discrepancy between each pair of DNA vectors of every tree, or simply the euclidean
-	      distance of the normalized DNA vectors, if the model is a Regressor.
-              <strong>The DNA vector of a tree is the predictions of the tree for every instance.</strong>
+	      distance of the normalized DNA vectors, if the model is a Regressor. The DNA vector of a tree is the
+            predictions of the tree for every instance.
             </p>
             <p>
               The data used to generate the tree DNA will be the training data.
@@ -150,8 +150,8 @@
             <p>
               With the 'vector of metafeatures' strategy
               the clustering is performed using the user chosen linkage and the euclidean distance.
-              <strong>The metafeature vector is built using the 'model-based' metafeature group in the
-              <a href="https://github.com/ealcobaca/pymfe" target="_blank">python 'pymfe' package</a>.</strong>
+              The metafeature vector is built using the 'model-based' metafeature group in the
+              <a href="https://github.com/ealcobaca/pymfe" target="_blank">python 'pymfe' package</a>.
             </p>
           </ng-template>
     <p *ngIf="numEstimators <= 1; else hierClusInputContainer">
