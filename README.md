@@ -3,6 +3,48 @@ Techniques to better visualize Random Forests and Decision Tree models.
 
 This platform summarizes model statistics and analytics, alongside a interactive view of each tree in the forest model.
 
+# Back-End
+## Dependencies
+The main nyata requirement is:
+```
+Python (>= 3.8)
+```
+
+Packages from pypi (see the requirements.txt):
+```
+flask
+numpy
+scikit-learn
+flask-cors
+flask-restful
+flask-session
+flask_socketio
+redis
+pymfe
+```
+
+
+## Installation
+We create a simple Makefile tag to install the back-end.
+Debian based system:
+```
+make install
+```
+Arch based system:
+```
+make install-arch
+```
+
+
+## Execution
+We create a simple Makefile tag to run the back-end.
+```
+make run
+```
+
+
+# Front-End
+
 # Main features
 - The platform works with sklearn Random Forest Classifiers and Regressors, and Decision Tree Classifiers and Regressors;
 - Model parameter summary and statistics;
