@@ -25,11 +25,12 @@ from . import gen_reports
 
 class _BaseResourceClass(flask_restful.Resource):
     """Base class for DT/RF visualization resources."""
+
     def delete(self, verbose: bool = True):
         if verbose:
             print("Nothing to clean for", self.__class__)
 
-        return '', 204
+        return "", 204
 
 
 class DecisionTree(_BaseResourceClass):
@@ -53,7 +54,9 @@ class DecisionTree(_BaseResourceClass):
         res = flask.jsonify(
             serialize.serialize_decision_tree(
                 dt_model=flask.session["model"],
-                attr_labels=flask.session["attr_labels"]))
+                attr_labels=flask.session["attr_labels"],
+            )
+        )
 
         return res
 
@@ -65,19 +68,20 @@ class DecisionTree(_BaseResourceClass):
 
         flask.session.modified = True
 
-        res = flask.make_response(('Success', 200, {'Content-Type': 'text/plain'}))
+        res = flask.make_response(("Success", 200, {"Content-Type": "text/plain"}))
 
         return res
 
 
 class PredictDataset(_BaseResourceClass):
     """Class dedicated to give methods for predicting a whole dataset."""
+
     def __init__(self, **kwargs):
         """."""
         self.reqparse = flask_restful.reqparse.RequestParser()
-        self.reqparse.add_argument("file",
-                                   type=werkzeug.datastructures.FileStorage,
-                                   location="files")
+        self.reqparse.add_argument(
+            "file", type=werkzeug.datastructures.FileStorage, location="files"
+        )
         self.reqparse.add_argument("sep", type=str, location="form")
         self.reqparse.add_argument("hasHeader", type=int, location="form")
         self.reqparse.add_argument("hasClasses", type=int, location="form")
@@ -93,9 +97,11 @@ class PredictDataset(_BaseResourceClass):
         has_header = bool(args["hasHeader"])
         has_classes = bool(args["hasClasses"])
 
-        data = pd.read_csv(filepath_or_buffer=dataset_file,
-                           sep=sep,
-                           header="infer" if has_header else None)
+        data = pd.read_csv(
+            filepath_or_buffer=dataset_file,
+            sep=sep,
+            header="infer" if has_header else None,
+        )
 
         if has_classes:
             X = data.iloc[:, :-1].values
@@ -112,28 +118,30 @@ class PredictDataset(_BaseResourceClass):
         preds = model.predict(X)
 
         res = flask.jsonify(
-            model_dt.get_metrics(dt_model=model,
-                                 preds=preds,
-                                 true_labels=y,
-                                 preds_proba=preds_proba,
-                                 true_labels_ohe=y_ohe))
+            model_dt.get_metrics(
+                dt_model=model,
+                preds=preds,
+                true_labels=y,
+                preds_proba=preds_proba,
+                true_labels_ohe=y_ohe,
+            )
+        )
 
         return res
 
 
 class PredictSingleInstance(_BaseResourceClass):
     """Class dedicated to provide methods for predicting a single instance."""
+
     def __init__(self, **kwargs):
         """."""
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("instance", type=str)
 
     @staticmethod
-    def _preprocess_instance(instance: str,
-                             sep: str = ",") -> t.Optional[np.ndarray]:
+    def _preprocess_instance(instance: str, sep: str = ",") -> t.Optional[np.ndarray]:
         """Preprocess the user-given single instance."""
-        preproc_inst = np.array(
-            utils.RE_EMPTY_SPACE.sub("", instance).split(sep))
+        preproc_inst = np.array(utils.RE_EMPTY_SPACE.sub("", instance).split(sep))
 
         if not set(map(str.lower, preproc_inst)).isdisjoint(utils.NULL_VALUES):
             return None
@@ -141,23 +149,23 @@ class PredictSingleInstance(_BaseResourceClass):
         return preproc_inst.astype(np.float32).reshape(1, -1)
 
     @staticmethod
-    def _handle_errors(
-            err_code: t.Sequence[str]) -> t.Dict[str, t.Dict[str, str]]:
+    def _handle_errors(err_code: t.Sequence[str]) -> t.Dict[str, t.Dict[str, str]]:
         """Handle probable errors found while predicting the instance."""
         err_msg = {}
 
         if "ERROR_MISSING_VAL" in err_code:
-            err_msg["error"] = {
-                "value": "Currently missing values are not supported."
-            }
+            err_msg["error"] = {"value": "Currently missing values are not supported."}
 
         return err_msg
 
-    def _decision_path(self, model,
-                       inst_proc: np.ndarray) -> t.Sequence[t.Sequence[int]]:
+    def _decision_path(
+        self, model, inst_proc: np.ndarray
+    ) -> t.Sequence[t.Sequence[int]]:
         """Get the decision path of the instace for every tree in the model."""
-        if isinstance(model, (sklearn.tree.DecisionTreeClassifier,
-                              sklearn.tree.DecisionTreeRegressor)):
+        if isinstance(
+            model,
+            (sklearn.tree.DecisionTreeClassifier, sklearn.tree.DecisionTreeRegressor),
+        ):
             nodes = [model.decision_path(inst_proc).indices]
 
         else:
@@ -191,35 +199,38 @@ class PredictSingleInstance(_BaseResourceClass):
             err_code.append("ERROR_MISSING_VAL")
 
         if err_code:
-            return flask.jsonify(
-                PredictSingleInstance._handle_errors(err_code))
+            return flask.jsonify(PredictSingleInstance._handle_errors(err_code))
 
         classes_by_tree, margin = model_dt.get_class_freqs(model, inst_proc)
 
         pred_vals = serialize.json_encoder_type_manager(
-            collections.OrderedDict((
-                ("prediction_result",
-                 descriptions.add_desc(
-                     value=model.predict(inst_proc)[0],
-                     from_id="prediction_result",
-                 )),
-                ("classes_by_tree",
-                 descriptions.add_desc(
-                     value=classes_by_tree,
-                     from_id="classes_by_tree",
-                 )),
-                ("margin",
-                 descriptions.add_desc(
-                     value=margin,
-                     from_id="pred_margin",
-                 )),
-                ("decision_path", {
-                    "value": self._decision_path(model, inst_proc),
-                }),
-                ("leaf_id", {
-                    "value": model.apply(inst_proc)[0],
-                }),
-            )))
+            collections.OrderedDict(
+                (
+                    (
+                        "prediction_result",
+                        descriptions.add_desc(
+                            value=model.predict(inst_proc)[0],
+                            from_id="prediction_result",
+                        ),
+                    ),
+                    (
+                        "classes_by_tree",
+                        descriptions.add_desc(
+                            value=classes_by_tree, from_id="classes_by_tree",
+                        ),
+                    ),
+                    (
+                        "margin",
+                        descriptions.add_desc(value=margin, from_id="pred_margin",),
+                    ),
+                    (
+                        "decision_path",
+                        {"value": self._decision_path(model, inst_proc),},
+                    ),
+                    ("leaf_id", {"value": model.apply(inst_proc)[0],}),
+                )
+            )
+        )
 
         res = flask.jsonify(pred_vals)
 
@@ -228,6 +239,7 @@ class PredictSingleInstance(_BaseResourceClass):
 
 class MostCommonAttrSeq(_BaseResourceClass):
     """Find the most common sequence of attributes in the forest."""
+
     def __init__(self, **kwargs):
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("seq_num", type=int)
@@ -241,23 +253,23 @@ class MostCommonAttrSeq(_BaseResourceClass):
         include_node_decision = bool(args["include_node_decision"])
 
         top_common_seqs = model_dt.top_most_common_attr_seq(
-            model,
-            seq_num=seq_num,
-            include_node_decision=include_node_decision)
+            model, seq_num=seq_num, include_node_decision=include_node_decision
+        )
 
         if gen_report:
             gen_reports.report_most_common_seq(
                 top_common_seqs=top_common_seqs,
-                include_node_decision=include_node_decision)
+                include_node_decision=include_node_decision,
+            )
 
-        res = flask.jsonify(
-            serialize.json_encoder_type_manager(top_common_seqs))
+        res = flask.jsonify(serialize.json_encoder_type_manager(top_common_seqs))
 
         return res
 
 
 class ForestHierarchicalClustering(_BaseResourceClass):
     """Perform a hierarchical clustering using each tree DNA."""
+
     def __init__(self, **kwargs):
         self.reqparse_post = flask_restful.reqparse.RequestParser()
         self.reqparse_post.add_argument("threshold_cut", type=float)
@@ -278,33 +290,35 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         strategy = args.get("strategy", "dna")
 
         if strategy not in ("dna", "metafeatures"):
-            raise ValueError(
-                "'strategy' must be either 'dna' or 'metafeatures.'")
+            raise ValueError("'strategy' must be either 'dna' or 'metafeatures.'")
 
         if strategy == "dna":
             dist_mat, dist_formula, max_dist = model_dt.calc_dna_dist_mat(
-                model=model, X=X)
+                model=model, X=X
+            )
 
         else:
-            dist_mat, dist_formula, max_dist = model_dt.calc_mtf_dist_mat(
-                model=model)
+            dist_mat, dist_formula, max_dist = model_dt.calc_mtf_dist_mat(model=model)
 
         dist_mat[np.isnan(dist_mat)] = 0.0
-        hier_clus_data = model_dt.get_hierarchical_cluster(dist_mat=dist_mat,
-                                                           linkage=linkage)
+        hier_clus_data = model_dt.get_hierarchical_cluster(
+            dist_mat=dist_mat, linkage=linkage
+        )
 
         hier_clus_data.update(
             model_dt.make_hier_clus_cut(
                 dendrogram=hier_clus_data.get("dendrogram"),
                 dist_mat=dist_mat,
-                threshold_cut=max_dist * threshold_cut))
+                threshold_cut=max_dist * threshold_cut,
+            )
+        )
 
-        hier_clus_data.update({
-            "hier_clus_distance":
-            "f(x) = {}".format(dist_formula),
-            "max_limit":
-            max_dist,
-        })
+        hier_clus_data.update(
+            {
+                "hier_clus_distance": "f(x) = {}".format(dist_formula),
+                "max_limit": max_dist,
+            }
+        )
 
         flask.session["hier_clus_data"] = hier_clus_data
         flask.session["dist_mat"] = dist_mat
@@ -312,11 +326,10 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         if gen_report:
             gen_reports.report_hier_clus(
-                hier_clus_data=hier_clus_data,
-                threshold_cut=max_dist * threshold_cut)
+                hier_clus_data=hier_clus_data, threshold_cut=max_dist * threshold_cut
+            )
 
-        response = flask.jsonify(
-            serialize.json_encoder_type_manager(hier_clus_data))
+        response = flask.jsonify(serialize.json_encoder_type_manager(hier_clus_data))
 
         flask.session.modified = True
 
@@ -332,7 +345,7 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         flask.session.modified = True
 
-        res = flask.make_response(('Success', 200, {'Content-Type': 'text/plain'}))
+        res = flask.make_response(("Success", 200, {"Content-Type": "text/plain"}))
 
         return res
 
@@ -346,23 +359,22 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         max_dist = flask.session.get("max_dist")
 
         if hier_clus_data is None:
-            raise ValueError(
-                "No hierarchical clustering hier_clus_data found.")
+            raise ValueError("No hierarchical clustering hier_clus_data found.")
 
         hier_clus_data = model_dt.make_hier_clus_cut(
             dendrogram=hier_clus_data.get("dendrogram"),
             dist_mat=dist_mat,
-            threshold_cut=max_dist * threshold_cut)
+            threshold_cut=max_dist * threshold_cut,
+        )
 
         flask.session["hier_clus_data"].update(hier_clus_data)
 
         if gen_report:
             gen_reports.report_hier_clus(
-                hier_clus_data=hier_clus_data,
-                threshold_cut=max_dist * threshold_cut)
+                hier_clus_data=hier_clus_data, threshold_cut=max_dist * threshold_cut
+            )
 
-        response = flask.jsonify(
-            serialize.json_encoder_type_manager(hier_clus_data))
+        response = flask.jsonify(serialize.json_encoder_type_manager(hier_clus_data))
 
         flask.session.modified = True
 
@@ -381,7 +393,6 @@ def create_app():
     api.add_resource(PredictSingleInstance, "/predict-single-instance")
     api.add_resource(PredictDataset, "/predict-dataset")
     api.add_resource(MostCommonAttrSeq, "/most-common-attr-seq")
-    api.add_resource(ForestHierarchicalClustering,
-                     "/forest-hierarchical-clustering")
+    api.add_resource(ForestHierarchicalClustering, "/forest-hierarchical-clustering")
 
     return app

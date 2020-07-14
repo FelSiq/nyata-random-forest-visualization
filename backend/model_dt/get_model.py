@@ -1,6 +1,6 @@
 def get_toy_model(forest: bool = True, regressor: bool = False):
     """Create a DT/RF toy model for testing purposes."""
-    import numpy as np # linear algebra
+    import numpy as np  # linear algebra
     import sklearn.tree
     import sklearn.ensemble
     from sklearn.datasets import load_iris
@@ -27,8 +27,9 @@ def get_toy_model(forest: bool = True, regressor: bool = False):
     else:
         args = {}
 
-    model = algorithms.get((forest, regressor),
-                           sklearn.tree.DecisionTreeClassifier)(**args)
+    model = algorithms.get((forest, regressor), sklearn.tree.DecisionTreeClassifier)(
+        **args
+    )
     model.fit(iris.data, iris.target)
 
     return model, X, y, attr_labels

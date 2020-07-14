@@ -18,8 +18,9 @@ except ImportError:
 
 def json_encoder_type_manager(obj: t.Any) -> t.Any:
     """Manage non-native python data type to serialize as a JSON."""
-    if isinstance(obj, (sklearn.tree.DecisionTreeClassifier,
-                        sklearn.tree.DecisionTreeRegressor)):
+    if isinstance(
+        obj, (sklearn.tree.DecisionTreeClassifier, sklearn.tree.DecisionTreeRegressor)
+    ):
         return serialize_decision_tree(obj)
 
     if isinstance(obj, scipy.cluster.hierarchy.ClusterNode):
@@ -28,8 +29,7 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     if isinstance(obj, (np.ndarray, list, tuple)):
         return list(map(json_encoder_type_manager, obj))
 
-    if isinstance(obj,
-                  (np.uint, np.int, np.int8, np.int16, np.int32, np.int64)):
+    if isinstance(obj, (np.uint, np.int, np.int8, np.int16, np.int32, np.int64)):
         return int(obj)
 
     if isinstance(obj, sklearn.tree._tree.Tree):
@@ -44,16 +44,14 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     return obj
 
 
-def serialize_generic_obj(obj: t.Any,
-                          include_description: bool = False
-                          ) -> t.Dict[str, t.Any]:
+def serialize_generic_obj(
+    obj: t.Any, include_description: bool = False
+) -> t.Dict[str, t.Any]:
     """Serialize a generic object."""
     if include_description:
         res = {
             utils.preprocess_key(str(key)): descriptions.add_desc(
-                value=json_encoder_type_manager(value),
-                from_id=key,
-                from_obj_doc=obj,
+                value=json_encoder_type_manager(value), from_id=key, from_obj_doc=obj,
             )
             for key, value in obj.__dict__.items()
         }
@@ -91,10 +89,12 @@ def serialize_cluster_node(obj: t.Any) -> t.Dict[str, t.Any]:
 
 
 def serialize_decision_tree(
-    dt_model: t.Union[sklearn.ensemble.RandomForestClassifier,
-                      sklearn.ensemble.RandomForestRegressor,
-                      sklearn.tree.DecisionTreeRegressor,
-                      sklearn.tree.DecisionTreeClassifier],
+    dt_model: t.Union[
+        sklearn.ensemble.RandomForestClassifier,
+        sklearn.ensemble.RandomForestRegressor,
+        sklearn.tree.DecisionTreeRegressor,
+        sklearn.tree.DecisionTreeClassifier,
+    ],
     attr_labels: t.Optional[t.Sequence[str]] = None,
 ) -> t.Dict[str, t.Any]:
     """Transform the given DT model into a serializable dictionary."""
@@ -110,18 +110,19 @@ def serialize_decision_tree(
             for attr_ind, attr in enumerate(attr_labels)
         ]
 
-        sorted_ft_imp = sorted(zip(dt_model.feature_importances_,
-                                   indexed_attr_labels),
-                               key=lambda item: item[0],
-                               reverse=True)
+        sorted_ft_imp = sorted(
+            zip(dt_model.feature_importances_, indexed_attr_labels),
+            key=lambda item: item[0],
+            reverse=True,
+        )
 
         new_model["feature_importances_"] = descriptions.add_desc(
-            value=json_encoder_type_manager([
-                descriptions.add_proportion(
-                    value=item[1],
-                    prop=item[0],
-                ) for item in sorted_ft_imp
-            ]),
+            value=json_encoder_type_manager(
+                [
+                    descriptions.add_proportion(value=item[1], prop=item[0],)
+                    for item in sorted_ft_imp
+                ]
+            ),
             from_id="feature_importances_",
             from_obj_doc=dt_model,
         )
@@ -149,25 +150,26 @@ def serialize_decision_tree(
 
         depth_formatted_sorted = list(
             map(
-                lambda item: descriptions.add_proportion(
-                    value=item[0],
-                    prop=item[1],
-                ),
-                sorted(depth_freqs.items(),
-                       key=lambda item: item[1],
-                       reverse=True)))
+                lambda item: descriptions.add_proportion(value=item[0], prop=item[1],),
+                sorted(depth_freqs.items(), key=lambda item: item[1], reverse=True),
+            )
+        )
 
         new_model["depth_frequencies"] = descriptions.add_desc(
             value=json_encoder_type_manager(depth_formatted_sorted),
             from_id="depth_frequencies",
         )
 
-    if isinstance(dt_model, (sklearn.tree.DecisionTreeClassifier,
-                             sklearn.ensemble.RandomForestClassifier)):
+    if isinstance(
+        dt_model,
+        (sklearn.tree.DecisionTreeClassifier, sklearn.ensemble.RandomForestClassifier),
+    ):
         new_model["model_type"] = "classifier"
 
-    elif isinstance(dt_model, (sklearn.tree.DecisionTreeRegressor,
-                               sklearn.ensemble.RandomForestRegressor)):
+    elif isinstance(
+        dt_model,
+        (sklearn.tree.DecisionTreeRegressor, sklearn.ensemble.RandomForestRegressor),
+    ):
         new_model["model_type"] = "regressor"
 
     else:

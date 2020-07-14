@@ -18,16 +18,18 @@ if not os.path.isdir(REPORT_PATH):
 
 
 def report_most_common_seq(
-        top_common_seqs: t.Sequence[t.Tuple[float, float]],
-        include_node_decision: bool) -> None:
+    top_common_seqs: t.Sequence[t.Tuple[float, float]], include_node_decision: bool
+) -> None:
     """TODO."""
     num_seqs = len(top_common_seqs[0])
 
-    filename = "_".join([
-        "most_common",
-        "rules" if include_node_decision else "attr_seq",
-        "{}.csv".format(num_seqs),
-    ])
+    filename = "_".join(
+        [
+            "most_common",
+            "rules" if include_node_decision else "attr_seq",
+            "{}.csv".format(num_seqs),
+        ]
+    )
 
     filepath = os.path.join(REPORT_PATH, filename)
 
@@ -37,8 +39,9 @@ def report_most_common_seq(
             f.write("{},{:.8f},'{}'\n".format(i, freq, seq))
 
 
-def report_hier_clus(hier_clus_data: t.Dict[str, np.ndarray],
-                     threshold_cut: float) -> None:
+def report_hier_clus(
+    hier_clus_data: t.Dict[str, np.ndarray], threshold_cut: float
+) -> None:
     """TODO."""
     num_clust = len(hier_clus_data["clust_assignment"])
     filepath = os.path.join(REPORT_PATH, "hier_clus_{}.csv".format(num_clust))
@@ -48,5 +51,6 @@ def report_hier_clus(hier_clus_data: t.Dict[str, np.ndarray],
         f.write("cluster_id,medoid_id,cluster_tree_ids\n")
 
         for i, cluster in enumerate(hier_clus_data["clust_assignment"]):
-            f.write("{},{},'{}'\n".format(
-                i, cluster["medoid_ind"], cluster["tree_inds"]))
+            f.write(
+                "{},{},'{}'\n".format(i, cluster["medoid_ind"], cluster["tree_inds"])
+            )
