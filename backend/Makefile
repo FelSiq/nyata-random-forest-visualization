@@ -19,3 +19,8 @@ install-arch:
 	systemctl start redis.service
 	systemctl enable redis.service
 
+install-manjaro:
+	python -m pip install -Ur model_dt/requirements.txt
+	pacman -S redis
+	systemctl start redis.service
+	systemctl enable redis.service
