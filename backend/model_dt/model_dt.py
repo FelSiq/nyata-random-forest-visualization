@@ -287,9 +287,8 @@ def calc_dna_dist_mat(model: t.Union[sklearn.ensemble.RandomForestClassifier,
         max_limit = 2.0
 
     else:
-        dna_min = dna.min(axis=0)
-
-        dna = (dna - dna_min) / (1e-6 + dna.max(axis=0) - dna_min)
+        dna_min, dna_max = np.quantile(dna, (0, 1), axis=0)
+        dna = (dna - dna_min) / (1e-8 + dna_max - dna_min)
 
         dna_dists = scipy.spatial.distance.pdist(X=dna, metric="euclidean")
 
@@ -304,16 +303,17 @@ def calc_mtf_dist_mat(
                    sklearn.ensemble.RandomForestRegressor]
 ) -> t.Tuple[np.ndarray, str, float]:
     """."""
-    mtf_names = pymfe.mfe.MFE.valid_metafeatures(groups="model-based")
-    summary = ("mean", "sd")
-    mtf_vec = np.zeros((model.n_estimators, len(summary) * len(mtf_names)),
-                       dtype=float)
+    extractor = pymfe.mfe.MFE(groups="model-based", summary=("mean", "sd"))
 
-    # TODO: extract.
-    mtf_vec = np.random.random(mtf_vec.shape)
+    num_mtf = len(extractor.extract_from_model(model.estimators_[0])[0])
+    mtf_vec = np.zeros((model.n_estimators, num_mtf), dtype=float)
 
-    mtf_min = mtf_vec.min(axis=0)
-    mtf_vec = (mtf_vec - mtf_min) / (mtf_vec.max(axis=0) - mtf_min)
+    for ind, cur_model in enumerate(model.estimators_):
+        mtf_vec[ind, :] = extractor.extract_from_model(cur_model)[1]
+
+    mtf_min, mtf_max = np.quantile(mtf_vec, (0, 1), axis=0)
+    mtf_vec = (mtf_vec - mtf_min) / (1e-8 + mtf_max - mtf_min)
+    print(mtf_vec)
 
     mtf_dists = scipy.spatial.distance.pdist(X=mtf_vec, metric="euclidean")
 
