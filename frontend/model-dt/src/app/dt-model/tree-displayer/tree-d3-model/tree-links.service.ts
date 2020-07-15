@@ -21,6 +21,7 @@ export class TreeLinksService {
   static readonly styleColorTextOutline = 'black';
   static readonly styleTextFontSize = 16;
   static readonly styleTextSpacing = 4;
+  static readonly styleAttrRectColor = 'white';
 
   height: number;
   width: number;
@@ -277,7 +278,7 @@ export class TreeLinksService {
 
     TreeExtraService.buildObjectsLabelRect(
       filteredLinks,
-      'red',
+      TreeLinksService.styleAttrRectColor,
       this.showLinkLabelsRect,
       (TreeLinksService.styleTextFontSize +
        TreeLinksService.styleTextSpacing),

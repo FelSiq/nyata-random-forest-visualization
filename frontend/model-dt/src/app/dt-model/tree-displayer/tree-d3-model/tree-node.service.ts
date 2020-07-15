@@ -29,6 +29,7 @@ export class TreeNodeService {
   static readonly styleWidthCircleDefault = 1;
   static readonly styleWidthCirclePredict = 2;
   static readonly styleWidthCircleHover = 3;
+  static readonly styleAttrRectColor = 'white';
 
   private impurityColors: d3Scale.ScaleLinear<string, number>;
   height: number;
@@ -345,7 +346,7 @@ export class TreeNodeService {
 
     TreeExtraService.buildObjectsLabelRect(
       filteredNodes,
-      'black',
+      TreeNodeService.styleAttrRectColor,
       this.showNodeLabelsRect,
       (TreeNodeService.styleTextFontSize +
        TreeNodeService.styleTextSpacing),

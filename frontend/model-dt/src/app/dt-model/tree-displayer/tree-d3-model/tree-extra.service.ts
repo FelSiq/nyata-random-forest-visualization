@@ -99,7 +99,9 @@ export class TreeExtraService {
           .classed('draggable label', true)
           .attr('rx', 3)
           .attr('opacity', 0.85)
-          .attr('fill', rectColor);
+          .attr('fill', rectColor)
+	  .style('stroke', 'black')
+	  .style('stroke-width', 1);
 
     objects
       .selectAll('rect')
@@ -227,12 +229,12 @@ export class TreeExtraService {
       .selectAll('.label-text')
         .attr('font-size', fontSize)
         .attr('font-family', "'Roboto', sans-serif")
-        .attr('font-weight', 900)
-        .attr('fill', 'white')
+        .attr('font-weight', 100)
+        .attr('fill', 'black')
         .attr('text-anchor', 'middle')
         .attr('x', funcXCoord)
         .attr('y', funcYCoord)
-        .style('stroke', textOutline)
+        .style('stroke', 'rgb(128, 128, 128)')
         .style('stroke-width', 1)
         .each(function(d, i) {
           d3.select(this)
