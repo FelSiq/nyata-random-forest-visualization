@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 
-import * as jspdf from 'jspdf';
+import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
 
@@ -61,7 +61,7 @@ export class IterableDisplayerComponent implements OnInit {
       const imgWidth = Math.min(200, canvas.width * 0.264583, imgHeight * origRatio);
   
       const contentDataURL = canvas.toDataURL('image/png');
-      const pdf = new jspdf('p', 'mm', 'a4');
+      const pdf = new jsPDF();
       const position = 0;
       pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
       pdf.save(pdfName);

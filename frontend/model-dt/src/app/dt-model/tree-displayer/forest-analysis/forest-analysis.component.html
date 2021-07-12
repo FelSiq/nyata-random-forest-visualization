@@ -40,6 +40,7 @@
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>
+	<!--
         <mat-action-list dense>
           <mat-list-item (click)="captureScreen('common-seq-results', 'analysis_result_freq_' + (decisionCheckbox.checked ? 'rules' : 'attr_seq') + '_' + rankCommonAttrSeq.length + '.pdf')">
             <mat-icon class="large-icon"
@@ -49,6 +50,7 @@
             Save this list as a .PDF file.
           </mat-list-item>
         </mat-action-list>
+        -->
         <mat-list dense>
                 <mat-list-item> Total of combinations obtained: {{ attrSeqRelFreq.length }} </mat-list-item>
                 <mat-list-item> Total of weighted combination frequency captured: {{ 100 * totalRelFreq | number: '.2-2'}}% </mat-list-item>
@@ -211,6 +213,7 @@
 				                  [hierClusDistFormula]="hierClusDistFormula"
 				                  [xMaxLimit]="xMaxLimit"
                                   (peekTree)="emitEventToParent($event)"></app-hier-clus-visual>
+	    <!--
             <mat-action-list dense>
               <mat-list-item (click)="captureScreen('clusters-assigment-list', 'hier_clus_clusters_' + numHierClusters + '_clusters.pdf')">
                 <mat-icon class="large-icon"
@@ -220,6 +223,7 @@
                 Save the clustering results as a .PDF file.
               </mat-list-item>
             </mat-action-list>
+	    -->
             <mat-list id="clusters-assigment-list">
               <mat-list-item>
                 <span class="common-attr-table-rank2"><strong>Cluster</strong></span>
