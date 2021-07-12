@@ -29,7 +29,7 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     if isinstance(obj, (np.ndarray, list, tuple)):
         return list(map(json_encoder_type_manager, obj))
 
-    if isinstance(obj, (np.uint, np.int, np.int8, np.int16, np.int32, np.int64)):
+    if np.issubdtype(type(obj), np.integer):
         return int(obj)
 
     if isinstance(obj, sklearn.tree._tree.Tree):
