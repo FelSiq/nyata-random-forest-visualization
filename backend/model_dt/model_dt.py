@@ -354,7 +354,10 @@ def make_hier_clus_cut(
         medoid_ind = clust_inst_inds[np.argmin(cluster_dists_sum)]
 
         clust_buckets.append(
-            {"tree_inds": clust_inst_inds, "medoid_ind": medoid_ind,}
+            {
+                "tree_inds": clust_inst_inds,
+                "medoid_ind": medoid_ind,
+            }
         )
 
     clust_sum_dists[2, :] = np.arange(clust_assignment.size)
@@ -366,7 +369,8 @@ def make_hier_clus_cut(
             descriptions.add_desc(
                 value=[
                     descriptions.add_proportion(
-                        value="{} ({:.2f})".format(int(key), val), prop=prop,
+                        value="{} ({:.2f})".format(int(key), val),
+                        prop=prop,
                     )
                     for val, prop, key in sorted(
                         zip(*clust_sum_dists), key=lambda item: item[1]

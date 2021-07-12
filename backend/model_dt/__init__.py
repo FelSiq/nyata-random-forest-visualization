@@ -216,18 +216,29 @@ class PredictSingleInstance(_BaseResourceClass):
                     (
                         "classes_by_tree",
                         descriptions.add_desc(
-                            value=classes_by_tree, from_id="classes_by_tree",
+                            value=classes_by_tree,
+                            from_id="classes_by_tree",
                         ),
                     ),
                     (
                         "margin",
-                        descriptions.add_desc(value=margin, from_id="pred_margin",),
+                        descriptions.add_desc(
+                            value=margin,
+                            from_id="pred_margin",
+                        ),
                     ),
                     (
                         "decision_path",
-                        {"value": self._decision_path(model, inst_proc),},
+                        {
+                            "value": self._decision_path(model, inst_proc),
+                        },
                     ),
-                    ("leaf_id", {"value": model.apply(inst_proc)[0],}),
+                    (
+                        "leaf_id",
+                        {
+                            "value": model.apply(inst_proc)[0],
+                        },
+                    ),
                 )
             )
         )

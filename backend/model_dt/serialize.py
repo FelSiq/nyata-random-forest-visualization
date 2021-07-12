@@ -51,7 +51,9 @@ def serialize_generic_obj(
     if include_description:
         res = {
             utils.preprocess_key(str(key)): descriptions.add_desc(
-                value=json_encoder_type_manager(value), from_id=key, from_obj_doc=obj,
+                value=json_encoder_type_manager(value),
+                from_id=key,
+                from_obj_doc=obj,
             )
             for key, value in obj.__dict__.items()
         }
@@ -119,7 +121,10 @@ def serialize_decision_tree(
         new_model["feature_importances_"] = descriptions.add_desc(
             value=json_encoder_type_manager(
                 [
-                    descriptions.add_proportion(value=item[1], prop=item[0],)
+                    descriptions.add_proportion(
+                        value=item[1],
+                        prop=item[0],
+                    )
                     for item in sorted_ft_imp
                 ]
             ),
@@ -150,7 +155,10 @@ def serialize_decision_tree(
 
         depth_formatted_sorted = list(
             map(
-                lambda item: descriptions.add_proportion(value=item[0], prop=item[1],),
+                lambda item: descriptions.add_proportion(
+                    value=item[0],
+                    prop=item[1],
+                ),
                 sorted(depth_freqs.items(), key=lambda item: item[1], reverse=True),
             )
         )
