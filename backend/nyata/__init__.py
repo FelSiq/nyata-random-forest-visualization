@@ -37,20 +37,56 @@ class DecisionTree(_BaseResourceClass):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
 
     def __init__(self, **kwargs):
-        pass
+        super(DecisionTree, self).__init__()
+        if flask.session and flask.session.get("model"):
+            self.model = flask.session["model"]
+            self.X = flask.session["X"]
+            self.y = flask.session["y"]
+            self.attr_labels = flask.session["attr_labels"]
 
-    def get(self):
-        """Serialize and jsonify a sklearn RF/DT model."""
-        model, X, y, attr_labels = get_model.get_toy_model()
-        # model, X, y, attr_labels = get_model.get_custom_model()
+        else:
+            self.model, self.X, self.y, self.attr_labels = get_model.get_toy_model()
 
-        flask.session["model"] = model
-        flask.session["X"] = X
-        flask.session["y"] = y
-        flask.session["attr_labels"] = attr_labels
+            flask.session["model"] = self.model
+            flask.session["X"] = self.X
+            flask.session["y"] = self.y
+            flask.session["attr_labels"] = self.attr_labels
+            flask.session.modified = True
+
+        self.reqparse = flask_restful.reqparse.RequestParser()
+        self.reqparse.add_argument(
+            "file", type=werkzeug.datastructures.FileStorage, location="files"
+        )
+
+    def post(self):
+        args = self.reqparse.parse_args()
+        data_pickle = args["file"]
+
+        data = pickle.load(data_pickle)
+
+        model = data["model"]
+        X, y = data["data"]
+        attr_labels = data["attr_labels"]
+
+        self.model = model
+        self.X = np.asfarray(X)
+        self.y = np.asarray(y)
+        self.attr_labels = attr_labels
+
+        if self.attr_labels == "infer":
+            self.attr_labels = np.unique(self.y)
+
+        flask.session["model"] = self.model
+        flask.session["X"] = self.X
+        flask.session["y"] = self.y
+        flask.session["attr_labels"] = self.attr_labels
 
         flask.session.modified = True
 
+        return None, 200
+
+    def get(self):
+        """Serialize and jsonify a sklearn RF/DT model."""
         res = flask.jsonify(
             serialize.serialize_decision_tree(
                 dt_model=flask.session["model"],
@@ -78,6 +114,8 @@ class PredictDataset(_BaseResourceClass):
 
     def __init__(self, **kwargs):
         """."""
+        super(PredictDataset, self).__init__()
+
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument(
             "file", type=werkzeug.datastructures.FileStorage, location="files"
@@ -135,6 +173,8 @@ class PredictSingleInstance(_BaseResourceClass):
 
     def __init__(self, **kwargs):
         """."""
+        super(PredictSingleInstance, self).__init__()
+
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("instance", type=str)
 
@@ -252,6 +292,8 @@ class MostCommonAttrSeq(_BaseResourceClass):
     """Find the most common sequence of attributes in the forest."""
 
     def __init__(self, **kwargs):
+        super(MostCommonAttrSeq, self).__init__()
+
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument("seq_num", type=int)
         self.reqparse.add_argument("include_node_decision", type=int)
@@ -282,6 +324,8 @@ class ForestHierarchicalClustering(_BaseResourceClass):
     """Perform a hierarchical clustering using each tree DNA."""
 
     def __init__(self, **kwargs):
+        super(ForestHierarchicalClustering, self).__init__()
+
         self.reqparse_post = flask_restful.reqparse.RequestParser()
         self.reqparse_post.add_argument("threshold_cut", type=float)
         self.reqparse_post.add_argument("linkage", type=str)
