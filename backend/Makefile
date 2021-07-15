@@ -11,7 +11,7 @@ run:
 
 install-apt:
 	python -m pip install -Ur requirements.txt
-	sudo aptinstall redis-server
+	sudo apt install redis-server
 
 install-apt-get:
 	python -m pip install -Ur requirements.txt
