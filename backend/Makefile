@@ -9,18 +9,22 @@ run:
 	export SESSION_PERMANENT=0 && \
 	python -m flask run
 
-install:
-	python -m pip install -Ur model_dt/requirements.txt
+install-apt:
+	python -m pip install -Ur requirements.txt
+	sudo aptinstall redis-server
+
+install-apt-get:
+	python -m pip install -Ur requirements.txt
 	sudo apt-get install redis-server
 
-install-arch:
-	python -m pip install -Ur model_dt/requirements.txt
+install-yay:
+	python -m pip install -Ur requirements.txt
 	yay -S redis
 	systemctl start redis.service
 	systemctl enable redis.service
 
-install-manjaro:
-	python -m pip install -Ur model_dt/requirements.txt
+install-pacman:
+	python -m pip install -Ur requirements.txt
 	pacman -S redis
 	systemctl start redis.service
 	systemctl enable redis.service
