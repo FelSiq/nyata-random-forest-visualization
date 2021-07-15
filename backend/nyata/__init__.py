@@ -16,7 +16,7 @@ import pandas as pd
 import sklearn.tree
 
 from . import utils
-from . import nyata
+from . import model_dt
 from . import serialize
 from . import config
 from . import get_model
@@ -106,7 +106,7 @@ class PredictDataset(_BaseResourceClass):
         if has_classes:
             X = data.iloc[:, :-1].values
             y = data.iloc[:, -1].values
-            y_ohe = None  # nyata.hot_encoding(y)
+            y_ohe = None  # model_dt.hot_encoding(y)
             preds_proba = None  # self.model.predict_proba(X)
 
         else:
@@ -118,7 +118,7 @@ class PredictDataset(_BaseResourceClass):
         preds = model.predict(X)
 
         res = flask.jsonify(
-            nyata.get_metrics(
+            model_dt.get_metrics(
                 dt_model=model,
                 preds=preds,
                 true_labels=y,
@@ -201,7 +201,7 @@ class PredictSingleInstance(_BaseResourceClass):
         if err_code:
             return flask.jsonify(PredictSingleInstance._handle_errors(err_code))
 
-        classes_by_tree, margin = nyata.get_class_freqs(model, inst_proc)
+        classes_by_tree, margin = model_dt.get_class_freqs(model, inst_proc)
 
         pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict(
@@ -263,7 +263,7 @@ class MostCommonAttrSeq(_BaseResourceClass):
         seq_num = args["seq_num"]
         include_node_decision = bool(args["include_node_decision"])
 
-        top_common_seqs = nyata.top_most_common_attr_seq(
+        top_common_seqs = model_dt.top_most_common_attr_seq(
             model, seq_num=seq_num, include_node_decision=include_node_decision
         )
 
@@ -304,20 +304,20 @@ class ForestHierarchicalClustering(_BaseResourceClass):
             raise ValueError("'strategy' must be either 'dna' or 'metafeatures.'")
 
         if strategy == "dna":
-            dist_mat, dist_formula, max_dist = nyata.calc_dna_dist_mat(
+            dist_mat, dist_formula, max_dist = model_dt.calc_dna_dist_mat(
                 model=model, X=X
             )
 
         else:
-            dist_mat, dist_formula, max_dist = nyata.calc_mtf_dist_mat(model=model)
+            dist_mat, dist_formula, max_dist = model_dt.calc_mtf_dist_mat(model=model)
 
         dist_mat[np.isnan(dist_mat)] = 0.0
-        hier_clus_data = nyata.get_hierarchical_cluster(
+        hier_clus_data = model_dt.get_hierarchical_cluster(
             dist_mat=dist_mat, linkage=linkage
         )
 
         hier_clus_data.update(
-            nyata.make_hier_clus_cut(
+            model_dt.make_hier_clus_cut(
                 dendrogram=hier_clus_data.get("dendrogram"),
                 dist_mat=dist_mat,
                 threshold_cut=max_dist * threshold_cut,
@@ -372,7 +372,7 @@ class ForestHierarchicalClustering(_BaseResourceClass):
         if hier_clus_data is None:
             raise ValueError("No hierarchical clustering hier_clus_data found.")
 
-        hier_clus_data = nyata.make_hier_clus_cut(
+        hier_clus_data = model_dt.make_hier_clus_cut(
             dendrogram=hier_clus_data.get("dendrogram"),
             dist_mat=dist_mat,
             threshold_cut=max_dist * threshold_cut,

@@ -10,7 +10,7 @@ from . import utils
 from . import descriptions
 
 try:
-    from . import nyata
+    from . import model_dt
 
 except ImportError:
     pass
@@ -33,7 +33,7 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
         return int(obj)
 
     if isinstance(obj, sklearn.tree._tree.Tree):
-        return nyata.get_tree_structure(obj)
+        return model_dt.get_tree_structure(obj)
 
     if isinstance(obj, dict):
         return {
