@@ -38,20 +38,17 @@ class DecisionTree(_BaseResourceClass):
 
     def __init__(self, **kwargs):
         super(DecisionTree, self).__init__()
+
+        self.model = None
+        self.X = None
+        self.y = None
+        self.attr_labels = None
+
         if flask.session and flask.session.get("model"):
             self.model = flask.session["model"]
             self.X = flask.session["X"]
             self.y = flask.session["y"]
             self.attr_labels = flask.session["attr_labels"]
-
-        else:
-            self.model, self.X, self.y, self.attr_labels = get_model.get_toy_model()
-
-            flask.session["model"] = self.model
-            flask.session["X"] = self.X
-            flask.session["y"] = self.y
-            flask.session["attr_labels"] = self.attr_labels
-            flask.session.modified = True
 
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument(
