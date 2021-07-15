@@ -1,6 +1,6 @@
 run:
 	export FLASK_ENV=development && \
-	export FLASK_APP=model_dt && \
+	export FLASK_APP=nyata && \
 	export FLASK_DEBUG=1 && \
 	export SESSION_TYPE=redis && \
 	export SESSION_USE_SIGNER=1 && \
