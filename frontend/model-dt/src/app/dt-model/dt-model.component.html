@@ -1,1 +1,20 @@
-<app-tree-displayer [treeModel]="treeModel"></app-tree-displayer>
+<app-tree-displayer [treeModel]="treeModel" *ngIf="treeModel else toPost"></app-tree-displayer>
+
+<ng-template #toPost>
+  <mat-card class="justified-block">
+    <mat-card-header>
+      <mat-card-title>
+        Choose the .pickle file with your model information
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+    </mat-card-content>
+    <mat-card-actions class="centered">
+      <input type="file" (change)="postModelOnSession($event.target.files)" accept=".pkl" id="model-pickle-id" hidden="true" />
+      <label for="model-pickle-id" class="md-button md-raised md-primary centered">
+        <mat-icon>upload</mat-icon>
+        UPLOAD
+      </label>
+    </mat-card-actions>
+  </mat-card>
+<ng-template>

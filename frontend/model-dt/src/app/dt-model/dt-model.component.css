@@ -1,3 +1,19 @@
 .app-tree-displayer {
   height: 100%;
 }
+
+.justified-block {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  margin-left: -320px;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
