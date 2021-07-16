@@ -50,9 +50,44 @@ def is_forest(model):
         (
             sklearn.ensemble.RandomForestClassifier,
             sklearn.ensemble.RandomForestRegressor,
+            sklearn.ensemble.ExtraTreesClassifier,
+            sklearn.ensemble.ExtraTreesRegressor,
+            sklearn.ensemble.BaggingClassifier,
+            sklearn.ensemble.BaggingRegressor,
+            # sklearn.ensemble.GradientBoostingClassifier,
+            # sklearn.ensemble.GradientBoostingRegressor,
         ),
     )
 
 
-def is_valid_model(model):
-    return is_tree(model) or is_forest(model)
+def is_valid_ensemble(model):
+    if isinstance(
+        model,
+        (
+            sklearn.ensemble.BaggingClassifier,
+            sklearn.ensemble.BaggingRegressor,
+        ),
+    ):
+        return is_tree(model.base_estimator_)
+
+    """
+    if isinstance(
+        model,
+        (
+            sklearn.ensemble.GradientBoostingClassifier,
+            sklearn.ensemble.GradientBoostingRegressor,
+        ),
+    ):
+        return all(map(is_tree, model.estimators_))
+    """
+
+    return False
+
+
+def is_valid_model(model, deep_check_ensemble: bool = False):
+    res = is_tree(model) or is_forest(model)
+
+    if deep_check_ensemble:
+        res = res and is_valid_ensemble(model)
+
+    return res

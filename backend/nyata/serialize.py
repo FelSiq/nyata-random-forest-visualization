@@ -4,6 +4,7 @@ import typing as t
 import sklearn.tree
 import sklearn.ensemble
 import sklearn.base
+import sklearn.dummy
 import numpy as np
 import scipy.cluster.hierarchy
 
@@ -21,6 +22,15 @@ def json_encoder_type_manager(obj: t.Any) -> t.Any:
     """Manage non-native python data type to serialize as a JSON."""
     if utils.is_tree(obj):
         return serialize_decision_tree(obj)
+
+    if isinstance(obj, np.random.RandomState):
+        return "(Random Number Generator instance)"
+
+    if isinstance(obj, sklearn.dummy.DummyClassifier):
+        return "(DummyClassifier instance)"
+
+    if isinstance(obj, sklearn.dummy.DummyRegressor):
+        return "(DummyClassifier instance)"
 
     if isinstance(obj, scipy.cluster.hierarchy.ClusterNode):
         return serialize_cluster_node(obj)

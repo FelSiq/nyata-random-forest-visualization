@@ -87,7 +87,7 @@ def get_class_freqs(
     dt_model: sklearn.ensemble.RandomForestClassifier, instance: np.ndarray
 ) -> t.Tuple[t.Optional[t.Dict[str, t.Dict[str, str]]], t.Optional[str]]:
     """Get the frequency of every class from a RF Classifier prediction."""
-    if not isinstance(dt_model, sklearn.ensemble.RandomForestClassifier):
+    if not sklearn.base.is_classifier(dt_model) or not utils.is_forest(dt_model):
         return None, None
 
     class_by_tree = {

@@ -70,6 +70,12 @@ DESCRIPTIONS = {
     ),
     **get_class_doc(sklearn.ensemble.RandomForestClassifier()),
     **get_class_doc(sklearn.ensemble.RandomForestRegressor()),
+    **get_class_doc(sklearn.ensemble.BaggingClassifier()),
+    **get_class_doc(sklearn.ensemble.BaggingRegressor()),
+    # **get_class_doc(sklearn.ensemble.GradientBoostingClassifier()),
+    # **get_class_doc(sklearn.ensemble.GradientBoostingRegressor()),
+    **get_class_doc(sklearn.ensemble.ExtraTreesClassifier()),
+    **get_class_doc(sklearn.ensemble.ExtraTreesRegressor()),
     **get_class_doc(sklearn.tree.DecisionTreeClassifier()),
     **get_class_doc(sklearn.tree.DecisionTreeRegressor()),
 }  # t.Dict[t.Any, str]

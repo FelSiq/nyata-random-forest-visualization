@@ -24,7 +24,9 @@ def dump(
         attr_labels == "infer" or attr_labels is None or hasattr(attr_labels, "__len__")
     ), "'attr_labels' must be None, 'infer' or a sequence of values."
 
-    assert utils.is_valid_model(model), f"Invalid model: {type(model)}"
+    assert utils.is_valid_model(
+        model, deep_check_ensemble=True
+    ), f"Invalid model: {type(model)}"
 
     if not output_uri.endswith(".pickle"):
         output_uri += ".pickle"
