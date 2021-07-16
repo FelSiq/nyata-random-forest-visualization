@@ -34,6 +34,28 @@ class _BaseResourceClass(flask_restful.Resource):
         return "", 204
 
 
+class SessionInformation(_BaseResourceClass):
+    def __init__(self, **kwargs):
+        super(SessionInformation, self).__init__()
+
+    def get(self):
+        """Serialize and jsonify a sklearn RF/DT model."""
+        model = flask.session.get("model")
+        X = flask.session.get("X")
+        y = flask.session.get("y")
+
+        res = flask.jsonify(
+            {
+                "is_forest": utils.is_forest(model),
+                "is_classifier": sklearn.base.is_classifier(model),
+                "X_given": X is not None,
+                "y_given": y is not None,
+            }
+        )
+
+        return res
+
+
 class DecisionTree(_BaseResourceClass):
     """Class dedicated to serialize and jsonify a sklearn DT/RF model."""
 
@@ -358,6 +380,9 @@ class ForestHierarchicalClustering(_BaseResourceClass):
             raise ValueError("'strategy' must be either 'dna' or 'metafeatures.'")
 
         if strategy == "dna":
+            if X is None:
+                return "DNA strategy requires training data alongside the model.", 400
+
             dist_mat, dist_formula, max_dist = model_dt.calc_dna_dist_mat(
                 model=model, X=X
             )
@@ -454,6 +479,7 @@ def create_app():
     api = flask_restful.Api(app)
     flask_session.Session(app)
 
+    api.add_resource(SessionInformation, "/session-information")
     api.add_resource(DecisionTree, "/dt-visualization")
     api.add_resource(PredictSingleInstance, "/predict-single-instance")
     api.add_resource(PredictDataset, "/predict-dataset")
