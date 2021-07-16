@@ -4,6 +4,8 @@ import pickle
 import numpy as np
 import sklearn.ensemble
 import sklearn.tree
+import sklearn.base
+import sklearn.pipeline
 
 from . import utils
 
@@ -13,6 +15,9 @@ def dump(
     train_data: t.Optional[t.Tuple[np.ndarray, np.ndarray]] = None,
     attr_labels: t.Optional[t.Union[str, t.Sequence]] = "infer",
     output_uri: str = "nyata_package.pickle",
+    preprocessing_pipeline: t.Optional[
+        t.Union[sklearn.base.TransformerMixin, sklearn.pipeline.Pipeline]
+    ] = None,
     protocol: int = pickle.HIGHEST_PROTOCOL,
 ):
     assert train_data is None or len(train_data) == 2, (
@@ -28,14 +33,23 @@ def dump(
         model, deep_check_ensemble=True
     ), f"Invalid model: {type(model)}"
 
+    assert preprocessing_pipeline is None or utils.is_valid_transformer(
+        preprocessing_pipeline
+    )
+
     if not output_uri.endswith(".pickle"):
         output_uri += ".pickle"
 
-    package = {
-        "model": model,
-        "train_data": train_data,
-        "attr_labels": attr_labels,
-    }
+    package = {"model": model}
+
+    if train_data is not None:
+        package["train_data"] = train_data
+
+    if attr_labels is not None:
+        package["attr_labels"] = attr_labels
+
+    if attr_labels is not None:
+        package["preproc_pipeline"] = preprocessing_pipeline
 
     with open(output_uri, "wb") as f_out:
         pickle.dump(package, f_out)

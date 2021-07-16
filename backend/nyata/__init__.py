@@ -66,12 +66,14 @@ class DecisionTree(_BaseResourceClass):
         self.X = None
         self.y = None
         self.attr_labels = None
+        self.preproc_pipeline = None
 
         if flask.session and flask.session.get("model"):
             self.model = flask.session["model"]
             self.X = flask.session["X"]
             self.y = flask.session["y"]
             self.attr_labels = flask.session["attr_labels"]
+            self.preproc_pipeline = flask.session["preproc_pipeline"]
 
         self.reqparse = flask_restful.reqparse.RequestParser()
         self.reqparse.add_argument(
@@ -84,9 +86,15 @@ class DecisionTree(_BaseResourceClass):
         data = pickle.load(data_pickle)
 
         model = data["model"]
+        preproc_pipeline = data.get("preproc_pipeline")
 
         if model is None:
             return "Model not found in the given .pickle file.", 400
+
+        if preproc_pipeline is not None and not utils.is_valid_transformer(
+            preproc_pipeline
+        ):
+            return f"Unsupported preprocessing pipeline: {type(preproc_pipeline)}", 400
 
         if not utils.is_valid_model(model):
             return f"Unsupported model: {type(model)}", 400
@@ -100,6 +108,7 @@ class DecisionTree(_BaseResourceClass):
         attr_labels = data.get("attr_labels")
 
         self.model = model
+        self.preproc_pipeline = preproc_pipeline
         self.attr_labels = attr_labels
 
         if X is not None:
@@ -115,6 +124,7 @@ class DecisionTree(_BaseResourceClass):
         flask.session["X"] = self.X
         flask.session["y"] = self.y
         flask.session["attr_labels"] = self.attr_labels
+        flask.session["preproc_pipeline"] = self.preproc_pipeline
 
         flask.session.modified = True
 
@@ -162,6 +172,7 @@ class PredictDataset(_BaseResourceClass):
     def post(self):
         """Make predictions and give metrics for the user-given dataset."""
         model = flask.session.get("model")
+        preproc_pipeline = flask.session.get("preproc_pipeline")
 
         args = self.reqparse.parse_args()
 
@@ -187,6 +198,9 @@ class PredictDataset(_BaseResourceClass):
             y = None
             y_ohe = None
             preds_proba = None
+
+        if preproc_pipeline is not None:
+            X = preproc_pipeline.transform(X)
 
         preds = model.predict(X)
 
@@ -263,6 +277,7 @@ class PredictSingleInstance(_BaseResourceClass):
         instance = args["instance"]
 
         model = flask.session.get("model")
+        preproc_pipeline = flask.session.get("preproc_pipeline")
 
         inst_proc = PredictSingleInstance._preprocess_instance(instance)
         err_code = []
@@ -274,6 +289,11 @@ class PredictSingleInstance(_BaseResourceClass):
             return flask.jsonify(PredictSingleInstance._handle_errors(err_code))
 
         classes_by_tree, margin = model_dt.get_class_freqs(model, inst_proc)
+
+        inst_proc = np.atleast_2d(np.asfarray(inst_proc))
+
+        if preproc_pipeline is not None:
+            inst_proc = preproc_pipeline.transform(inst_proc)
 
         pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict(

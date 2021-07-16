@@ -1,6 +1,8 @@
 """Generic utility functions."""
 import sklearn.tree
 import sklearn.ensemble
+import sklearn.base
+import sklearn.pipeline
 import re
 
 NULL_VALUES = {
@@ -91,3 +93,9 @@ def is_valid_model(model, deep_check_ensemble: bool = False):
         res = res and is_valid_ensemble(model)
 
     return res
+
+
+def is_valid_transformer(pipeline):
+    return isinstance(
+        pipeline, (sklearn.base.TransformerMixin, sklearn.pipeline.Pipeline)
+    )
