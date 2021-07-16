@@ -3,12 +3,12 @@
 <ng-template #toPost>
   <div class="justified-block">
   <mat-card>
+    <img mat-card-image src="/assets/images/nyata_logo.jpg" style="width:100%;" alt="Nyata logo" class="justified-block-2 centered">
     <mat-card-header>
       <mat-card-title>
         Upload the .pickle file with your model data
       </mat-card-title>
     </mat-card-header>
-
     <mat-card-actions class="centered">
       <input type="file" (change)="postModelOnSession($event.target.files)" accept=".pickle" id="model-pickle-id" hidden="true" />
       <label for="model-pickle-id" class="md-button md-raised md-primary centered">
@@ -57,7 +57,11 @@
       # Done!<br>
 
   </ng-template>
-</mat-expansion-panel>
-</mat-accordion>
-  </div>
-<ng-template>
+  </mat-expansion-panel>
+  </mat-accordion>
+  <footer>
+   <p style="color:#909090; margin-top: 48px; font-size: 14px;">
+   Logo by <a target="_blank" rel="noopener noreferrer" href="http://www.cemeai.icmc.usp.br/pessoal/tecnico-administrativos">Assessoria de Comunicação do CeMEAI</a>.
+   </p>
+  </footer>
+</div>

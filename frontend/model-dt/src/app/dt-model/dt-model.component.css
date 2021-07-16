@@ -7,9 +7,19 @@
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 30%;
-  left: 50%;
-  margin-left: -280px;
+  top: 40%;
+  left: 25%;
+  right: 25%;
+}
+
+.justified-block-2 {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: -150%;
+  left: 0%;
+  right: 0%;
 }
 
 .centered {
