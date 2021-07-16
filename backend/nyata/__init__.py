@@ -19,7 +19,6 @@ from . import utils
 from . import model_dt
 from . import serialize
 from . import config
-from . import get_model
 from . import gen_reports
 
 
