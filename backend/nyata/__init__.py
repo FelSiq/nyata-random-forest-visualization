@@ -20,6 +20,7 @@ from . import model_dt
 from . import serialize
 from . import config
 from . import gen_reports
+from .create_pickle import *
 
 
 class _BaseResourceClass(flask_restful.Resource):
