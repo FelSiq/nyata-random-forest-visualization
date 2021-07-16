@@ -1,3 +1,8 @@
+<img src="images/nyata_logo.jpg" style="width:100%;" alt="Nyata logo">
+<sub>
+Logo by <a target="_blank" rel="noopener noreferrer" href="http://www.cemeai.icmc.usp.br/pessoal/tecnico-administrativos">Assessoria de Comunicação do CeMEAI</a>.
+</sub>
+
 ## Nyata: visualization of Decision Tree and Random Forest models
 
 - Web platform to visualize and interpret Random Forests and Decision Tree models.
