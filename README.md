@@ -19,9 +19,9 @@ This document is organized as follows:
 
 ---
 
-## Instalation instructions
-
 <a name="nyata-installation"></a>
+
+## Instalation instructions
 First things first, you need to have **Python 3**, **pip**, [**node.js** and **npm**](https://github.com/nvm-sh/nvm), and [**angular 2**](https://angular.io/cli) installed in your local machine in order to proceed with the Nyata installation.
 
 After everything listed above checks out, now you need to install both the dependencies from the front-end and back-end. The script `install.sh` should do all the work for you with a bit of luck, if you run it giving your package manager as argument:
@@ -45,9 +45,9 @@ I wrote down the `Makefile` clauses for the following package managers: `yay`, `
 
 ---
 
-## Dependency list
-
 <a name="nyata-dependencies"></a>
+
+## Dependency list
 
 Nyata depends on the following third-party softwares:
 - Python 3
@@ -59,9 +59,9 @@ Nyata depends on the following third-party softwares:
 
 ---
 
-## Run instructions
-
 <a name="running-nyata"></a>
+
+## Run instructions
 
 After everything is installed correctly, you can run Nyata using `run.sh`:
 ```bash
@@ -75,9 +75,9 @@ after running `run.sh`, your default web browser should conveniently pop up expo
 
 ---
 
-## Usage
-
 <a name="using-nyata"></a>
+
+## Usage
 
 After both backend and frontend are running, you can use Nyata directly from your web browser ([http://localhost:4200](http://localhost:4200)). At first, you'll see an upload button asking for a `.pickle` file, which are Serialized Python Objections. The construction of this `.pickle` file is a bit specific, so a function from the backend, `nyata.create_pickle`, is available to create it for you after you given the required objects.
 
@@ -85,9 +85,9 @@ The [visualization_example.ipynb](visualization_example.ipynb) jupyter notebook 
 
 ---
 
-## Security considerations
-
 <a name="security-considerations"></a>
+
+## Security considerations
 
 If you're going to use the current version of Nyata in your system, remember that:
 - Do not use the public available secret key given in the `backend/Makefile`, since it is just for debugging purposes
@@ -95,9 +95,9 @@ If you're going to use the current version of Nyata in your system, remember tha
 
 ---
 
-## Presenting Nyata main features
-
 <a name="nyata-main-features"></a>
+
+## Presenting Nyata main features
 
 - The platform works with sklearn Random Forest Classifiers and Regressors, and Decision Tree Classifiers and Regressors;
 - Model parameter summary and statistics;
