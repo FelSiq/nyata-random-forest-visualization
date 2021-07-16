@@ -5,7 +5,7 @@
   <mat-card>
     <mat-card-header>
       <mat-card-title>
-        Choose the .pickle file with your model information
+        Upload the .pickle file with your model data
       </mat-card-title>
     </mat-card-header>
 
@@ -17,7 +17,17 @@
       </label>
     </mat-card-actions>
   </mat-card>
-<mat-divisor> </mat-divisor>
+<mat-accordion>
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    About Nyata
+  </mat-expansion-panel-header>
+  <div>
+	  Nyata is a visualization tool for Random Forests and Decision Trees. <br>
+	  It supports both classifiers and regressors from scikit-learn (Python library).<br>
+  </div>
+</mat-expansion-panel>
+
 <mat-expansion-panel>
   <mat-expansion-panel-header>
     <mat-panel-title>
@@ -48,5 +58,6 @@
 
   </ng-template>
 </mat-expansion-panel>
+</mat-accordion>
   </div>
 <ng-template>

@@ -9,11 +9,13 @@
   position: absolute;
   top: 30%;
   left: 50%;
-  margin-left: -320px;
+  margin-left: -280px;
 }
 
 .centered {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 16px;
+  margin-bottom: 48px;
 }
