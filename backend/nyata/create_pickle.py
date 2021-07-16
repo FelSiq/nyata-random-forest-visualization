@@ -40,6 +40,7 @@ def dump(
     if not output_uri.endswith(".pickle"):
         output_uri += ".pickle"
 
+    sklearn.utils.validation.check_is_fitted(model)
     package = {"model": model}
 
     if train_data is not None:
@@ -48,7 +49,10 @@ def dump(
     if attr_labels is not None:
         package["attr_labels"] = attr_labels
 
-    if attr_labels is not None:
+    if preproc_pipeline is not None:
+        for p in preproc_pipeline:
+            sklearn.utils.validation.check_is_fitted(p)
+
         package["preproc_pipeline"] = preprocessing_pipeline
 
     with open(output_uri, "wb") as f_out:
