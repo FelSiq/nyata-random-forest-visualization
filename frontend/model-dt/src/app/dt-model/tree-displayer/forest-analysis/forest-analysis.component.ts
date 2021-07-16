@@ -19,6 +19,11 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
   @Input() modelType: string;
   @Input() attrLabels: string[] = [];
 
+  @Input() isClassifier: boolean;
+  @Input() isForest: boolean;
+  @Input() XGiven: boolean;
+  @Input() YGiven: boolean;
+
   @Output() peekMedoidTree = new EventEmitter<number>();
 
   rankCommonAttrSeq = [];
@@ -54,6 +59,7 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
               public hierClusService: HierClusService) { }
 
   ngOnInit(): void {
+	  console.log(this.isClassifier);
   }
 
   ngOnDestroy(): void {

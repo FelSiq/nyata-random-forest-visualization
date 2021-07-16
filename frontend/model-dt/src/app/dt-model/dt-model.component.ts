@@ -11,14 +11,20 @@ import { ModelLoaderService } from './model-loader.service';
 })
 export class DtModelComponent implements OnDestroy {
   treeModel: DTInterface = null;
+  isClassifier: boolean = false;
+  isForest: boolean = false;
+  XGiven: boolean = false;
+  YGiven: boolean = false;
 
   constructor(private getModelService: GetModelService, private postModelService: ModelLoaderService) { 
   }
 
   postModelOnSession(modelPickle) {
-    console.log(modelPickle);
     this.postModelService.postFile(modelPickle)
-      .subscribe(() => {this.getDTModel()});
+      .subscribe(() => {
+        this.getDTModel();
+        this.getDTInfo();
+      });
   }
 
   /*
@@ -47,6 +53,16 @@ export class DtModelComponent implements OnDestroy {
     this.getModelService.getDTModel()
       .subscribe((model: DTInterface ) => {
 	      this.treeModel = { ...model };
+      });
+  }
+
+  getDTInfo(): void {
+    this.getModelService.getDTInfo()
+      .subscribe((info) => {
+            this.isClassifier = info["is_classifier"];
+            this.isForest = info["is_forest"];
+            this.XGiven = info["X_given"];
+            this.YGiven = info["y_given"];
       });
   }
 

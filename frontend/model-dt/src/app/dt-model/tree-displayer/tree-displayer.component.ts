@@ -12,6 +12,11 @@ import { SingleInstRestEmitterInterface } from './data-loader-pannel/data-loader
 })
 export class TreeDisplayerComponent implements OnInit {
   @Input() treeModel: DTInterface;
+  @Input() isClassifier: boolean;
+  @Input() isForest: boolean;
+  @Input() XGiven: boolean;
+  @Input() YGiven: boolean;
+
   predictResults: PredictResults;
   singleInstAttrs: Array<string | number>;
   attrNames: string[];

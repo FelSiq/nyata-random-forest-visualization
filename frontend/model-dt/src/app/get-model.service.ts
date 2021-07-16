@@ -14,12 +14,21 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class GetModelService {
-  private urlResource = 'http://127.0.0.1:5000/dt-visualization';
+  private urlResourceGetModel = 'http://127.0.0.1:5000/dt-visualization';
+  private urlResourceGetInfo = 'http://127.0.0.1:5000/session-information';
 
   constructor(private httpClient: HttpClient) { }
 
   getDTModel(): Observable<DTInterface> {
-    return this.httpClient.get<DTInterface>(this.urlResource, httpOptions)
+    return this.httpClient.get<DTInterface>(this.urlResourceGetModel, httpOptions)
+      .pipe(
+        retry(3),
+      	catchError(this.handleError)
+      );
+  }
+
+   getDTInfo() {
+    return this.httpClient.get(this.urlResourceGetInfo, httpOptions)
       .pipe(
         retry(3),
       	catchError(this.handleError)
@@ -27,7 +36,9 @@ export class GetModelService {
   }
 
   destroy() {
-    this.httpClient.delete(this.urlResource, httpOptions).subscribe();
+    this.httpClient.delete(this.urlResourceGetModel, httpOptions).subscribe();
+    this.httpClient.delete(this.urlResourceGetInfo, httpOptions).subscribe();
+
   }
 
   private handleError(error: HttpErrorResponse) {

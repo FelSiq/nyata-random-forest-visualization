@@ -164,9 +164,19 @@
 	      with regressors won't work.
             </p>
           </ng-template>
-    <p *ngIf="numEstimators <= 1; else hierClusInputContainer">
-      <mat-icon style="vertical-align: middle; margin-right: 8px; font-size: 150%;">error</mat-icon>
-      <strong style="style=vertical-align: middle;">It is necessary a forest to run this analysis.</strong>
+          <p *ngIf="!isForest || (!isClassifier && selectedChVectorType === 'metafeatures') || (!XGiven && selectedChVectorType === 'dna'); else hierClusInputContainer">
+            <mat-icon style="vertical-align: middle; margin-right: 8px; font-size: 150%;">error</mat-icon>
+	    <span *ngIf="!isForest"><strong style="style=vertical-align: middle;">It is necessary a forest to run this analysis.</strong></span>
+	    <span *ngIf="!isClassifier && selectedChVectorType === 'metafeatures'">
+	      <strong style="style=vertical-align: middle;">Pymfe package does not support regressor trees. Please switch to 'dna' strategy.</strong>
+	    </span>
+	    <span *ngIf="!XGiven && selectedChVectorType === 'dna'">
+	      <strong style="style=vertical-align: middle;">
+	        Your training X (independent attributes) was not provided alongside the model in the .pickle file,
+		which is required by the 'dna' strategy. Please provide a .pickle with your training data or
+		switch to the 'metafeatures' strategy.
+	      </strong>
+	    </span>
           </p>
           <ng-template #hierClusInputContainer>
           <p>
@@ -258,9 +268,8 @@
     </mat-card>
     </mat-card-content>
     <mat-card-actions align="end">
-    <button [disabled]="numEstimators <= 1"
+    <button [disabled]="!isForest || (!isClassifier && selectedChVectorType === 'metafeatures') || (!XGiven && selectedChVectorType === 'dna')"
             mat-raised-button
-            [matTooltip]="numEstimators <= 1 ? 'It is necessary a forest to run this analysis' : ''" 
             color="primary"
             (click)="getHierarchicalClustering(+propCutSliderValue)">
         Run

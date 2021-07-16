@@ -1,4 +1,10 @@
-<app-tree-displayer [treeModel]="treeModel" *ngIf="treeModel else toPost"></app-tree-displayer>
+<app-tree-displayer
+	[XGiven]="XGiven"
+	[YGiven]="YGiven"
+	[isForest]="isForest"
+	[isClassifier]="isClassifier"
+	[treeModel]="treeModel"
+	*ngIf="treeModel else toPost"></app-tree-displayer>
 
 <ng-template #toPost>
   <div class="justified-block">
