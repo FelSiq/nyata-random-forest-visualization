@@ -10,7 +10,7 @@ def dump(
     model,
     train_data: t.Optional[t.Tuple[np.ndarray, np.ndarray]] = None,
     attr_labels: t.Optional[t.Union[str, t.Sequence]] = "infer",
-    output_uri: str = "nyata_package.pkl",
+    output_uri: str = "nyata_package.pickle",
     protocol: int = pickle.HIGHEST_PROTOCOL,
 ):
     assert train_data is None or len(train_data) == 2, (
@@ -32,8 +32,8 @@ def dump(
         ),
     )
 
-    if not output_uri.endswith(".pkl"):
-        output_uri += ".pkl"
+    if not output_uri.endswith(".pickle"):
+        output_uri += ".pickle"
 
     package = {
         "model": model,
