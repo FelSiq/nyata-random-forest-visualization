@@ -322,7 +322,10 @@ def calc_mtf_dist_mat(
 
 
 def make_hier_clus_cut(
-    dendrogram: np.ndarray, dist_mat: np.ndarray, threshold_cut: t.Union[int, float]
+    dendrogram: np.ndarray,
+    dist_mat: np.ndarray,
+    threshold_cut: t.Union[int, float],
+    X: np.ndarray,
 ) -> t.Dict[str, t.Any]:
     """Make a cut in a given tree dendrogram."""
     clust_assignment = scipy.cluster.hierarchy.fcluster(
@@ -334,10 +337,13 @@ def make_hier_clus_cut(
     sqr_dist_mat = scipy.spatial.distance.squareform(dist_mat)
 
     clust_buckets = []
-    clust_sum_dists = np.zeros((3, clust_assignment.size), dtype=float)
+    clust_sum_dists = np.empty((3, clust_assignment.size), dtype=float)
+    all_inst_clust_ids = np.empty(X.shape[0], dtype=int)
 
     for i in np.arange(1, 1 + num_cluster):
-        clust_inst_inds = tuple(np.flatnonzero(clust_assignment == i))
+        clust_inst_inds = np.flatnonzero(clust_assignment == i)
+        all_inst_clust_ids[clust_inst_inds] = i
+        clust_inst_inds = tuple(clust_inst_inds)
 
         cluster_dists_sum = np.sum(
             sqr_dist_mat[tuple(np.meshgrid(clust_inst_inds, clust_inst_inds))], axis=0
@@ -378,10 +384,17 @@ def make_hier_clus_cut(
         )
     }
 
+    sil_score = descriptions.dictionarize(
+        value=sklearn.metrics.silhouette_score(X, all_inst_clust_ids),
+        aux_value="Silhouette score of the given clustering",
+        aux_key="description",
+    )
+
     return {
         "clust_assignment": clust_buckets,
         "num_cluster": num_cluster,
         "clust_sum_dists": formatted_clust_sum_dists,
+        "silhouette_score": sil_score,
     }
 
 

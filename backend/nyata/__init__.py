@@ -400,6 +400,7 @@ class ForestHierarchicalClustering(_BaseResourceClass):
                 dendrogram=hier_clus_data.get("dendrogram"),
                 dist_mat=dist_mat,
                 threshold_cut=max_dist * threshold_cut,
+                X=X,
             )
         )
 
@@ -444,6 +445,7 @@ class ForestHierarchicalClustering(_BaseResourceClass):
 
         threshold_cut = args.get("threshold_cut", 0.5)
 
+        X = flask.session.get("X")
         hier_clus_data = flask.session.get("hier_clus_data")
         dist_mat = flask.session.get("dist_mat")
         max_dist = flask.session.get("max_dist")
@@ -455,6 +457,7 @@ class ForestHierarchicalClustering(_BaseResourceClass):
             dendrogram=hier_clus_data.get("dendrogram"),
             dist_mat=dist_mat,
             threshold_cut=max_dist * threshold_cut,
+            X=X,
         )
 
         flask.session["hier_clus_data"].update(hier_clus_data)

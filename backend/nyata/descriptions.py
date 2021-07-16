@@ -81,12 +81,10 @@ DESCRIPTIONS = {
 }  # t.Dict[t.Any, str]
 
 
-def dictionarize(
-    value: t.Any, auxiliar_value: t.Any, auxiliar_key: str
-) -> t.Dict[str, t.Any]:
+def dictionarize(value: t.Any, aux_value: t.Any, aux_key: str) -> t.Dict[str, t.Any]:
     res = {
         "value": value,
-        auxiliar_key: auxiliar_value,
+        aux_key: aux_value,
     }
 
     return res
@@ -112,9 +110,9 @@ def add_desc(
 
         desc = DESCRIPTIONS.get(from_id, None)
 
-    return dictionarize(value=value, auxiliar_value=desc, auxiliar_key="description")
+    return dictionarize(value=value, aux_value=desc, aux_key="description")
 
 
 def add_proportion(value: t.Any, prop: float) -> t.Dict[str, t.Any]:
     """Attach a proportion to an object."""
-    return dictionarize(value=value, auxiliar_value=prop, auxiliar_key="proportion")
+    return dictionarize(value=value, aux_value=prop, aux_key="proportion")
