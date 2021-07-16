@@ -66,6 +66,15 @@ def is_valid_ensemble(model):
     if isinstance(
         model,
         (
+            sklearn.ensemble.RandomForestClassifier,
+            sklearn.ensemble.RandomForestRegressor,
+        ),
+    ):
+        return True
+
+    if isinstance(
+        model,
+        (
             sklearn.ensemble.BaggingClassifier,
             sklearn.ensemble.BaggingRegressor,
         ),

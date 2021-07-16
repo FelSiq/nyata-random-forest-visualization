@@ -49,9 +49,12 @@ def dump(
     if attr_labels is not None:
         package["attr_labels"] = attr_labels
 
-    if preproc_pipeline is not None:
-        for p in preproc_pipeline:
-            sklearn.utils.validation.check_is_fitted(p)
+    if preprocessing_pipeline is not None:
+        if isinstance(preprocessing_pipeline, sklearn.pipeline.Pipeline):
+            for p in preprocessing_pipeline:
+                sklearn.utils.validation.check_is_fitted(p)
+        else:
+            sklearn.utils.validation.check_is_fitted(preprocessing_pipeline)
 
         package["preproc_pipeline"] = preprocessing_pipeline
 
