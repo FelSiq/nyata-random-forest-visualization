@@ -67,11 +67,11 @@ After everything is installed correctly, you can run Nyata using `run.sh`:
 ```bash
 ./run.sh
 ```
-If, for some reason, that does not work as expected, you can try to fire up both back-end and front-end using its respectives Makefiles.
+If, for some reason, that does not work as expected, you can try to activate both back-end and front-end using its respectives Makefiles.
 
-after running `run.sh`, your default web browser should conveniently pop up exposing the Nyata front-end for your use. If this is not the case, then note that the front-end is served in `http://localhost:4200` by default, and the back-end is served in `http://localhost:5000` also by default.
+After activating the front-end, your default web browser should conveniently pop up with the Nyata application ready for use. If this is not the case, the front-end is served in [http://localhost:4200](http://localhost:4200) by default, and the back-end is served in [http://localhost:5000](http://localhost:5000).
 
-**Note that some web browsers does not support Nyata front-end.**
+Note that some web browsers does not support Nyata front-end.
 
 ---
 
