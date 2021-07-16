@@ -34,7 +34,7 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   calledCommonAttrSeqService: boolean = false;
   calledHierClusService = false;
-  propCutSliderValue: number = 0.0;
+  propCutSliderValue: number = 0.25;
   numHierClusters: number = 0;
   thresholdCut: number;
   includeDecisionFeature: boolean = false;
@@ -47,6 +47,7 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
   clustSumDists: KeyValuePair[];
   hierClusDistFormula: string;
   xMaxLimit: number;
+  clusterSilScore: number = -1;
 
   availableLinkages: string[] = [
     'single',
@@ -162,6 +163,7 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
     this.thresholdCut = +this.propCutSliderValue;
     this.resultLinkageType =  this.selectedLinkageType;
     this.clustSumDists = null;
+    this.clusterSilScore = -1;
 
     this.hierClusService.getHierarchicalClustering(this.thresholdCut,
                                                    this.selectedLinkageType,
@@ -173,6 +175,7 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
           this.numHierClusters = +results['num_cluster'];
           this.hierClustersTree = results['dendrogram_tree'];
           this.clustSumDists = results['clust_sum_dists'];
+          this.clusterSilScore = results['silhouette_score'];
 	  this.xMaxLimit = +results['max_limit'];
           this.calledHierClusService = false;
         }, error => {
@@ -204,6 +207,7 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
           this.numHierClusters = +results['num_cluster'];
           this.calledHierClusCutService = false;
           this.clustSumDists = results['clust_sum_dists'];
+          this.clusterSilScore = results['silhouette_score'];
           this.emitEventToChild();
         }, error => {
           this.hierClusters = [];
