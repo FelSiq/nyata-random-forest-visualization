@@ -325,7 +325,6 @@ def make_hier_clus_cut(
     dendrogram: np.ndarray,
     dist_mat: np.ndarray,
     threshold_cut: t.Union[int, float],
-    X: np.ndarray,
 ) -> t.Dict[str, t.Any]:
     """Make a cut in a given tree dendrogram."""
     clust_assignment = scipy.cluster.hierarchy.fcluster(
@@ -338,11 +337,9 @@ def make_hier_clus_cut(
 
     clust_buckets = []
     clust_sum_dists = np.empty((3, clust_assignment.size), dtype=float)
-    all_inst_clust_ids = np.empty(X.shape[0], dtype=int)
 
     for i in np.arange(1, 1 + num_cluster):
         clust_inst_inds = np.flatnonzero(clust_assignment == i)
-        all_inst_clust_ids[clust_inst_inds] = i
         clust_inst_inds = tuple(clust_inst_inds)
 
         cluster_dists_sum = np.sum(
@@ -384,11 +381,16 @@ def make_hier_clus_cut(
         )
     }
 
-    sil_score = descriptions.dictionarize(
-        value=sklearn.metrics.silhouette_score(X, all_inst_clust_ids),
-        aux_value="Silhouette score of the given clustering",
-        aux_key="description",
-    )
+    if sqr_dist_mat.shape[0] > num_cluster > 1:
+        sil_score = sklearn.metrics.silhouette_score(
+            sqr_dist_mat, clust_assignment, metric="precomputed"
+        )
+
+    elif num_cluster == 1:
+        sil_score = "Unable to compute (all trees in a single cluster)"
+
+    else:
+        sil_score = "Unable to compute (all trees in its own cluster)"
 
     return {
         "clust_assignment": clust_buckets,
