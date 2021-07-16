@@ -7,6 +7,7 @@ import sklearn.tree
 import sklearn.ensemble
 import sklearn.metrics
 import sklearn.preprocessing
+import sklearn.impute
 import numpy as np
 import scipy.cluster.hierarchy
 import pymfe.mfe
@@ -288,7 +289,7 @@ def calc_dna_dist_mat(
         max_limit = 2.0
 
     else:
-        dna_min, dna_max = np.quantile(dna, (0, 1), axis=0)
+        dna_min, dna_max = np.nanquantile(dna, (0, 1), axis=0)
         dna = (dna - dna_min) / (1e-8 + dna_max - dna_min)
 
         dna_dists = scipy.spatial.distance.pdist(X=dna, metric="euclidean")
@@ -313,9 +314,10 @@ def calc_mtf_dist_mat(
     for ind, cur_model in enumerate(model.estimators_):
         mtf_vec[ind, :] = extractor.extract_from_model(cur_model)[1]
 
-    mtf_min, mtf_max = np.quantile(mtf_vec, (0, 1), axis=0)
+    mtf_min, mtf_max = np.nanquantile(mtf_vec, (0, 1), axis=0)
     mtf_vec = (mtf_vec - mtf_min) / (1e-8 + mtf_max - mtf_min)
-    print(mtf_vec)
+    nan_imputer = sklearn.impute.SimpleImputer(copy=False, strategy="median")
+    mtf_vec = nan_imputer.fit_transform(mtf_vec)
 
     mtf_dists = scipy.spatial.distance.pdist(X=mtf_vec, metric="euclidean")
 
