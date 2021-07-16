@@ -154,6 +154,8 @@
               the clustering is performed using the user chosen linkage and the euclidean distance.
               The metafeature vector is built using the 'model-based' metafeature group in the
               <a href="https://github.com/ealcobaca/pymfe" target="_blank">python 'pymfe' package</a>.
+	      If a metafeature for some tree can't be extracted properly, it will be replaced with
+	      the median of the corresponding metafeatures of all other trees.
             </p>
           </ng-template>
     <p *ngIf="numEstimators <= 1; else hierClusInputContainer">

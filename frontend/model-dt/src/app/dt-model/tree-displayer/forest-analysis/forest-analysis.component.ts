@@ -36,7 +36,7 @@ export class ForestAnalysisComponent implements OnInit, OnDestroy {
   hierClustersTree: ClusterNode[] = null;
   selectedLinkageType: string;
   resultLinkageType: string;
-  selectedChVectorType: string = 'dna';
+  selectedChVectorType: string = 'metafeatures';
   calledHierClusCutService: boolean = false;
   childUpdateThreshold: Subject<void> = new Subject<void>();
   clustSumDists: KeyValuePair[];
