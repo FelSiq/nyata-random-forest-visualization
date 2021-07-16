@@ -79,9 +79,9 @@ Note that some web browsers does not support Nyata front-end.
 
 ## Usage
 
-After both backend and frontend are running, you can use Nyata directly from your web browser ([http://localhost:4200](http://localhost:4200)). At first, you'll see an upload button asking for a `.pickle` file (Serialized Python Objects). The specific construction of this `.pickle` file for Nyata is a bit specific, so a function from the backend, `nyata.create_pickle`, is available to create it for you after you give the required objects.
+After both backend and frontend are running, you can use Nyata directly from your web browser ([http://localhost:4200](http://localhost:4200)). At first, you'll see an upload button asking for a `.pickle` file (Serialized Python Objects). The specific construction of this `.pickle` file for Nyata is a bit specific, so a function from the backend, `nyata.dump`, is available to create it for you after you give the required objects.
 
-The [visualization_example.ipynb](visualization_example.ipynb) jupyter notebook demonstrating the `nyata.create_pickle` usage is available in this repository, so you can easily check it out and reproduce with your forest model.
+The [visualization_example.ipynb](visualization_example.ipynb) jupyter notebook demonstrating the `nyata.dump` usage is available in this repository, so you can easily check it out and reproduce with your forest model.
 
 ---
 
