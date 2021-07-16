@@ -58,11 +58,10 @@ class DecisionTree(_BaseResourceClass):
     def post(self):
         args = self.reqparse.parse_args()
         data_pickle = args["file"]
-
         data = pickle.load(data_pickle)
 
         model = data["model"]
-        X, y = data["data"]
+        X, y = data["train_data"]
         attr_labels = data["attr_labels"]
 
         self.model = model
