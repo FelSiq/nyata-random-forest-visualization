@@ -104,7 +104,7 @@
   
   <mat-expansion-panel>
     <mat-expansion-panel-header
-          matTooltip="Load your own test dataset to make predictions with the current model.">
+          matTooltip="Load your own test dataset (.csv) to make predictions with the current model.">
       <mat-panel-title>
         <mat-icon class="panel-option-icon">attachment</mat-icon>
         Load test dataset
@@ -115,12 +115,24 @@
       <form (ngSubmit)="uploadDatasetToPredict()">
         <mat-list dense>
           <mat-list-item>
-            Please note that the dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }}.
+	    Please note that:
           </mat-list-item>
+          <mat-list-item>
+            1. The dataset file must be smaller than {{ maxFileSize }} {{ maxFileSizeUnit }};
+          </mat-list-item>
+          <mat-list-item>
+            2. It must be a .csv (comma separated value) file; and
+          </mat-list-item>
+          <mat-list-item>
+            3. It must be numeric only.
+          </mat-list-item>
+	  <br>
+	  <br>
           <mat-list-item>
             <label for="file-upload-input" style="margin-right: 8px;"> Choose your file: </label>
             <input type="file"
                    id="file-upload-input"
+		   accept=".csv"
                    (change)="handleFileInput($event.target.files)"/>
           </mat-list-item>
           <mat-list-item>

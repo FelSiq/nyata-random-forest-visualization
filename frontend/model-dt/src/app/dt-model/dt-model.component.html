@@ -1,20 +1,52 @@
 <app-tree-displayer [treeModel]="treeModel" *ngIf="treeModel else toPost"></app-tree-displayer>
 
 <ng-template #toPost>
-  <mat-card class="justified-block">
+  <div class="justified-block">
+  <mat-card>
     <mat-card-header>
       <mat-card-title>
         Choose the .pickle file with your model information
       </mat-card-title>
     </mat-card-header>
-    <mat-card-content>
-    </mat-card-content>
+
     <mat-card-actions class="centered">
-      <input type="file" (change)="postModelOnSession($event.target.files)" accept=".pkl" id="model-pickle-id" hidden="true" />
+      <input type="file" (change)="postModelOnSession($event.target.files)" accept=".pickle" id="model-pickle-id" hidden="true" />
       <label for="model-pickle-id" class="md-button md-raised md-primary centered">
         <mat-icon>upload</mat-icon>
         UPLOAD
       </label>
     </mat-card-actions>
   </mat-card>
+<mat-divisor> </mat-divisor>
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      How to create your .pickle file
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+  <ng-template matExpansionPanelContent>
+      # To create an .pickle (Python Serialized File) file for nyata:<br>
+      # 1. Import Nyata's backend from the backend<br>
+      <span style="color:#0060FF"> import </span> sys<br>
+      sys.path.append(<span style="color:#8A0505">"./backend"</span>)<br>
+      <span style="color:#0060FF"> import </span> nyata<br>
+      <br>
+      # 2. Train your model<br>
+      <span style="color:#FF6000">model</span> = sklearn.ensemble.RandomForestClassifier(...)<br>
+      <span style="color:#FF6000">model</span>.fit(<span style="color:#B09030">X_train</span>, <span style="color:#B09030">y_train</span>)<br>
+      # (...)<br>
+      <br>
+      # 3. use nyata.dump(...) to create your .pickle<br>
+      nyata.dump(<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;model=<span style="color:#FF6000">model</span>,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;train_data=(<span style="color:#B09030">X_train</span>, <span style="color:#B09030">y_train</span>),<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;attr_labels=<span style="color:#8A0505">"infer"</span>,<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;output_uri=<span style="color:#8A0505">"my_nyata_package.pickle"</span><br>
+)<br>
+      <br>
+      # Done!<br>
+
+  </ng-template>
+</mat-expansion-panel>
+  </div>
 <ng-template>
