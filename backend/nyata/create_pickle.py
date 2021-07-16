@@ -5,6 +5,8 @@ import numpy as np
 import sklearn.ensemble
 import sklearn.tree
 
+from . import utils
+
 
 def dump(
     model,
@@ -22,15 +24,7 @@ def dump(
         attr_labels == "infer" or attr_labels is None or hasattr(attr_labels, "__len__")
     ), "'attr_labels' must be None, 'infer' or a sequence of values."
 
-    assert isinstance(
-        model,
-        (
-            sklearn.ensemble.RandomForestClassifier,
-            sklearn.ensemble.RandomForestRegressor,
-            sklearn.tree.DecisionTreeClassifier,
-            sklearn.tree.DecisionTreeRegressor,
-        ),
-    )
+    assert utils.is_valid_model(model), f"Invalid model: {type(model)}"
 
     if not output_uri.endswith(".pickle"):
         output_uri += ".pickle"

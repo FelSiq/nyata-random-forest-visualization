@@ -3,6 +3,7 @@ import typing as t
 
 import sklearn.tree
 import sklearn.ensemble
+import sklearn.base
 import numpy as np
 import scipy.cluster.hierarchy
 
@@ -18,9 +19,7 @@ except ImportError:
 
 def json_encoder_type_manager(obj: t.Any) -> t.Any:
     """Manage non-native python data type to serialize as a JSON."""
-    if isinstance(
-        obj, (sklearn.tree.DecisionTreeClassifier, sklearn.tree.DecisionTreeRegressor)
-    ):
+    if utils.is_tree(obj):
         return serialize_decision_tree(obj)
 
     if isinstance(obj, scipy.cluster.hierarchy.ClusterNode):
@@ -168,19 +167,10 @@ def serialize_decision_tree(
             from_id="depth_frequencies",
         )
 
-    if isinstance(
-        dt_model,
-        (sklearn.tree.DecisionTreeClassifier, sklearn.ensemble.RandomForestClassifier),
-    ):
+    if sklearn.base.is_classifier(dt_model):
         new_model["model_type"] = "classifier"
 
-    elif isinstance(
-        dt_model,
-        (sklearn.tree.DecisionTreeRegressor, sklearn.ensemble.RandomForestRegressor),
-    ):
-        new_model["model_type"] = "regressor"
-
     else:
-        new_model["model_type"] = "unknown"
+        new_model["model_type"] = "regressor"
 
     return new_model

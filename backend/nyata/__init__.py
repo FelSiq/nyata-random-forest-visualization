@@ -14,6 +14,7 @@ import werkzeug
 import numpy as np
 import pandas as pd
 import sklearn.tree
+import sklearn.base
 
 from . import utils
 from . import model_dt
@@ -61,16 +62,32 @@ class DecisionTree(_BaseResourceClass):
         data = pickle.load(data_pickle)
 
         model = data["model"]
-        X, y = data["train_data"]
-        attr_labels = data["attr_labels"]
+
+        if model is None:
+            return "Model not found in the given .pickle file.", 400
+
+        if not utils.is_valid_model(model):
+            return f"Unsupported model: {type(model)}", 400
+
+        try:
+            X, y = data.get("train_data")
+
+        except TypeError:
+            X, y = (None, None)
+
+        attr_labels = data.get("attr_labels")
 
         self.model = model
-        self.X = np.asfarray(X)
-        self.y = np.asarray(y)
         self.attr_labels = attr_labels
 
-        if self.attr_labels == "infer":
-            self.attr_labels = np.unique(self.y)
+        if X is not None:
+            self.X = np.asfarray(X)
+
+        if y is not None:
+            self.y = np.asarray(y)
+
+            if self.attr_labels is not None and self.attr_labels == "infer":
+                self.attr_labels = np.unique(self.y)
 
         flask.session["model"] = self.model
         flask.session["X"] = self.X
@@ -79,7 +96,7 @@ class DecisionTree(_BaseResourceClass):
 
         flask.session.modified = True
 
-        return None, 200
+        return "Success", 200
 
     def get(self):
         """Serialize and jsonify a sklearn RF/DT model."""
@@ -198,10 +215,7 @@ class PredictSingleInstance(_BaseResourceClass):
         self, model, inst_proc: np.ndarray
     ) -> t.Sequence[t.Sequence[int]]:
         """Get the decision path of the instace for every tree in the model."""
-        if isinstance(
-            model,
-            (sklearn.tree.DecisionTreeClassifier, sklearn.tree.DecisionTreeRegressor),
-        ):
+        if utils.is_tree(model):
             nodes = [model.decision_path(inst_proc).indices]
 
         else:

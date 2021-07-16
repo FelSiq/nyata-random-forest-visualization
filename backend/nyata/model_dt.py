@@ -8,6 +8,7 @@ import sklearn.ensemble
 import sklearn.metrics
 import sklearn.preprocessing
 import sklearn.impute
+import sklearn.base
 import numpy as np
 import scipy.cluster.hierarchy
 import pymfe.mfe
@@ -172,16 +173,10 @@ def get_metrics(
 
     chosen_metrics = None
 
-    if isinstance(
-        dt_model,
-        (sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier),
-    ):
+    if sklearn.base.is_classifier(dt_model):
         chosen_metrics = METRICS_CLASSIFICATION
 
-    if isinstance(
-        dt_model,
-        (sklearn.ensemble.RandomForestRegressor, sklearn.tree.DecisionTreeRegressor),
-    ):
+    else:
         chosen_metrics = METRICS_REGRESSION
 
     if chosen_metrics:
@@ -275,7 +270,7 @@ def calc_dna_dist_mat(
     for tree_ind, tree in enumerate(model.estimators_):
         dna[tree_ind, :] = tree.predict(X)
 
-    if isinstance(model, sklearn.ensemble.RandomForestClassifier):
+    if sklearn.base.is_classifier(model):
         # Shift Cohen's Kappa to prevent negative values, and also transform
         # it to a distance measure (i.e., the higher is the correlation, the
         # smaller will be the dna_dists value.)

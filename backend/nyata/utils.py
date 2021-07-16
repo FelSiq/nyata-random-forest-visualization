@@ -1,4 +1,6 @@
 """Generic utility functions."""
+import sklearn.tree
+import sklearn.ensemble
 import re
 
 NULL_VALUES = {
@@ -34,3 +36,23 @@ def preprocess_key(key: str) -> str:
     key = RE_KEY_PARAMS.sub("parameters", key)
     key = key.replace(" ", "_")
     return key
+
+
+def is_tree(model):
+    return isinstance(
+        model, (sklearn.tree.DecisionTreeClassifier, sklearn.tree.DecisionTreeRegressor)
+    )
+
+
+def is_forest(model):
+    return isinstance(
+        model,
+        (
+            sklearn.ensemble.RandomForestClassifier,
+            sklearn.ensemble.RandomForestRegressor,
+        ),
+    )
+
+
+def is_valid_model(model):
+    return is_tree(model) or is_forest(model)
