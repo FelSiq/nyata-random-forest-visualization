@@ -60,7 +60,7 @@
             <ng-container *ngIf="!featureNameCheckbox.checked; else attrNameLists">
                     <mat-list-item>
                       <span class="common-attr-table-rank"><strong>Rank</strong></span>
-                      <span class="common-attr-table-left-bar"><strong>Frequency</strong></span>
+                      <span class="common-attr-table-left-bar"><strong>Weighted frequency</strong></span>
           <span class="common-attr-table-right"><strong>{{ includeDecisionFeature ? 'Rule' : 'Feature' }} indices sequences</strong></span>
                     </mat-list-item>
               <mat-divider></mat-divider>
@@ -75,7 +75,7 @@
                     <div *ngFor="let seq of rankCommonAttrSeq; index as i" [style.background-color]="i % 2 ? 'rgb(251, 246, 253)' : 'white'">
                 <mat-list-item>
                   <span class="common-attr-table-rank2"> <strong> Rank: </strong> {{ i + 1 }} </span>
-                  <span class="common-attr-table-left2"><strong> Frequency: </strong> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
+                  <span class="common-attr-table-left2"><strong> Weighted frequency: </strong> {{ 100 * attrSeqRelFreq[i] | number:'.2-2' }}% </span>
                   <mat-progress-bar class="common-attr-table-bar2" [mode]="determinate" [value]="100 * attrSeqRelFreq[i]"></mat-progress-bar>
                 </mat-list-item>
                 <mat-list-item>
@@ -154,8 +154,14 @@
               the clustering is performed using the user chosen linkage and the euclidean distance.
               The metafeature vector is built using the 'model-based' metafeature group in the
               <a href="https://github.com/ealcobaca/pymfe" target="_blank">python 'pymfe' package</a>.
+            </p>
+            <p>
 	      If a metafeature for some tree can't be extracted properly, it will be replaced with
 	      the median of the corresponding metafeatures of all other trees.
+            </p>
+            <p>
+	      Note that the pymfe package only supports DecisionTreeClassifier as models, so this strategy
+	      with regressors won't work.
             </p>
           </ng-template>
     <p *ngIf="numEstimators <= 1; else hierClusInputContainer">
