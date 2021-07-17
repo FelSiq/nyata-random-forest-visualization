@@ -67,31 +67,12 @@ def is_valid_ensemble(model):
     if isinstance(
         model,
         (
-            sklearn.ensemble.RandomForestClassifier,
-            sklearn.ensemble.RandomForestRegressor,
-        ),
-    ):
-        return True
-
-    if isinstance(
-        model,
-        (
-            sklearn.ensemble.ExtraTreesClassifier,
-            sklearn.ensemble.ExtraTreesRegressor,
-        ),
-    ):
-        return True
-
-    if isinstance(
-        model,
-        (
             sklearn.ensemble.BaggingClassifier,
             sklearn.ensemble.BaggingRegressor,
         ),
     ):
         return is_tree(model.base_estimator_)
 
-    """
     if isinstance(
         model,
         (
@@ -100,9 +81,8 @@ def is_valid_ensemble(model):
         ),
     ):
         return all(map(is_tree, model.estimators_))
-    """
 
-    return False
+    return True
 
 
 def is_valid_model(model, deep_check_ensemble: bool = False):
