@@ -68,6 +68,15 @@ DESCRIPTIONS = {
         "Margin is the instance highest class probability "
         "minus second highest class probability."
     ),
+    "pred_margin": (
+        "Margin is the instance highest class probability "
+        "minus second highest class probability."
+    ),
+    "preds_std": ("Standard deviation of the all tree predictions."),
+    "preds_quantiles": (
+        "(0.0, 0.25, 0.50, 0.75, 1.0) quantiles of the all "
+        "tree predictions. The format is 'quantile: value'."
+    ),
     **get_class_doc(sklearn.ensemble.RandomForestClassifier()),
     **get_class_doc(sklearn.ensemble.RandomForestRegressor()),
     **get_class_doc(sklearn.ensemble.BaggingClassifier()),

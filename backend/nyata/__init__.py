@@ -305,7 +305,10 @@ class PredictSingleInstance(_BaseResourceClass):
             return flask.jsonify(self._handle_errors(err_codes))
 
         classes_by_tree, margin = model_dt.get_class_freqs(model, inst_proc)
-        quants, std = model_dt.get_regression_distrib_stats(model, inst_proc)
+        preds_quants, preds_std = model_dt.get_regression_distrib_stats(
+            model, inst_proc
+        )
+        preds = f"{model.predict(inst_proc).squeeze():.3f}"
 
         pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict(
@@ -313,7 +316,7 @@ class PredictSingleInstance(_BaseResourceClass):
                     (
                         "prediction_result",
                         descriptions.add_desc(
-                            value=model.predict(inst_proc)[0],
+                            value=preds,
                             from_id="prediction_result",
                         ),
                     ),
@@ -329,6 +332,20 @@ class PredictSingleInstance(_BaseResourceClass):
                         descriptions.add_desc(
                             value=margin,
                             from_id="pred_margin",
+                        ),
+                    ),
+                    (
+                        "predictions_standard_deviation",
+                        descriptions.add_desc(
+                            value=preds_std,
+                            from_id="preds_std",
+                        ),
+                    ),
+                    (
+                        "predictions_quantiles",
+                        descriptions.add_desc(
+                            value=preds_quants,
+                            from_id="preds_quantiles",
                         ),
                     ),
                     (

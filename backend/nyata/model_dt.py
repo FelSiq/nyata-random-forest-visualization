@@ -138,13 +138,14 @@ def get_regression_distrib_stats(
     for i, tree in enumerate(dt_model.estimators_):
         pred_vals[i] = float(tree.predict(instance))
 
-    quants = np.quantile(pred_vals, (0.0, 0.25, 0.5, 0.75, 1.0))
+    quants = (0.0, 0.25, 0.5, 0.75, 1.0)
+    quants_vals = np.quantile(pred_vals, quants)
     std = np.std(pred_vals)
 
-    quants = list(map("{:.3f}".format, quants))
-    std = f"{std:.4f}"
+    quants_vals = list(map("{0[0]:.2f}: {0[1]:.3f}".format, zip(quants, quants_vals)))
+    std = f"{std:.3f}"
 
-    return quants, std
+    return quants_vals, std
 
 
 def hot_encoding(labels: np.ndarray) -> np.ndarray:
