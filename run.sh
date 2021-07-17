@@ -1,3 +1,4 @@
-make -C backend &
 make -C frontend &
-wait
+PID_FRONTEND=$!
+make -C backend
+kill $PID_FRONTEND
