@@ -126,6 +126,27 @@ def get_class_freqs(
     return ret, margin
 
 
+def get_regression_distrib_stats(
+    dt_model: sklearn.ensemble.RandomForestRegressor, instance: np.ndarray
+) -> t.Tuple[t.Optional[t.Dict[str, t.Dict[str, str]]], t.Optional[str]]:
+    """Get point statistics from a RF Regressor prediction."""
+    if not sklearn.base.is_regressor(dt_model) or not utils.is_forest(dt_model):
+        return None, None
+
+    pred_vals = np.empty(dt_model.n_estimators, dtype=float)
+
+    for i, tree in enumerate(dt_model.estimators_):
+        pred_vals[i] = float(tree.predict(instance))
+
+    quants = np.quantile(pred_vals, (0.0, 0.25, 0.5, 0.75, 1.0))
+    std = np.std(pred_vals)
+
+    quants = list(map("{:.3f}".format, quants))
+    std = f"{std:.4f}"
+
+    return quants, std
+
+
 def hot_encoding(labels: np.ndarray) -> np.ndarray:
     """One-Hot Encoding labels."""
     if labels.ndim == 1:
@@ -179,15 +200,13 @@ def get_metrics(
     else:
         chosen_metrics = METRICS_REGRESSION
 
-    if chosen_metrics:
-        return {
-            metric_name: descriptions.add_desc(
-                value=safe_call_func(*metric_pack, true_labels, preds), desc="TODO."
-            )
-            for metric_name, metric_pack in chosen_metrics.items()
-        }
-
-    return {}
+    return {
+        metric_name: descriptions.add_desc(
+            value=safe_call_func(*metric_pack, true_labels, preds),
+            desc="Metric score from the given test dataset uploaded previously.",
+        )
+        for metric_name, metric_pack in chosen_metrics.items()
+    }
 
 
 def top_most_common_attr_seq(

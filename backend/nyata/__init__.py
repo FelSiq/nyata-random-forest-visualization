@@ -228,14 +228,27 @@ class PredictSingleInstance(_BaseResourceClass):
         self.reqparse.add_argument("instance", type=str)
 
     @staticmethod
-    def _preprocess_instance(instance: str, sep: str = ",") -> t.Optional[np.ndarray]:
+    def _preproc_single_inst(instance: str, sep: str = ",") -> t.Optional[np.ndarray]:
         """Preprocess the user-given single instance."""
-        preproc_inst = np.array(utils.RE_EMPTY_SPACE.sub("", instance).split(sep))
+        inst_proc = np.array(utils.RE_EMPTY_SPACE.sub("", instance).split(sep))
 
-        if not set(map(str.lower, preproc_inst)).isdisjoint(utils.NULL_VALUES):
-            return None
+        if not set(map(str.lower, inst_proc)).isdisjoint(utils.NULL_VALUES):
+            return None, {"ERROR_MISSING_VAL"}
 
-        return preproc_inst.astype(np.float32).reshape(1, -1)
+        try:
+            inst_proc = np.asfarray(inst_proc)
+
+        except ValueError:
+            return None, {"ERROR_INVALID_VAL"}
+
+        inst_proc = np.atleast_2d(inst_proc)
+
+        preproc_pipeline = flask.session.get("preproc_pipeline")
+
+        if preproc_pipeline is not None:
+            inst_proc = preproc_pipeline.transform(inst_proc)
+
+        return inst_proc, {}
 
     @staticmethod
     def _handle_errors(err_code: t.Sequence[str]) -> t.Dict[str, t.Dict[str, str]]:
@@ -244,6 +257,14 @@ class PredictSingleInstance(_BaseResourceClass):
 
         if "ERROR_MISSING_VAL" in err_code:
             err_msg["error"] = {"value": "Currently missing values are not supported."}
+
+        if "ERROR_INVALID_VAL" in err_code:
+            err_msg["error"] = {
+                "value": (
+                    "Invalid values in instance features. "
+                    "Please provide numeric-only values."
+                ),
+            }
 
         return err_msg
 
@@ -277,23 +298,14 @@ class PredictSingleInstance(_BaseResourceClass):
         instance = args["instance"]
 
         model = flask.session.get("model")
-        preproc_pipeline = flask.session.get("preproc_pipeline")
 
-        inst_proc = PredictSingleInstance._preprocess_instance(instance)
-        err_code = []
+        inst_proc, err_codes = self._preproc_single_inst(instance)
 
-        if inst_proc is None:
-            err_code.append("ERROR_MISSING_VAL")
-
-        if err_code:
-            return flask.jsonify(PredictSingleInstance._handle_errors(err_code))
+        if err_codes:
+            return flask.jsonify(self._handle_errors(err_codes))
 
         classes_by_tree, margin = model_dt.get_class_freqs(model, inst_proc)
-
-        inst_proc = np.atleast_2d(np.asfarray(inst_proc))
-
-        if preproc_pipeline is not None:
-            inst_proc = preproc_pipeline.transform(inst_proc)
+        quants, std = model_dt.get_regression_distrib_stats(model, inst_proc)
 
         pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict(
