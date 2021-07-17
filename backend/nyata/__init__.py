@@ -319,7 +319,14 @@ class PredictSingleInstance(_BaseResourceClass):
         preds_quants, preds_std = model_dt.get_regression_distrib_stats(
             model, inst_proc
         )
-        preds = f"{model.predict(inst_proc).squeeze():.3f}"
+
+        preds = model.predict(inst_proc).squeeze()
+
+        if sklearn.base.is_regressor(model):
+            preds = f"{preds:.3f}"
+
+        else:
+            preds = str(preds)
 
         pred_vals = serialize.json_encoder_type_manager(
             collections.OrderedDict(
