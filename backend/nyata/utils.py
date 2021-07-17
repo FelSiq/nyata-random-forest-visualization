@@ -13,6 +13,7 @@ NULL_VALUES = {
     "noone",
     "",
     "nil",
+    "?",
 }
 """Values in the instances to be interpreted as missing values."""
 

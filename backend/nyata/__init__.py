@@ -230,10 +230,11 @@ class PredictSingleInstance(_BaseResourceClass):
     @staticmethod
     def _preproc_single_inst(instance: str, sep: str = ",") -> t.Optional[np.ndarray]:
         """Preprocess the user-given single instance."""
-        inst_proc = np.array(utils.RE_EMPTY_SPACE.sub("", instance).split(sep))
-
-        if not set(map(str.lower, inst_proc)).isdisjoint(utils.NULL_VALUES):
-            return None, {"ERROR_MISSING_VAL"}
+        inst_proc = utils.RE_EMPTY_SPACE.sub("", instance).lower()
+        inst_proc = inst_proc.split(sep)
+        inst_proc = [
+            val if val not in utils.NULL_VALUES else np.nan for val in inst_proc
+        ]
 
         try:
             inst_proc = np.asfarray(inst_proc)
@@ -248,6 +249,9 @@ class PredictSingleInstance(_BaseResourceClass):
         if preproc_pipeline is not None:
             inst_proc = preproc_pipeline.transform(inst_proc)
 
+        if np.any(np.isnan(inst_proc)):
+            return None, {"ERROR_MISSING_VAL"}
+
         return inst_proc, {}
 
     @staticmethod
@@ -256,7 +260,14 @@ class PredictSingleInstance(_BaseResourceClass):
         err_msg = {}
 
         if "ERROR_MISSING_VAL" in err_code:
-            err_msg["error"] = {"value": "Currently missing values are not supported."}
+            err_msg["error"] = {
+                "value": (
+                    "Missing values are not supported. Please provide an "
+                    "instance without missing values or a preprocessing "
+                    "pipeline alongside your model to handle missing values "
+                    "before the predictions."
+                ),
+            }
 
         if "ERROR_INVALID_VAL" in err_code:
             err_msg["error"] = {
