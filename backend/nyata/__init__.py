@@ -335,14 +335,14 @@ class PredictSingleInstance(_BaseResourceClass):
                         ),
                     ),
                     (
-                        "predictions_standard_deviation",
+                        "prediction_standard_deviation",
                         descriptions.add_desc(
                             value=preds_std,
                             from_id="preds_std",
                         ),
                     ),
                     (
-                        "predictions_quantiles",
+                        "prediction_quantiles",
                         descriptions.add_desc(
                             value=preds_quants,
                             from_id="preds_quantiles",

@@ -10,6 +10,6 @@ export interface PredictResults {
   leaf_id?: ValDescPair<number | number[]>;
   error?: { value: string };
   margin?: ValDescPair<string>;
-  predictions_quantiles?: ValDescPair<string[]>;
-  predictions_standard_deviation?: ValDescPair<string>;
+  prediction_quantiles?: ValDescPair<string[]>;
+  prediction_standard_deviation?: ValDescPair<string>;
 }
