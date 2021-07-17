@@ -29,3 +29,9 @@
   margin-top: 16px;
   margin-bottom: 48px;
 }
+
+.waiting-spinner {
+  margin-left: calc(50% - 0.5 * 45px);
+  margin-top: 4%;
+  margin-bottom: 4%;
+}

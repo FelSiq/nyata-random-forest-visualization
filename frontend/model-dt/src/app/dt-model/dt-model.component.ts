@@ -15,11 +15,13 @@ export class DtModelComponent implements OnDestroy {
   isForest: boolean = false;
   XGiven: boolean = false;
   YGiven: boolean = false;
+  postedModel: boolean = false;
 
   constructor(private getModelService: GetModelService, private postModelService: ModelLoaderService) { 
   }
 
   postModelOnSession(modelPickle) {
+    this.postedModel = true;
     this.postModelService.postFile(modelPickle)
       .subscribe(() => {
         this.getDTModel();

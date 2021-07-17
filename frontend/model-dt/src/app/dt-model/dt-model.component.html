@@ -4,10 +4,10 @@
 	[isForest]="isForest"
 	[isClassifier]="isClassifier"
 	[treeModel]="treeModel"
-	*ngIf="treeModel else toPost"></app-tree-displayer>
+	*ngIf="treeModel; else toPost"></app-tree-displayer>
 
 <ng-template #toPost>
-  <div class="justified-block">
+  <div class="justified-block" *ngIf="!postedModel; else loading">
   <mat-card>
     <img mat-card-image src="/assets/images/nyata_logo.jpg" style="width:100%;" alt="Nyata logo" class="justified-block-2 centered">
     <mat-card-header>
@@ -29,7 +29,7 @@
     About Nyata
   </mat-expansion-panel-header>
   <div>
-	  Nyata is a visualization tool for Tree Ensembles and Decision Trees. <br>
+	  Nyata is a visualization tool for tree ensembles and decision trees. <br>
 	  It supports both classifiers and regressors from scikit-learn (Python library).<br>
   </div>
 </mat-expansion-panel>
@@ -70,4 +70,8 @@
    Logo by <a target="_blank" rel="noopener noreferrer" href="http://www.cemeai.icmc.usp.br/pessoal/tecnico-administrativos">Assessoria de Comunicação do CeMEAI</a>.
    </p>
   </footer>
-</div>
+  </div>
+  <ng-template #loading>
+    <mat-spinner class="waiting-spinner"></mat-spinner>
+  </ng-template>
+</ng-template>
