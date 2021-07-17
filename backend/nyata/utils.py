@@ -75,6 +75,15 @@ def is_valid_ensemble(model):
     if isinstance(
         model,
         (
+            sklearn.ensemble.ExtraTreesClassifier,
+            sklearn.ensemble.ExtraTreesRegressor,
+        ),
+    ):
+        return True
+
+    if isinstance(
+        model,
+        (
             sklearn.ensemble.BaggingClassifier,
             sklearn.ensemble.BaggingRegressor,
         ),
