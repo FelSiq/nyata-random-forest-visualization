@@ -73,8 +73,11 @@
                 matTooltip="Select the symbol used to separate each attribute of the test instance"
                 formControlName="sep"
                 required>
+	    <p>
+	      Feature separator:
+	    </p>
             <div *ngFor="let sepOpt of sepOptions">
-              <mat-radio-button value="{{ sepOpt.symb }}">
+              <mat-radio-button value="{{ sepOpt.symb }}" style="margin-bottom:12px;">
                 {{ sepOpt.label }}
               </mat-radio-button>
             </div>
