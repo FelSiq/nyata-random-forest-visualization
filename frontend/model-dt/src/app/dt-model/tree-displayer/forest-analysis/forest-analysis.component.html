@@ -164,20 +164,28 @@
 	      with regressors won't work.
             </p>
           </ng-template>
-          <p *ngIf="!isForest || (!isClassifier && selectedChVectorType === 'metafeatures') || (!XGiven && selectedChVectorType === 'dna'); else hierClusInputContainer">
-            <mat-icon style="vertical-align: middle; margin-right: 8px; font-size: 150%;">error</mat-icon>
-	    <span *ngIf="!isForest"><strong style="style=vertical-align: middle;">It is necessary a forest to run this analysis.</strong></span>
-	    <span *ngIf="!isClassifier && selectedChVectorType === 'metafeatures'">
-	      <strong style="style=vertical-align: middle;">Pymfe package does not support regressor trees. Please switch to 'dna' strategy.</strong>
-	    </span>
-	    <span *ngIf="!XGiven && selectedChVectorType === 'dna'">
+          <div *ngIf="!isForest || (!isClassifier && selectedChVectorType === 'metafeatures') || (!XGiven && selectedChVectorType === 'dna'); else hierClusInputContainer">
+	    <p *ngIf="!isForest">
+              <mat-icon class="error-icon">error</mat-icon>
+	      <strong style="style=vertical-align: middle;">
+                It is necessary a forest to run this analysis.
+	      </strong>
+	    </p>
+	    <p *ngIf="!isClassifier && selectedChVectorType === 'metafeatures'">
+              <mat-icon class="error-icon">error</mat-icon>
+	      <strong style="style=vertical-align: middle;">
+                Pymfe package does not support regressor trees. Please switch to 'dna' strategy.
+	      </strong>
+	    </p>
+	    <p *ngIf="!XGiven && selectedChVectorType === 'dna'">
+              <mat-icon class="error-icon">error</mat-icon>
 	      <strong style="style=vertical-align: middle;">
 	        Your training X (independent attributes) was not provided alongside the model in the .pickle file,
 		which is required by the 'dna' strategy. Please provide a .pickle with your training data or
 		switch to the 'metafeatures' strategy.
 	      </strong>
-	    </span>
-          </p>
+	    </p>
+          </div>
           <ng-template #hierClusInputContainer>
           <p>
             Please select the linkage type (the default value will be 'average' linkage.)
