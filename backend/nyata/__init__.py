@@ -339,10 +339,10 @@ class PredictSingleInstance(_BaseResourceClass):
                         ),
                     ),
                     (
-                        "classes_by_tree",
+                        "class_distribution",
                         descriptions.add_desc(
                             value=classes_by_tree,
-                            from_id="classes_by_tree",
+                            from_id="class_distribution",
                         ),
                     ),
                     (

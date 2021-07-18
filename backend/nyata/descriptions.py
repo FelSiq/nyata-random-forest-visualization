@@ -63,7 +63,9 @@ DESCRIPTIONS = {
         "mode value for all forest tree outputs for classification tasks, or the "
         "average value for all forest tree outputs for regression tasks."
     ),
-    "classes_by_tree": "Frequency of each class based on all forest tree votes.",
+    "class_distribution": (
+        "Class distribution for the given instance considering all tree votes."
+    ),
     "pred_margin": (
         "Margin is the instance highest class probability "
         "minus second highest class probability."
