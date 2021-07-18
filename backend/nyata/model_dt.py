@@ -61,6 +61,7 @@ METRICS_REGRESSION = {
     "mean_squared_log_error": (sklearn.metrics.mean_squared_log_error, None),
     "explained_variance_score": (sklearn.metrics.explained_variance_score, None),
     "mean_squared_error": (sklearn.metrics.mean_squared_error, None),
+    "root_mean_squared_error": (sklearn.metrics.mean_squared_error, {"squared": False}),
     "median_absolute_error": (sklearn.metrics.median_absolute_error, None),
 }  # type: t.Dict[str, t.Tuple[t.Callable[[np.ndarray, np.ndarray], float], t.Optional[t.Dict[str, t.Any]]]]
 """Chosen metrics to evaluate regressor models."""
