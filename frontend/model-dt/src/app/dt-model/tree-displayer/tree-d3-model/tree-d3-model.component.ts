@@ -506,7 +506,7 @@ export class TreeD3ModelComponent implements OnInit, AfterViewInit {
     const nodeAttrs = {
       'impurity': impurity,
       'decision-feature': feature >= 0 ? feature : null,
-      'node-class': nodeClass,
+      'node-class': (""+nodeClass).indexOf('.') != -1 ?  nodeClass.toFixed(2) : nodeClass,
       'threshold': feature >= 0 ? threshold : null,
       'number-of-instances': numInstInNode,
       'parent-id': parentId,
