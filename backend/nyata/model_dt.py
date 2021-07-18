@@ -406,6 +406,7 @@ def make_hier_clus_cut(
         sil_score = sklearn.metrics.silhouette_score(
             sqr_dist_mat, clust_assignment, metric="precomputed"
         )
+        sil_score = f"{sil_score:.4f}"
 
     elif num_cluster == 1:
         sil_score = "Unable to compute (all trees in a single cluster)"
