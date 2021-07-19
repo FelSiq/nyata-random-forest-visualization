@@ -114,11 +114,11 @@ class DecisionTree(_BaseResourceClass):
         if X is not None:
             self.X = np.asfarray(X)
 
+            if self.attr_labels is None:
+                self.attr_labels = list(map("attr_{0}".format, range(self.X.shape[1])))
+
         if y is not None:
             self.y = np.asarray(y)
-
-            if self.attr_labels is not None and self.attr_labels == "infer":
-                self.attr_labels = np.unique(self.y)
 
         flask.session["model"] = self.model
         flask.session["X"] = self.X
