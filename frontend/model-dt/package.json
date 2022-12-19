@@ -52,7 +52,7 @@
     "@types/jasminewd2": "^2.0.8",
     "@types/node": "^8.10.61",
     "codelyzer": "^5.2.2",
-    "gts": "^1.1.2",
+    "gts": "^3.1.1",
     "jasmine-core": "~2.99.1",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^6.3.14",
